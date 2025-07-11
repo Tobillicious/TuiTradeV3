@@ -41,6 +41,7 @@ const RealEstateLanding = lazy(() => import('./components/pages/RealEstateLandin
 const JobsLanding = lazy(() => import('./components/pages/JobsLanding'));
 const DigitalGoodsLanding = lazy(() => import('./components/pages/DigitalGoodsLanding'));
 const CommunityLanding = lazy(() => import('./components/pages/CommunityLanding'));
+const AdminDashboard = lazy(() => import('./components/pages/AdminDashboard'));
 // This is the inner component that can access notifications
 // Placeholder legal/support/info pages
 const PlaceholderPage = ({ title }) => (
@@ -265,6 +266,9 @@ function AppContent() {
                         case 'jobs-landing': return <JobsLanding {...pageProps} />;
                         case 'digital-goods-landing': return <DigitalGoodsLanding {...pageProps} />;
                         case 'community-landing': return <CommunityLanding {...pageProps} />;
+                        
+                        // Admin Dashboard (admin access only)
+                        case 'admin': return <AdminDashboard {...pageProps} />;
 
                         // Support pages
                         case 'help-center':
