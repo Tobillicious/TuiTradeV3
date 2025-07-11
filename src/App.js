@@ -12,11 +12,11 @@ import { trackPageView, trackEvent, trackEngagement, setUserId } from './lib/ana
 
 // UI Components & Pages - Lazy loaded for better performance
 import { FullPageLoader } from './components/ui/Loaders';
-import ErrorBoundary from './components/ErrorBoundary';
+import ErrorBoundary from './components/ui/ErrorBoundary';
 import AuthModal from './components/modals/AuthModal';
 import ContactSellerModal from './components/modals/ContactSellerModal';
 import ShoppingCartModal from './components/modals/ShoppingCartModal';
-import CheckoutModal from './components/modals/CheckoutModal';
+import EnhancedCheckoutModal from './components/modals/EnhancedCheckoutModal';
 import './App.css';
 
 // Lazy load page components
@@ -33,6 +33,14 @@ const SellerDashboard = lazy(() => import('./components/pages/SellerDashboard'))
 const SellerPage = lazy(() => import('./components/pages/SellerPage'));
 const OrdersPage = lazy(() => import('./components/pages/OrdersPage'));
 const TermsAndPrivacyPage = lazy(() => import('./components/pages/TermsAndPrivacyPage'));
+
+// Category Landing Pages
+const MarketplaceLanding = lazy(() => import('./components/pages/MarketplaceLanding'));
+const MotorsLanding = lazy(() => import('./components/pages/MotorsLanding'));
+const RealEstateLanding = lazy(() => import('./components/pages/RealEstateLanding'));
+const JobsLanding = lazy(() => import('./components/pages/JobsLanding'));
+const DigitalGoodsLanding = lazy(() => import('./components/pages/DigitalGoodsLanding'));
+const CommunityLanding = lazy(() => import('./components/pages/CommunityLanding'));
 // This is the inner component that can access notifications
 // Placeholder legal/support/info pages
 const PlaceholderPage = ({ title }) => (
@@ -84,11 +92,27 @@ function AppContent() {
             setWatchedItems([]);
             return;
         }
-        const watchlistRef = collection(db, "users", currentUser.uid, "watchlist");
-        const unsubscribe = onSnapshot(watchlistRef, (snapshot) => {
-            setWatchedItems(snapshot.docs.map(doc => doc.id));
-        });
-        return () => unsubscribe();
+
+        try {
+            const watchlistRef = collection(db, "users", currentUser.uid, "watchlist");
+            const unsubscribe = onSnapshot(watchlistRef, (snapshot) => {
+                setWatchedItems(snapshot.docs.map(doc => doc.id));
+            }, (error) => {
+                console.error('Error loading watchlist:', error);
+                setWatchedItems([]);
+            });
+
+            return () => {
+                try {
+                    unsubscribe();
+                } catch (error) {
+                    console.warn('Error cleaning up watchlist listener:', error);
+                }
+            };
+        } catch (error) {
+            console.error('Error setting up watchlist listener:', error);
+            setWatchedItems([]);
+        }
     }, [currentUser]);
 
     // --- HANDLERS ---
@@ -105,7 +129,7 @@ function AppContent() {
         setIsMobileMenuOpen(false);
         if (page !== 'item-detail') setSelectedItem(null);
         window.scrollTo(0, 0);
-        
+
         // Track page navigation
         trackPageView(page, context);
     };
@@ -134,14 +158,14 @@ function AppContent() {
         e.preventDefault();
         if (!searchQuery.trim()) return;
         const keywords = searchQuery.toLowerCase().split(' ').filter(word => word.length > 2);
-        
+
         // Track search
-        trackEvent('search', { 
-            query: searchQuery, 
+        trackEvent('search', {
+            query: searchQuery,
             keywords: keywords.length,
-            page: currentPage 
+            page: currentPage
         });
-        
+
         handleNavigate('search-results', { keywords, originalQuery: searchQuery });
     };
 
@@ -233,6 +257,16 @@ function AppContent() {
                             return <MessagesPage {...pageProps} />;
                         case 'orders':
                             return <OrdersPage {...pageProps} />;
+
+                        // Category Landing Pages
+                        case 'marketplace-landing': return <MarketplaceLanding {...pageProps} />;
+                        case 'motors-landing': return <MotorsLanding {...pageProps} />;
+                        case 'real-estate-landing': return <RealEstateLanding {...pageProps} />;
+                        case 'jobs-landing': return <JobsLanding {...pageProps} />;
+                        case 'digital-goods-landing': return <DigitalGoodsLanding {...pageProps} />;
+                        case 'community-landing': return <CommunityLanding {...pageProps} />;
+
+                        // Support pages
                         case 'help-center':
                             return <PlaceholderPage title="Help Center" />;
                         case 'contact-us':
@@ -273,7 +307,7 @@ function AppContent() {
                 <AuthModal isOpen={isAuthModalOpen} onClose={() => setIsAuthModalOpen(false)} />
                 <ContactSellerModal isOpen={isContactSellerModalOpen} onClose={() => setIsContactSellerModalOpen(false)} item={contactSellerItem} />
                 <ShoppingCartModal isOpen={isCartModalOpen} onClose={() => setIsCartModalOpen(false)} cartItems={cartItems} onRemoveFromCart={handleRemoveFromCart} onClearCart={handleClearCart} onBuyNow={handleBuyNow} />
-                <CheckoutModal isOpen={isCheckoutModalOpen} onClose={() => setIsCheckoutModalOpen(false)} item={checkoutItem} onSuccess={handleCheckoutSuccess} />
+                <EnhancedCheckoutModal isOpen={isCheckoutModalOpen} onClose={() => setIsCheckoutModalOpen(false)} item={checkoutItem} onSuccess={handleCheckoutSuccess} currentUser={currentUser} />
 
                 {/* --- Header --- */}
                 <header className={`shadow-sm border-b sticky top-0 z-40 ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}>
@@ -307,28 +341,40 @@ function AppContent() {
                             {/* Main Navigation Menu */}
                             <nav className="hidden lg:flex items-center space-x-6">
                                 <button
-                                    onClick={() => handleNavigate('category', { categoryKey: 'marketplace' })}
+                                    onClick={() => handleNavigate('marketplace-landing')}
                                     className={`text-sm font-medium transition-colors ${isDarkMode ? 'text-gray-300 hover:text-green-400' : 'text-gray-700 hover:text-green-600'}`}
                                 >
                                     Marketplace
                                 </button>
                                 <button
-                                    onClick={() => handleNavigate('category', { categoryKey: 'motors' })}
+                                    onClick={() => handleNavigate('motors-landing')}
                                     className={`text-sm font-medium transition-colors ${isDarkMode ? 'text-gray-300 hover:text-green-400' : 'text-gray-700 hover:text-green-600'}`}
                                 >
                                     Motors
                                 </button>
                                 <button
-                                    onClick={() => handleNavigate('category', { categoryKey: 'property' })}
+                                    onClick={() => handleNavigate('real-estate-landing')}
                                     className={`text-sm font-medium transition-colors ${isDarkMode ? 'text-gray-300 hover:text-green-400' : 'text-gray-700 hover:text-green-600'}`}
                                 >
                                     Property
                                 </button>
                                 <button
-                                    onClick={() => handleNavigate('category', { categoryKey: 'jobs' })}
+                                    onClick={() => handleNavigate('jobs-landing')}
                                     className={`text-sm font-medium transition-colors ${isDarkMode ? 'text-gray-300 hover:text-green-400' : 'text-gray-700 hover:text-green-600'}`}
                                 >
                                     Jobs
+                                </button>
+                                <button
+                                    onClick={() => handleNavigate('digital-goods-landing')}
+                                    className={`text-sm font-medium transition-colors ${isDarkMode ? 'text-gray-300 hover:text-green-400' : 'text-gray-700 hover:text-green-600'}`}
+                                >
+                                    Digital Goods
+                                </button>
+                                <button
+                                    onClick={() => handleNavigate('community-landing')}
+                                    className={`text-sm font-medium transition-colors ${isDarkMode ? 'text-gray-300 hover:text-green-400' : 'text-gray-700 hover:text-green-600'}`}
+                                >
+                                    Community
                                 </button>
                             </nav>
 
@@ -347,7 +393,7 @@ function AppContent() {
                                 >
                                     {isDarkMode ? <Sun className="w-6 h-6" /> : <Moon className="w-6 h-6" />}
                                 </button>
-                                
+
                                 <button
                                     onClick={() => currentUser ? handleNavigate('watchlist') : setIsAuthModalOpen(true)}
                                     className={`p-2 transition-colors relative group ${isDarkMode ? 'text-gray-300 hover:text-green-400' : 'text-gray-600 hover:text-green-600'}`}
@@ -469,28 +515,40 @@ function AppContent() {
                     <div className={`lg:hidden shadow-lg border-t ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}>
                         <div className="px-4 py-3 space-y-2">
                             <button
-                                onClick={() => handleNavigate('category', { categoryKey: 'marketplace' })}
+                                onClick={() => handleNavigate('marketplace-landing')}
                                 className={`w-full text-left px-3 py-2 rounded-lg transition-colors ${isDarkMode ? 'text-gray-300 hover:bg-gray-700' : 'text-gray-700 hover:bg-gray-50'}`}
                             >
                                 Marketplace
                             </button>
                             <button
-                                onClick={() => handleNavigate('category', { categoryKey: 'motors' })}
+                                onClick={() => handleNavigate('motors-landing')}
                                 className={`w-full text-left px-3 py-2 rounded-lg transition-colors ${isDarkMode ? 'text-gray-300 hover:bg-gray-700' : 'text-gray-700 hover:bg-gray-50'}`}
                             >
                                 Motors
                             </button>
                             <button
-                                onClick={() => handleNavigate('category', { categoryKey: 'property' })}
+                                onClick={() => handleNavigate('real-estate-landing')}
                                 className={`w-full text-left px-3 py-2 rounded-lg transition-colors ${isDarkMode ? 'text-gray-300 hover:bg-gray-700' : 'text-gray-700 hover:bg-gray-50'}`}
                             >
                                 Property
                             </button>
                             <button
-                                onClick={() => handleNavigate('category', { categoryKey: 'jobs' })}
+                                onClick={() => handleNavigate('jobs-landing')}
                                 className={`w-full text-left px-3 py-2 rounded-lg transition-colors ${isDarkMode ? 'text-gray-300 hover:bg-gray-700' : 'text-gray-700 hover:bg-gray-50'}`}
                             >
                                 Jobs
+                            </button>
+                            <button
+                                onClick={() => handleNavigate('digital-goods-landing')}
+                                className={`w-full text-left px-3 py-2 rounded-lg transition-colors ${isDarkMode ? 'text-gray-300 hover:bg-gray-700' : 'text-gray-700 hover:bg-gray-50'}`}
+                            >
+                                Digital Goods
+                            </button>
+                            <button
+                                onClick={() => handleNavigate('community-landing')}
+                                className={`w-full text-left px-3 py-2 rounded-lg transition-colors ${isDarkMode ? 'text-gray-300 hover:bg-gray-700' : 'text-gray-700 hover:bg-gray-50'}`}
+                            >
+                                Community
                             </button>
                         </div>
                     </div>

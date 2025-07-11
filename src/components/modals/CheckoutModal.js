@@ -38,7 +38,7 @@ const CheckoutModal = ({ isOpen, onClose, item, onSuccess }) => {
                 >
                     <X size={20} />
                 </button>
-                
+
                 <div className="p-6">
                     {stripeError ? (
                         <div className="text-center py-8">

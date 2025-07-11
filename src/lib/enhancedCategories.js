@@ -378,6 +378,239 @@ export const ENHANCED_CATEGORIES = {
                 }
             }
         }
+    },
+    digitalGoods: {
+        name: 'Digital Goods',
+        icon: Monitor,
+        color: 'indigo',
+        listingTypes: ['fixed-price', 'auction'],
+        defaultDuration: 30,
+        fees: { listingFee: 0, successFeeRate: 0.05, maxSuccessFee: 199 },
+        attributes: ['Category', 'License Type', 'Format', 'Compatibility', 'Delivery Method', 'Language'],
+        subcategories: {
+            'software': {
+                name: 'Software',
+                attributes: ['Software Type', 'Operating System', 'License Type', 'Version', 'Language'],
+                required: ['Software Type', 'Operating System', 'License Type'],
+                subcategories: {
+                    'applications': { 
+                        name: 'Applications', 
+                        attributes: ['Category', 'Platform', 'License Duration', 'Updates Included'],
+                        filters: {
+                            category: ['Productivity', 'Creative', 'Business', 'Education', 'Utilities'],
+                            platform: ['Windows', 'macOS', 'Linux', 'Cross-Platform'],
+                            licenseType: ['Lifetime', 'Annual', 'Monthly', 'One-Time']
+                        }
+                    },
+                    'games': { 
+                        name: 'PC Games', 
+                        attributes: ['Genre', 'Platform', 'Age Rating', 'Multiplayer', 'VR Support'],
+                        filters: {
+                            genre: ['Action', 'Adventure', 'RPG', 'Strategy', 'Simulation', 'Sports', 'Racing'],
+                            platform: ['Steam', 'Epic Games', 'GOG', 'Origin', 'Ubisoft Connect'],
+                            ageRating: ['E (Everyone)', 'T (Teen)', 'M (Mature)', 'AO (Adults Only)']
+                        }
+                    },
+                    'mobile-apps': { 
+                        name: 'Mobile Apps', 
+                        attributes: ['Platform', 'App Type', 'In-App Purchases', 'Offline Support'],
+                        filters: {
+                            platform: ['iOS', 'Android', 'Cross-Platform'],
+                            appType: ['Games', 'Productivity', 'Social', 'Education', 'Health', 'Entertainment']
+                        }
+                    }
+                }
+            },
+            'ebooks': {
+                name: 'eBooks & Audiobooks',
+                attributes: ['Format', 'Language', 'Genre', 'Page Count', 'Publisher', 'DRM Protection'],
+                required: ['Format', 'Language', 'Genre'],
+                subcategories: {
+                    'fiction': { 
+                        name: 'Fiction', 
+                        attributes: ['Sub-Genre', 'Series', 'Author', 'Publication Year'],
+                        filters: {
+                            subGenre: ['Romance', 'Mystery', 'Sci-Fi', 'Fantasy', 'Thriller', 'Historical', 'Contemporary']
+                        }
+                    },
+                    'non-fiction': { 
+                        name: 'Non-Fiction', 
+                        attributes: ['Subject', 'Author', 'Publication Year', 'Target Audience'],
+                        filters: {
+                            subject: ['Business', 'Self-Help', 'History', 'Science', 'Biography', 'Health', 'Technology']
+                        }
+                    },
+                    'educational': { 
+                        name: 'Educational', 
+                        attributes: ['Subject', 'Grade Level', 'Publisher', 'Edition'],
+                        filters: {
+                            subject: ['Mathematics', 'Science', 'Language Arts', 'History', 'Programming', 'Business']
+                        }
+                    }
+                },
+                filters: {
+                    format: ['PDF', 'EPUB', 'MOBI', 'MP3 (Audiobook)', 'M4A (Audiobook)'],
+                    language: ['English', 'Te Reo Māori', 'Spanish', 'French', 'German', 'Japanese', 'Chinese']
+                }
+            },
+            'graphics': {
+                name: 'Graphics & Design',
+                attributes: ['File Format', 'Resolution', 'Color Mode', 'License Type', 'Software Compatibility'],
+                required: ['File Format', 'License Type'],
+                subcategories: {
+                    'stock-photos': { 
+                        name: 'Stock Photos', 
+                        attributes: ['Resolution', 'Orientation', 'Subject', 'Color Palette'],
+                        filters: {
+                            resolution: ['Web (72 DPI)', 'Print (300 DPI)', 'High-Res (600+ DPI)'],
+                            orientation: ['Landscape', 'Portrait', 'Square'],
+                            subject: ['Nature', 'Business', 'People', 'Technology', 'Abstract', 'Food']
+                        }
+                    },
+                    'templates': { 
+                        name: 'Design Templates', 
+                        attributes: ['Template Type', 'Software', 'Customizable Elements', 'Color Scheme'],
+                        filters: {
+                            templateType: ['Logo', 'Brochure', 'Website', 'Social Media', 'Presentation', 'Print'],
+                            software: ['Photoshop', 'Illustrator', 'InDesign', 'Figma', 'Canva', 'PowerPoint']
+                        }
+                    },
+                    'fonts': { 
+                        name: 'Fonts & Typography', 
+                        attributes: ['Font Style', 'Character Set', 'License Scope', 'File Format'],
+                        filters: {
+                            fontStyle: ['Serif', 'Sans-Serif', 'Script', 'Display', 'Monospace'],
+                            licenseScope: ['Personal Use', 'Commercial Use', 'Extended Commercial']
+                        }
+                    }
+                }
+            },
+            'music': {
+                name: 'Music & Audio',
+                attributes: ['Format', 'Quality', 'Duration', 'Genre', 'Licensing', 'Instruments'],
+                required: ['Format', 'Quality', 'Licensing'],
+                subcategories: {
+                    'tracks': { 
+                        name: 'Music Tracks', 
+                        attributes: ['Genre', 'Mood', 'Tempo', 'Key', 'Vocals'],
+                        filters: {
+                            genre: ['Pop', 'Rock', 'Jazz', 'Classical', 'Electronic', 'Hip-Hop', 'Country'],
+                            mood: ['Happy', 'Sad', 'Energetic', 'Calm', 'Dramatic', 'Romantic', 'Mysterious'],
+                            tempo: ['Slow', 'Medium', 'Fast', 'Variable']
+                        }
+                    },
+                    'sound-effects': { 
+                        name: 'Sound Effects', 
+                        attributes: ['Category', 'Duration', 'Loop Ready', 'Environment'],
+                        filters: {
+                            category: ['Nature', 'Urban', 'Mechanical', 'Electronic', 'Human', 'Animals'],
+                            duration: ['Under 5s', '5-30s', '30s-2min', 'Over 2min']
+                        }
+                    },
+                    'beats': { 
+                        name: 'Beats & Loops', 
+                        attributes: ['BPM', 'Key', 'Style', 'Instruments', 'Loop Length'],
+                        filters: {
+                            bpm: ['60-80', '80-100', '100-120', '120-140', '140+'],
+                            style: ['Hip-Hop', 'R&B', 'Pop', 'Rock', 'Electronic', 'Trap']
+                        }
+                    }
+                }
+            },
+            'videos': {
+                name: 'Videos & Animation',
+                attributes: ['Format', 'Resolution', 'Frame Rate', 'Duration', 'License Type', 'Audio Included'],
+                required: ['Format', 'Resolution', 'License Type'],
+                subcategories: {
+                    'stock-footage': { 
+                        name: 'Stock Footage', 
+                        attributes: ['Subject', 'Style', 'Camera Movement', 'Lighting'],
+                        filters: {
+                            subject: ['Nature', 'Business', 'Technology', 'People', 'Abstract', 'Travel'],
+                            style: ['Cinematic', 'Documentary', 'Time-lapse', 'Slow Motion'],
+                            resolution: ['HD (1080p)', '4K (2160p)', '8K', 'Ultra HD']
+                        }
+                    },
+                    'animations': { 
+                        name: 'Animations', 
+                        attributes: ['Animation Type', 'Style', 'Character Count', 'Background'],
+                        filters: {
+                            animationType: ['2D', '3D', 'Motion Graphics', 'Whiteboard', 'Stop Motion'],
+                            style: ['Cartoon', 'Realistic', 'Minimalist', 'Corporate', 'Artistic']
+                        }
+                    },
+                    'tutorials': { 
+                        name: 'Educational Videos', 
+                        attributes: ['Subject', 'Skill Level', 'Duration', 'Language', 'Instructor'],
+                        filters: {
+                            subject: ['Programming', 'Design', 'Business', 'Marketing', 'Photography', 'Music'],
+                            skillLevel: ['Beginner', 'Intermediate', 'Advanced', 'Expert']
+                        }
+                    }
+                }
+            },
+            'courses': {
+                name: 'Online Courses',
+                attributes: ['Subject', 'Level', 'Duration', 'Language', 'Certification', 'Format'],
+                required: ['Subject', 'Level', 'Duration'],
+                subcategories: {
+                    'programming': { 
+                        name: 'Programming & Development', 
+                        attributes: ['Programming Language', 'Framework', 'Project Included', 'Prerequisites'],
+                        filters: {
+                            language: ['JavaScript', 'Python', 'Java', 'C#', 'PHP', 'Ruby', 'Go', 'Rust'],
+                            framework: ['React', 'Angular', 'Vue', 'Node.js', 'Django', 'Laravel', 'Spring']
+                        }
+                    },
+                    'design': { 
+                        name: 'Design & Creative', 
+                        attributes: ['Design Type', 'Software', 'Portfolio Projects', 'Style Focus'],
+                        filters: {
+                            designType: ['UI/UX', 'Graphic Design', 'Web Design', 'Brand Design', 'Illustration'],
+                            software: ['Adobe Creative Suite', 'Figma', 'Sketch', 'Canva', 'Procreate']
+                        }
+                    },
+                    'business': { 
+                        name: 'Business & Marketing', 
+                        attributes: ['Business Area', 'Case Studies', 'Tools Covered', 'Industry Focus'],
+                        filters: {
+                            businessArea: ['Marketing', 'Sales', 'Management', 'Finance', 'Entrepreneurship', 'HR'],
+                            industryFocus: ['E-commerce', 'SaaS', 'Retail', 'Healthcare', 'Education', 'General']
+                        }
+                    }
+                }
+            },
+            'nft': {
+                name: 'NFTs & Digital Art',
+                attributes: ['Blockchain', 'Collection', 'Rarity', 'Utility', 'Artist', 'Mint Date'],
+                required: ['Blockchain', 'Collection', 'Rarity'],
+                subcategories: {
+                    'art': { 
+                        name: 'Digital Art', 
+                        attributes: ['Art Style', 'Medium', 'Dimensions', 'Color Palette'],
+                        filters: {
+                            artStyle: ['Abstract', 'Realistic', 'Cartoon', 'Pixel Art', 'Minimalist', 'Surreal'],
+                            medium: ['Digital Painting', 'Photography', '3D Render', 'AI Generated', 'Mixed Media']
+                        }
+                    },
+                    'collectibles': { 
+                        name: 'Collectibles', 
+                        attributes: ['Collection Size', 'Traits', 'Rarity Score', 'Community'],
+                        filters: {
+                            blockchain: ['Ethereum', 'Polygon', 'Solana', 'Cardano', 'Tezos'],
+                            rarity: ['Common', 'Uncommon', 'Rare', 'Epic', 'Legendary']
+                        }
+                    },
+                    'utility': { 
+                        name: 'Utility NFTs', 
+                        attributes: ['Utility Type', 'Access Rights', 'Expiration', 'Transferable'],
+                        filters: {
+                            utilityType: ['Game Items', 'Membership', 'Access Pass', 'Voting Rights', 'Rewards']
+                        }
+                    }
+                }
+            }
+        }
     }
 };
 

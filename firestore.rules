@@ -37,6 +37,24 @@ service cloud.firestore {
       allow read, write: if request.auth != null && request.auth.uid == userId;
     }
     
+    // Conversations - users can access conversations they're part of
+    match /conversations/{conversationId} {
+      allow read, write: if request.auth != null && 
+        request.auth.uid in resource.data.participants;
+      
+      // Messages subcollection
+      match /messages/{messageId} {
+        allow read, write: if request.auth != null && 
+          request.auth.uid in get(/databases/$(database)/documents/conversations/$(conversationId)).data.participants;
+      }
+    }
+    
+    // Reviews - users can read all reviews, write their own
+    match /reviews/{reviewId} {
+      allow read: if true;
+      allow write: if request.auth != null && request.auth.uid == request.resource.data.reviewerId;
+    }
+    
     // Default deny
     match /{document=**} {
       allow read, write: if false;

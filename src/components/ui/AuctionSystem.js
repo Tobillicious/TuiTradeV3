@@ -53,22 +53,39 @@ const BidHistory = ({ auctionId }) => {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        if (!auctionId) return;
-
-        const bidsRef = collection(db, 'auctions', auctionId, 'bids');
-        const q = query(bidsRef, orderBy('amount', 'desc'), orderBy('createdAt', 'desc'));
-
-        const unsubscribe = onSnapshot(q, (snapshot) => {
-            const bidData = snapshot.docs.map(doc => ({
-                id: doc.id,
-                ...doc.data(),
-                createdAt: doc.data().createdAt?.toDate()
-            }));
-            setBids(bidData);
+        if (!auctionId) {
             setLoading(false);
-        });
+            return;
+        }
 
-        return () => unsubscribe();
+        try {
+            const bidsRef = collection(db, 'auctions', auctionId, 'bids');
+            const q = query(bidsRef, orderBy('amount', 'desc'), orderBy('createdAt', 'desc'));
+
+            const unsubscribe = onSnapshot(q, (snapshot) => {
+                const bidData = snapshot.docs.map(doc => ({
+                    id: doc.id,
+                    ...doc.data(),
+                    createdAt: doc.data().createdAt?.toDate()
+                }));
+                setBids(bidData);
+                setLoading(false);
+            }, (error) => {
+                console.error('Error loading bid history:', error);
+                setLoading(false);
+            });
+
+            return () => {
+                try {
+                    unsubscribe();
+                } catch (error) {
+                    console.warn('Error cleaning up bid history listener:', error);
+                }
+            };
+        } catch (error) {
+            console.error('Error setting up bid history listener:', error);
+            setLoading(false);
+        }
     }, [auctionId]);
 
     if (loading) {
@@ -373,8 +390,8 @@ const AuctionCard = ({ auction, onItemClick, onWatchToggle, watchedItems = [], o
                         {auction.reservePrice && (
                             <div className="mb-2">
                                 <div className={`text-xs px-2 py-1 rounded-full inline-block ${currentBid >= auction.reservePrice
-                                        ? 'bg-green-500/20 text-green-300'
-                                        : 'bg-orange-500/20 text-orange-300'
+                                    ? 'bg-green-500/20 text-green-300'
+                                    : 'bg-orange-500/20 text-orange-300'
                                     }`}>
                                     {currentBid >= auction.reservePrice ? '✓ Reserve Met' : 'Reserve Not Met'}
                                 </div>
