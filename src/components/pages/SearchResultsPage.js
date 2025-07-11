@@ -17,6 +17,8 @@ const SearchResultsPage = ({ searchParams, onNavigate, onItemClick, onWatchToggl
         priceMax: '',
         location: '',
         condition: '',
+        listingType: '',
+        tags: [],
         sortBy: 'newest'
     });
 
@@ -25,20 +27,20 @@ const SearchResultsPage = ({ searchParams, onNavigate, onItemClick, onWatchToggl
             setLoading(true);
             try {
                 console.log('SearchResultsPage: Searching for:', searchParams);
-                
+
                 // Fetch from both listings and auctions collections
                 const promises = [];
-                
+
                 // Get regular listings
                 const listingsQuery = query(collection(db, 'listings'), orderBy('createdAt', 'desc'));
                 promises.push(getDocs(listingsQuery));
-                
+
                 // Get auctions
                 const auctionsQuery = query(collection(db, 'auctions'), orderBy('createdAt', 'desc'));
                 promises.push(getDocs(auctionsQuery));
-                
+
                 const [listingsSnapshot, auctionsSnapshot] = await Promise.all(promises);
-                
+
                 // Process listings
                 let listings = listingsSnapshot.docs.map(doc => ({
                     id: doc.id,
@@ -46,7 +48,7 @@ const SearchResultsPage = ({ searchParams, onNavigate, onItemClick, onWatchToggl
                     createdAt: doc.data().createdAt?.toDate(),
                     listingType: doc.data().listingType || 'fixed-price'
                 }));
-                
+
                 // Process auctions
                 let auctions = auctionsSnapshot.docs.map(doc => ({
                     id: doc.id,
@@ -55,10 +57,10 @@ const SearchResultsPage = ({ searchParams, onNavigate, onItemClick, onWatchToggl
                     endTime: doc.data().endTime?.toDate(),
                     listingType: 'auction'
                 }));
-                
+
                 // Combine all results
                 let allResults = [...listings, ...auctions];
-                
+
                 console.log('SearchResultsPage: Total items before filtering:', allResults.length);
 
                 // Apply client-side filtering for keywords
@@ -70,9 +72,9 @@ const SearchResultsPage = ({ searchParams, onNavigate, onItemClick, onWatchToggl
                         );
                     });
                 }
-                
+
                 console.log('SearchResultsPage: Results after filtering:', allResults.length);
-                
+
                 // Sort by creation date
                 allResults.sort((a, b) => b.createdAt - a.createdAt);
 
@@ -95,12 +97,23 @@ const SearchResultsPage = ({ searchParams, onNavigate, onItemClick, onWatchToggl
             filtered = filtered.filter(item => item.category === filters.category);
         }
 
+        // Apply listing type filter
+        if (filters.listingType) {
+            filtered = filtered.filter(item => item.listingType === filters.listingType);
+        }
+
         // Apply price range filter
         if (filters.priceMin) {
-            filtered = filtered.filter(item => item.price >= parseFloat(filters.priceMin));
+            filtered = filtered.filter(item => {
+                const price = item.listingType === 'auction' ? (item.currentBid || item.startingBid) : item.price;
+                return price >= parseFloat(filters.priceMin);
+            });
         }
         if (filters.priceMax) {
-            filtered = filtered.filter(item => item.price <= parseFloat(filters.priceMax));
+            filtered = filtered.filter(item => {
+                const price = item.listingType === 'auction' ? (item.currentBid || item.startingBid) : item.price;
+                return price <= parseFloat(filters.priceMax);
+            });
         }
 
         // Apply location filter
@@ -113,13 +126,33 @@ const SearchResultsPage = ({ searchParams, onNavigate, onItemClick, onWatchToggl
             filtered = filtered.filter(item => item.condition === filters.condition);
         }
 
+        // Apply tags filter
+        if (filters.tags && filters.tags.length > 0) {
+            filtered = filtered.filter(item => {
+                const itemTags = item.tags || [];
+                return filters.tags.some(tag =>
+                    itemTags.includes(tag) ||
+                    item.title?.toLowerCase().includes(tag.toLowerCase()) ||
+                    item.description?.toLowerCase().includes(tag.toLowerCase())
+                );
+            });
+        }
+
         // Apply sorting
         switch (filters.sortBy) {
             case 'price-low':
-                filtered.sort((a, b) => a.price - b.price);
+                filtered.sort((a, b) => {
+                    const priceA = a.listingType === 'auction' ? (a.currentBid || a.startingBid) : a.price;
+                    const priceB = b.listingType === 'auction' ? (b.currentBid || b.startingBid) : b.price;
+                    return priceA - priceB;
+                });
                 break;
             case 'price-high':
-                filtered.sort((a, b) => b.price - a.price);
+                filtered.sort((a, b) => {
+                    const priceA = a.listingType === 'auction' ? (a.currentBid || a.startingBid) : a.price;
+                    const priceB = b.listingType === 'auction' ? (b.currentBid || b.startingBid) : b.price;
+                    return priceB - priceA;
+                });
                 break;
             case 'title-az':
                 filtered.sort((a, b) => a.title.localeCompare(b.title));
@@ -130,6 +163,14 @@ const SearchResultsPage = ({ searchParams, onNavigate, onItemClick, onWatchToggl
             case 'oldest':
                 filtered.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
                 break;
+            case 'popular':
+                // Sort by watch count (demo data) or bid count for auctions
+                filtered.sort((a, b) => {
+                    const popularityA = a.listingType === 'auction' ? (a.bidCount || 0) : (a.watchCount || 0);
+                    const popularityB = b.listingType === 'auction' ? (b.bidCount || 0) : (b.watchCount || 0);
+                    return popularityB - popularityA;
+                });
+                break;
             case 'newest':
             default:
                 filtered.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
@@ -138,7 +179,72 @@ const SearchResultsPage = ({ searchParams, onNavigate, onItemClick, onWatchToggl
         return filtered;
     }, [results, filters]);
 
-    if (loading) return <FullPageLoader message="Searching..." />;
+    if (loading) {
+        return (
+            <div className="bg-gray-50 flex-grow">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                    {/* Breadcrumb Skeleton */}
+                    <div className="mb-6 flex items-center">
+                        <div className="h-4 bg-gray-200 rounded animate-pulse w-16"></div>
+                        <div className="h-4 bg-gray-200 rounded animate-pulse w-4 mx-2"></div>
+                        <div className="h-4 bg-gray-200 rounded animate-pulse w-24"></div>
+                    </div>
+
+                    {/* Header Skeleton */}
+                    <div className="mb-6">
+                        <div className="h-8 bg-gray-200 rounded animate-pulse mb-2 w-1/3"></div>
+                        <div className="h-4 bg-gray-200 rounded animate-pulse w-1/4"></div>
+                    </div>
+
+                    {/* Filters Skeleton */}
+                    <div className="mb-6">
+                        <div className="bg-white rounded-lg shadow-sm p-4">
+                            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                                {[...Array(4)].map((_, i) => (
+                                    <div key={i} className="space-y-2">
+                                        <div className="h-4 bg-gray-200 rounded animate-pulse w-20"></div>
+                                        <div className="h-10 bg-gray-200 rounded animate-pulse"></div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* View Controls Skeleton */}
+                    <div className="flex justify-between items-center mb-6">
+                        <div className="flex items-center gap-4">
+                            <div className="h-4 bg-gray-200 rounded animate-pulse w-12"></div>
+                            <div className="flex gap-2">
+                                <div className="w-10 h-10 bg-gray-200 rounded animate-pulse"></div>
+                                <div className="w-10 h-10 bg-gray-200 rounded animate-pulse"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Results Skeleton */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                        {[...Array(8)].map((_, i) => (
+                            <div key={i} className="bg-white rounded-xl overflow-hidden shadow-sm border border-gray-100">
+                                <div className="relative aspect-[4/5]">
+                                    <div className="w-full h-full bg-gray-200 animate-pulse"></div>
+                                    <div className="absolute top-2 right-2">
+                                        <div className="w-8 h-8 bg-gray-200 rounded-full animate-pulse"></div>
+                                    </div>
+                                    <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-3">
+                                        <div className="space-y-2">
+                                            <div className="h-4 bg-gray-300 rounded animate-pulse"></div>
+                                            <div className="h-6 bg-gray-300 rounded animate-pulse w-1/2"></div>
+                                            <div className="h-3 bg-gray-300 rounded animate-pulse w-3/4"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="bg-gray-50 flex-grow">

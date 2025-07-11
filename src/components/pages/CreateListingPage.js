@@ -1,6 +1,6 @@
 // src/components/pages/CreateListingPage.js
-import { useState } from 'react';
-import { collection, addDoc } from 'firebase/firestore';
+import { useState, useEffect } from 'react';
+import { collection, addDoc, doc, updateDoc } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { db, storage } from '../../lib/firebase';
 import { useAuth } from '../../context/AuthContext';
@@ -9,8 +9,9 @@ import { CATEGORIES, NZ_REGIONS } from '../../lib/utils';
 import { calculateListingFees, validateCategoryListing, getDefaultListingDuration } from '../../lib/categoryUtils';
 import { LoadingSpinner } from '../ui/Loaders';
 import { Tag, DollarSign, MapPin, Home, ChevronRight, X, Gavel, Clock, Calculator } from 'lucide-react';
+import { serverTimestamp } from 'firebase/firestore';
 
-const CreateListingPage = ({ onNavigate }) => {
+const CreateListingPage = ({ onNavigate, ...props }) => {
     const [formData, setFormData] = useState({
         title: '',
         description: '',
@@ -25,21 +26,55 @@ const CreateListingPage = ({ onNavigate }) => {
         auctionDuration: '7',
         startingBid: '',
         reservePrice: '',
-        bidIncrement: '1'
+        bidIncrement: '1',
+        isDigital: false,
+        digitalFile: null,
+        deliveryMethod: 'instant',
+        licenseType: 'single-use',
+        downloadLimit: 1
     });
     const [imageFiles, setImageFiles] = useState([]);
     const [imagePreviews, setImagePreviews] = useState([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
+    const [isEdit, setIsEdit] = useState(false);
+    const [editId, setEditId] = useState(null);
 
     const { currentUser } = useAuth();
     const { showNotification } = useNotification();
 
+    // Pre-fill form if editing
+    useEffect(() => {
+        if (props?.editItem) {
+            setFormData({
+                ...formData,
+                ...props.editItem,
+                price: props.editItem.price || '',
+                startingBid: props.editItem.startingBid || '',
+                reservePrice: props.editItem.reservePrice || '',
+                bidIncrement: props.editItem.bidIncrement || '1',
+                auctionDuration: props.editItem.auctionDuration || '7',
+                images: props.editItem.images || [],
+                isDigital: props.editItem.isDigital || false,
+                digitalFileUrl: props.editItem.digitalFileUrl || null,
+                deliveryMethod: props.editItem.deliveryMethod || 'instant',
+                licenseType: props.editItem.licenseType || 'single-use',
+                downloadLimit: props.editItem.downloadLimit || 1
+            });
+            setImagePreviews(props.editItem.images || [props.editItem.imageUrl].filter(Boolean));
+            setIsEdit(true);
+            setEditId(props.editItem.id);
+        }
+    }, [props.editItem]);
+
     const conditions = ['New', 'Used - Like New', 'Used - Good', 'Used - Fair'];
 
     const handleInputChange = (e) => {
-        const { name, value } = e.target;
-        setFormData(prev => ({ ...prev, [name]: value }));
+        const { name, value, type, checked } = e.target;
+        setFormData(prev => ({
+            ...prev,
+            [name]: type === 'checkbox' ? checked : value
+        }));
         if (name === 'category') {
             const newCategory = CATEGORIES[value];
             const defaultListingType = newCategory?.listingTypes[0] || 'fixed-price';
@@ -55,6 +90,13 @@ const CreateListingPage = ({ onNavigate }) => {
         }
         if (name === 'subcategory') {
             setFormData(prev => ({ ...prev, tags: [], attributes: {} }));
+        }
+        if (name === 'isDigital') {
+            setFormData(prev => ({
+                ...prev,
+                location: checked ? 'Digital Delivery' : '',
+                condition: checked ? 'New' : 'Used - Good'
+            }));
         }
     };
 
@@ -90,6 +132,17 @@ const CreateListingPage = ({ onNavigate }) => {
             };
             reader.readAsDataURL(file);
         });
+    };
+
+    const handleDigitalFileChange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            if (file.size > 100 * 1024 * 1024) { // 100MB limit
+                setError('Digital file must be smaller than 100MB');
+                return;
+            }
+            setFormData(prev => ({ ...prev, digitalFile: file }));
+        }
     };
 
     const removeImage = (index) => {
@@ -159,6 +212,22 @@ const CreateListingPage = ({ onNavigate }) => {
             }
             console.log('Images uploaded:', imageUrls.length);
 
+            // Upload digital file if this is a digital listing
+            let digitalFileUrl = null;
+            if (formData.isDigital && formData.digitalFile) {
+                console.log('Uploading digital file:', formData.digitalFile.name);
+                const digitalRef = ref(storage, `digital-files/${currentUser.uid}/${Date.now()}_${formData.digitalFile.name}`);
+                await uploadBytes(digitalRef, formData.digitalFile);
+                digitalFileUrl = await getDownloadURL(digitalRef);
+                console.log('Digital file uploaded:', digitalFileUrl);
+            }
+
+            // Use existing images if editing and none uploaded
+            let finalImages = imageUrls.length > 0 ? imageUrls : (formData.images || []);
+            if (isEdit && finalImages.length === 0 && imagePreviews.length > 0) {
+                finalImages = imagePreviews;
+            }
+
             // Create listing
             const baseListingData = {
                 title: formData.title,
@@ -170,14 +239,16 @@ const CreateListingPage = ({ onNavigate }) => {
                 condition: formData.condition,
                 location: formData.location,
                 listingType: formData.listingType,
-                imageUrl: imageUrls[0] || 'https://placehold.co/400x300/e2e8f0/cbd5e0?text=TuiTrade',
-                images: imageUrls,
+                imageUrl: finalImages[0] || 'https://placehold.co/400x300/e2e8f0/cbd5e0?text=TuiTrade',
+                images: finalImages,
                 userId: currentUser.uid,
                 userEmail: currentUser.email,
-                createdAt: new Date(),
-                views: 0,
-                inquiries: 0,
-                status: 'active'
+                createdAt: serverTimestamp(),
+                isDigital: formData.isDigital,
+                digitalFileUrl: digitalFileUrl,
+                deliveryMethod: formData.deliveryMethod,
+                licenseType: formData.licenseType,
+                downloadLimit: parseInt(formData.downloadLimit) || 1
             };
 
             let listingData;
@@ -207,14 +278,25 @@ const CreateListingPage = ({ onNavigate }) => {
             }
 
             console.log('Creating document in collection:', collection_name, listingData);
-            const docRef = await addDoc(collection(db, collection_name), listingData);
-            console.log('Document created with ID:', docRef.id);
-
-            showNotification('Listing created successfully!', 'success');
+            if (isEdit && editId) {
+                // Update existing listing
+                await updateDoc(doc(db, collection_name, editId), listingData);
+                showNotification('Listing updated successfully!', 'success');
+            } else {
+                // Create new listing
+                const docRef = await addDoc(collection(db, collection_name), {
+                    ...listingData,
+                    createdAt: new Date(),
+                    views: 0,
+                    inquiries: 0
+                });
+                console.log('Document created with ID:', docRef.id);
+                showNotification('Listing created successfully!', 'success');
+            }
             onNavigate('listings');
         } catch (error) {
             console.error('Error creating listing:', error);
-            setError('Failed to create listing. Please try again.');
+            setError('Failed to save listing. Please try again.');
         } finally {
             setLoading(false);
         }
@@ -232,7 +314,7 @@ const CreateListingPage = ({ onNavigate }) => {
                     <span className="font-semibold text-gray-700">Create Listing</span>
                 </div>
 
-                <h1 className="text-3xl font-bold text-gray-900 mb-8">Create New Listing</h1>
+                <h1 className="text-3xl font-bold text-gray-900 mb-8">{isEdit ? 'Edit Listing' : 'Create New Listing'}</h1>
 
                 <div className="bg-white rounded-lg shadow-md p-8">
                     <form onSubmit={handleSubmit} className="space-y-6">
@@ -276,14 +358,14 @@ const CreateListingPage = ({ onNavigate }) => {
                                     Listing Type <span className="text-red-500">*</span>
                                 </label>
                                 <div className={`grid gap-4 ${CATEGORIES[formData.category]?.listingTypes.length === 1
-                                        ? 'grid-cols-1'
-                                        : 'grid-cols-1 md:grid-cols-2'
+                                    ? 'grid-cols-1'
+                                    : 'grid-cols-1 md:grid-cols-2'
                                     }`}>
                                     {CATEGORIES[formData.category]?.listingTypes.includes('fixed-price') && (
                                         <div
                                             className={`p-4 rounded-lg border-2 cursor-pointer transition-all ${formData.listingType === 'fixed-price'
-                                                    ? 'border-green-500 bg-green-50'
-                                                    : 'border-gray-200 hover:border-gray-300'
+                                                ? 'border-green-500 bg-green-50'
+                                                : 'border-gray-200 hover:border-gray-300'
                                                 }`}
                                             onClick={() => setFormData(prev => ({ ...prev, listingType: 'fixed-price' }))}
                                         >
@@ -298,8 +380,8 @@ const CreateListingPage = ({ onNavigate }) => {
                                     {CATEGORIES[formData.category]?.listingTypes.includes('auction') && (
                                         <div
                                             className={`p-4 rounded-lg border-2 cursor-pointer transition-all ${formData.listingType === 'auction'
-                                                    ? 'border-green-500 bg-green-50'
-                                                    : 'border-gray-200 hover:border-gray-300'
+                                                ? 'border-green-500 bg-green-50'
+                                                : 'border-gray-200 hover:border-gray-300'
                                                 }`}
                                             onClick={() => setFormData(prev => ({ ...prev, listingType: 'auction' }))}
                                         >
@@ -314,8 +396,8 @@ const CreateListingPage = ({ onNavigate }) => {
                                     {CATEGORIES[formData.category]?.listingTypes.includes('classified') && (
                                         <div
                                             className={`p-4 rounded-lg border-2 cursor-pointer transition-all ${formData.listingType === 'classified'
-                                                    ? 'border-green-500 bg-green-50'
-                                                    : 'border-gray-200 hover:border-gray-300'
+                                                ? 'border-green-500 bg-green-50'
+                                                : 'border-gray-200 hover:border-gray-300'
                                                 }`}
                                             onClick={() => setFormData(prev => ({ ...prev, listingType: 'classified' }))}
                                         >
@@ -391,8 +473,8 @@ const CreateListingPage = ({ onNavigate }) => {
                                             type="button"
                                             onClick={() => handleTagToggle(tag)}
                                             className={`px-3 py-2 rounded-lg text-sm transition-colors ${formData.tags.includes(tag)
-                                                    ? 'bg-green-600 text-white'
-                                                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                                ? 'bg-green-600 text-white'
+                                                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                                                 }`}
                                         >
                                             {tag}
@@ -564,6 +646,94 @@ const CreateListingPage = ({ onNavigate }) => {
                             </div>
                         </div>
 
+                        {/* Digital Goods Section */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    Is this a digital good?
+                                </label>
+                                <div className="flex items-center">
+                                    <input
+                                        type="checkbox"
+                                        name="isDigital"
+                                        checked={formData.isDigital}
+                                        onChange={handleInputChange}
+                                        className="mr-2 h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 rounded"
+                                    />
+                                    <span className="text-sm text-gray-700">Yes, this is a digital good that can be delivered instantly.</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        {formData.isDigital && (
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                                        Digital File (Max 100MB)
+                                    </label>
+                                    <input
+                                        type="file"
+                                        name="digitalFile"
+                                        onChange={handleDigitalFileChange}
+                                        accept=".pdf,.doc,.docx,.zip,.rar,.7z,.jpg,.jpeg,.png,.gif"
+                                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                                    />
+                                    {formData.digitalFile && (
+                                        <p className="text-xs text-gray-500 mt-2">Selected file: {formData.digitalFile.name}</p>
+                                    )}
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                                        Delivery Method
+                                    </label>
+                                    <select
+                                        name="deliveryMethod"
+                                        value={formData.deliveryMethod}
+                                        onChange={handleInputChange}
+                                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                                    >
+                                        <option value="instant">Instant Delivery</option>
+                                        <option value="email">Email Delivery</option>
+                                        <option value="download">Download Link</option>
+                                    </select>
+                                </div>
+
+                                {formData.deliveryMethod === 'download' && (
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                                            Download Limit (Optional)
+                                        </label>
+                                        <input
+                                            type="number"
+                                            name="downloadLimit"
+                                            value={formData.downloadLimit}
+                                            onChange={handleInputChange}
+                                            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                                            placeholder="1"
+                                            min="1"
+                                        />
+                                        <p className="text-xs text-gray-500 mt-1">Number of times the file can be downloaded.</p>
+                                    </div>
+                                )}
+
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                                        License Type
+                                    </label>
+                                    <select
+                                        name="licenseType"
+                                        value={formData.licenseType}
+                                        onChange={handleInputChange}
+                                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                                    >
+                                        <option value="single-use">Single Use License</option>
+                                        <option value="perpetual">Perpetual License</option>
+                                    </select>
+                                </div>
+                            </div>
+                        )}
+
                         {/* Fee Calculator */}
                         {formData.category && (formData.price || formData.startingBid) && (
                             <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
@@ -665,7 +835,7 @@ const CreateListingPage = ({ onNavigate }) => {
                             disabled={loading}
                             className="w-full bg-green-600 text-white py-3 px-4 rounded-lg font-semibold hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors flex items-center justify-center"
                         >
-                            {loading ? <LoadingSpinner /> : (
+                            {loading ? <LoadingSpinner /> : isEdit ? 'Update Listing' : (
                                 <>
                                     {formData.listingType === 'auction' ? (
                                         <Gavel className="w-5 h-5 mr-2" />

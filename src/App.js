@@ -1,34 +1,38 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, Suspense, lazy } from 'react';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
 import { collection, onSnapshot, doc, deleteDoc, setDoc } from 'firebase/firestore';
+import { Search, Heart, ShoppingCart, User, List, Eye, Lock, Tag, MessageCircle, Shield, Star, BarChart3, Package, Sun, Moon, Menu, X } from 'lucide-react';
 
 // Core setup
 import { auth, db } from './lib/firebase';
 import { AuthContext } from './context/AuthContext';
 import { NotificationProvider, useNotification } from './context/NotificationContext';
 import { ThemeProvider, useTheme } from './context/ThemeContext';
+import { trackPageView, trackEvent, trackEngagement, setUserId } from './lib/analytics';
 
-// UI Components & Pages
+// UI Components & Pages - Lazy loaded for better performance
 import { FullPageLoader } from './components/ui/Loaders';
+import ErrorBoundary from './components/ErrorBoundary';
 import AuthModal from './components/modals/AuthModal';
 import ContactSellerModal from './components/modals/ContactSellerModal';
 import ShoppingCartModal from './components/modals/ShoppingCartModal';
 import CheckoutModal from './components/modals/CheckoutModal';
-import HomePage from './components/pages/HomePage';
-import ProfilePage from './components/pages/ProfilePage';
-import MyListingsPage from './components/pages/MyListingsPage';
-import WatchlistPage from './components/pages/WatchlistPage';
-import CreateListingPage from './components/pages/CreateListingPage';
-import ItemDetailPage from './components/pages/ItemDetailPage';
-import CategoryPage from './components/pages/CategoryPage';
-import SearchResultsPage from './components/pages/SearchResultsPage';
-import MessagesPage from './components/pages/MessagesPage';
-import SellerDashboard from './components/pages/SellerDashboard';
-import SellerPage from './components/pages/SellerPage';
-import OrdersPage from './components/pages/OrdersPage';
-import TermsAndPrivacyPage from './components/pages/TermsAndPrivacyPage';
-import { Search, Heart, ShoppingCart, User, List, Eye, Lock, Tag, MessageCircle, Shield, Star, BarChart3, Package, Sun, Moon } from 'lucide-react';
-import './App.css'; // <--- ADD THIS LINE
+import './App.css';
+
+// Lazy load page components
+const HomePage = lazy(() => import('./components/pages/HomePage'));
+const ProfilePage = lazy(() => import('./components/pages/ProfilePage'));
+const MyListingsPage = lazy(() => import('./components/pages/MyListingsPage'));
+const WatchlistPage = lazy(() => import('./components/pages/WatchlistPage'));
+const CreateListingPage = lazy(() => import('./components/pages/CreateListingPage'));
+const ItemDetailPage = lazy(() => import('./components/pages/ItemDetailPage'));
+const CategoryPage = lazy(() => import('./components/pages/CategoryPage'));
+const SearchResultsPage = lazy(() => import('./components/pages/SearchResultsPage'));
+const MessagesPage = lazy(() => import('./components/pages/MessagesPage'));
+const SellerDashboard = lazy(() => import('./components/pages/SellerDashboard'));
+const SellerPage = lazy(() => import('./components/pages/SellerPage'));
+const OrdersPage = lazy(() => import('./components/pages/OrdersPage'));
+const TermsAndPrivacyPage = lazy(() => import('./components/pages/TermsAndPrivacyPage'));
 // This is the inner component that can access notifications
 // Placeholder legal/support/info pages
 const PlaceholderPage = ({ title }) => (
@@ -42,6 +46,7 @@ function AppContent() {
     const [isAuthReady, setIsAuthReady] = useState(false);
     const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
     const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
+    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [currentPage, setCurrentPage] = useState('home');
     const [pageContext, setPageContext] = useState({});
     const [selectedItem, setSelectedItem] = useState(null);
@@ -61,10 +66,14 @@ function AppContent() {
         const unsubscribe = onAuthStateChanged(auth, user => {
             setCurrentUser(user);
             setIsAuthReady(true);
-            if (!user) {
+            if (user) {
+                setUserId(user.uid);
+                trackEvent('user_login', { email: user.email });
+            } else {
                 setCurrentPage('home');
                 setWatchedItems([]);
                 setCartItems([]);
+                trackEvent('user_logout');
             }
         });
         return () => unsubscribe();
@@ -93,8 +102,12 @@ function AppContent() {
         setCurrentPage(page);
         setPageContext(context);
         setIsProfileMenuOpen(false);
+        setIsMobileMenuOpen(false);
         if (page !== 'item-detail') setSelectedItem(null);
         window.scrollTo(0, 0);
+        
+        // Track page navigation
+        trackPageView(page, context);
     };
 
     const handleItemClick = (item) => {
@@ -121,6 +134,14 @@ function AppContent() {
         e.preventDefault();
         if (!searchQuery.trim()) return;
         const keywords = searchQuery.toLowerCase().split(' ').filter(word => word.length > 2);
+        
+        // Track search
+        trackEvent('search', { 
+            query: searchQuery, 
+            keywords: keywords.length,
+            page: currentPage 
+        });
+        
         handleNavigate('search-results', { keywords, originalQuery: searchQuery });
     };
 
@@ -192,50 +213,56 @@ function AppContent() {
             cartItems,
         };
 
-        switch (currentPage) {
-            case 'profile': return <ProfilePage {...pageProps} />;
-            case 'listings': return <MyListingsPage {...pageProps} />;
-            case 'watchlist': return <WatchlistPage {...pageProps} />;
-            case 'create-listing': return <CreateListingPage {...pageProps} />;
-            case 'seller-dashboard': return <SellerDashboard {...pageProps} />;
-            case 'seller-page': return <SellerPage {...pageProps} sellerId={pageContext.sellerId} />;
-            case 'item-detail':
-                return <ItemDetailPage {...pageProps} item={selectedItem} currentUser={currentUser} onContactSeller={handleContactSeller} isInCart={cartItems.some(cartItem => cartItem.id === selectedItem?.id)} />;
-            case 'category':
-                return <CategoryPage {...pageProps} categoryKey={pageContext.categoryKey} subcategoryKey={pageContext.subcategoryKey} />;
-            case 'search-results':
-                return <SearchResultsPage {...pageProps} searchParams={pageContext} />;
-            case 'messages':
-                return <MessagesPage {...pageProps} />;
-            case 'orders':
-                return <OrdersPage {...pageProps} />;
-            case 'help-center':
-                return <PlaceholderPage title="Help Center" />;
-            case 'contact-us':
-                return <PlaceholderPage title="Contact Us" />;
-            case 'safety-tips':
-                return <PlaceholderPage title="Safety Tips" />;
-            case 'terms-privacy':
-                return <TermsAndPrivacyPage {...pageProps} />;
-            case 'how-to-buy':
-                return <PlaceholderPage title="How to Buy" />;
-            case 'payment-options':
-                return <PlaceholderPage title="Payment Options" />;
-            case 'buyer-protection':
-                return <PlaceholderPage title="Buyer Protection" />;
-            case 'shipping-info':
-                return <PlaceholderPage title="Shipping Info" />;
-            case 'how-to-sell':
-                return <PlaceholderPage title="How to Sell" />;
-            case 'seller-fees':
-                return <PlaceholderPage title="Seller Fees" />;
-            case 'seller-tools':
-                return <PlaceholderPage title="Seller Tools" />;
-            case 'success-tips':
-                return <PlaceholderPage title="Success Tips" />;
-            default:
-                return <HomePage {...pageProps} />;
-        }
+        return (
+            <Suspense fallback={<FullPageLoader message="Loading..." />}>
+                {(() => {
+                    switch (currentPage) {
+                        case 'profile': return <ProfilePage {...pageProps} />;
+                        case 'listings': return <MyListingsPage {...pageProps} />;
+                        case 'watchlist': return <WatchlistPage {...pageProps} />;
+                        case 'create-listing': return <CreateListingPage {...pageProps} />;
+                        case 'seller-dashboard': return <SellerDashboard {...pageProps} />;
+                        case 'seller-page': return <SellerPage {...pageProps} sellerId={pageContext.sellerId} />;
+                        case 'item-detail':
+                            return <ItemDetailPage {...pageProps} item={selectedItem} currentUser={currentUser} onContactSeller={handleContactSeller} isInCart={cartItems.some(cartItem => cartItem.id === selectedItem?.id)} />;
+                        case 'category':
+                            return <CategoryPage {...pageProps} categoryKey={pageContext.categoryKey} subcategoryKey={pageContext.subcategoryKey} />;
+                        case 'search-results':
+                            return <SearchResultsPage {...pageProps} searchParams={pageContext} />;
+                        case 'messages':
+                            return <MessagesPage {...pageProps} />;
+                        case 'orders':
+                            return <OrdersPage {...pageProps} />;
+                        case 'help-center':
+                            return <PlaceholderPage title="Help Center" />;
+                        case 'contact-us':
+                            return <PlaceholderPage title="Contact Us" />;
+                        case 'safety-tips':
+                            return <PlaceholderPage title="Safety Tips" />;
+                        case 'terms-privacy':
+                            return <TermsAndPrivacyPage {...pageProps} />;
+                        case 'how-to-buy':
+                            return <PlaceholderPage title="How to Buy" />;
+                        case 'payment-options':
+                            return <PlaceholderPage title="Payment Options" />;
+                        case 'buyer-protection':
+                            return <PlaceholderPage title="Buyer Protection" />;
+                        case 'shipping-info':
+                            return <PlaceholderPage title="Shipping Info" />;
+                        case 'how-to-sell':
+                            return <PlaceholderPage title="How to Sell" />;
+                        case 'seller-fees':
+                            return <PlaceholderPage title="Seller Fees" />;
+                        case 'seller-tools':
+                            return <PlaceholderPage title="Seller Tools" />;
+                        case 'success-tips':
+                            return <PlaceholderPage title="Success Tips" />;
+                        default:
+                            return <HomePage {...pageProps} />;
+                    }
+                })()}
+            </Suspense>
+        );
     };
 
     return (
@@ -264,16 +291,16 @@ function AppContent() {
                                 </button>
                             </div>
 
-                            <div className="hidden md:flex flex-1 max-w-2xl mx-8">
+                            <div className="flex-1 max-w-2xl mx-4 md:mx-8">
                                 <form onSubmit={handleSearch} className="relative w-full">
                                     <input
                                         type="text"
                                         value={searchQuery}
                                         onChange={(e) => setSearchQuery(e.target.value)}
                                         placeholder="Search for anything..."
-                                        className="w-full pl-12 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all"
+                                        className="w-full pl-10 md:pl-12 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all text-sm md:text-base"
                                     />
-                                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+                                    <Search className="absolute left-3 md:left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
                                 </form>
                             </div>
 
@@ -306,6 +333,14 @@ function AppContent() {
                             </nav>
 
                             <div className="flex items-center space-x-2 md:space-x-4">
+                                {/* Mobile menu button */}
+                                <button
+                                    onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                                    className={`lg:hidden p-2 transition-colors ${isDarkMode ? 'text-gray-300 hover:text-green-400' : 'text-gray-600 hover:text-green-600'}`}
+                                >
+                                    {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+                                </button>
+
                                 <button
                                     onClick={toggleDarkMode}
                                     className={`p-2 transition-colors ${isDarkMode ? 'text-gray-300 hover:text-yellow-400' : 'text-gray-600 hover:text-gray-800'}`}
@@ -429,6 +464,38 @@ function AppContent() {
                     </div>
                 </header>
 
+                {/* Mobile Navigation Menu */}
+                {isMobileMenuOpen && (
+                    <div className={`lg:hidden shadow-lg border-t ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}>
+                        <div className="px-4 py-3 space-y-2">
+                            <button
+                                onClick={() => handleNavigate('category', { categoryKey: 'marketplace' })}
+                                className={`w-full text-left px-3 py-2 rounded-lg transition-colors ${isDarkMode ? 'text-gray-300 hover:bg-gray-700' : 'text-gray-700 hover:bg-gray-50'}`}
+                            >
+                                Marketplace
+                            </button>
+                            <button
+                                onClick={() => handleNavigate('category', { categoryKey: 'motors' })}
+                                className={`w-full text-left px-3 py-2 rounded-lg transition-colors ${isDarkMode ? 'text-gray-300 hover:bg-gray-700' : 'text-gray-700 hover:bg-gray-50'}`}
+                            >
+                                Motors
+                            </button>
+                            <button
+                                onClick={() => handleNavigate('category', { categoryKey: 'property' })}
+                                className={`w-full text-left px-3 py-2 rounded-lg transition-colors ${isDarkMode ? 'text-gray-300 hover:bg-gray-700' : 'text-gray-700 hover:bg-gray-50'}`}
+                            >
+                                Property
+                            </button>
+                            <button
+                                onClick={() => handleNavigate('category', { categoryKey: 'jobs' })}
+                                className={`w-full text-left px-3 py-2 rounded-lg transition-colors ${isDarkMode ? 'text-gray-300 hover:bg-gray-700' : 'text-gray-700 hover:bg-gray-50'}`}
+                            >
+                                Jobs
+                            </button>
+                        </div>
+                    </div>
+                )}
+
                 {/* --- Main Content --- */}
                 <main className="flex-grow flex flex-col">
                     {renderPage()}
@@ -506,10 +573,12 @@ function AppContent() {
 // This is the final export, wrapping the app in the NotificationProvider and ThemeProvider
 export default function App() {
     return (
-        <ThemeProvider>
-            <NotificationProvider>
-                <AppContent />
-            </NotificationProvider>
-        </ThemeProvider>
+        <ErrorBoundary>
+            <ThemeProvider>
+                <NotificationProvider>
+                    <AppContent />
+                </NotificationProvider>
+            </ThemeProvider>
+        </ErrorBoundary>
     );
 }

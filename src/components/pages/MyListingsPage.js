@@ -1,8 +1,9 @@
 // src/components/pages/MyListingsPage.js
 import { useState, useEffect } from 'react';
-import { collection, query, where, orderBy, getDocs } from 'firebase/firestore';
+import { collection, query, where, orderBy, getDocs, doc, deleteDoc } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
 import { useAuth } from '../../context/AuthContext';
+import { useNotification } from '../../context/NotificationContext';
 import { FullPageLoader } from '../ui/Loaders';
 import ItemCard from '../ui/ItemCard';
 import { AuctionCard } from '../ui/AuctionSystem';
@@ -13,6 +14,8 @@ const MyListingsPage = ({ onNavigate, onItemClick, onWatchToggle, watchedItems, 
     const [isLoading, setIsLoading] = useState(true);
     const [refreshTrigger, setRefreshTrigger] = useState(0);
     const { currentUser } = useAuth();
+    const { showNotification } = useNotification();
+    const [deletingId, setDeletingId] = useState(null);
 
     // Function to refresh listings
     const refreshListings = () => {
@@ -32,7 +35,7 @@ const MyListingsPage = ({ onNavigate, onItemClick, onWatchToggle, watchedItems, 
             setIsLoading(true);
             try {
                 console.log('Fetching listings for user:', currentUser.uid);
-                
+
                 // Fetch from both listings and auctions collections
                 const promises = [];
 
@@ -88,6 +91,25 @@ const MyListingsPage = ({ onNavigate, onItemClick, onWatchToggle, watchedItems, 
         fetchMyListings();
     }, [currentUser, refreshTrigger]);
 
+    const handleEdit = (item) => {
+        onNavigate('create-listing', { editItem: item });
+    };
+
+    const handleDelete = async (item) => {
+        if (!window.confirm('Are you sure you want to delete this listing?')) return;
+        setDeletingId(item.id);
+        try {
+            const collectionName = item.listingType === 'auction' ? 'auctions' : 'listings';
+            await deleteDoc(doc(db, collectionName, item.id));
+            showNotification('Listing deleted.', 'success');
+            refreshListings();
+        } catch (err) {
+            showNotification('Failed to delete listing.', 'error');
+        } finally {
+            setDeletingId(null);
+        }
+    };
+
     if (isLoading) {
         return <FullPageLoader message="Loading your listings..." />;
     }
@@ -133,27 +155,42 @@ const MyListingsPage = ({ onNavigate, onItemClick, onWatchToggle, watchedItems, 
             ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                     {listings.map(item => (
-                        item.listingType === 'auction' ? (
-                            <AuctionCard
-                                key={item.id}
-                                auction={item}
-                                onItemClick={onItemClick}
-                                onWatchToggle={onWatchToggle}
-                                watchedItems={watchedItems}
-                                onNavigate={onNavigate}
-                            />
-                        ) : (
-                            <ItemCard
-                                key={item.id}
-                                item={item}
-                                isWatched={watchedItems.includes(item.id)}
-                                onWatchToggle={onWatchToggle}
-                                onItemClick={onItemClick}
-                                onAddToCart={onAddToCart}
-                                isInCart={cartItems.some(cartItem => cartItem.id === item.id)}
-                                onNavigate={onNavigate}
-                            />
-                        )
+                        <div key={item.id} className="relative group">
+                            {item.listingType === 'auction' ? (
+                                <AuctionCard
+                                    auction={item}
+                                    onItemClick={onItemClick}
+                                    onWatchToggle={onWatchToggle}
+                                    watchedItems={watchedItems}
+                                    onNavigate={onNavigate}
+                                />
+                            ) : (
+                                <ItemCard
+                                    item={item}
+                                    isWatched={watchedItems.includes(item.id)}
+                                    onWatchToggle={onWatchToggle}
+                                    onItemClick={onItemClick}
+                                    onAddToCart={onAddToCart}
+                                    isInCart={cartItems.some(cartItem => cartItem.id === item.id)}
+                                    onNavigate={onNavigate}
+                                />
+                            )}
+                            <div className="absolute top-2 right-2 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <button
+                                    onClick={() => handleEdit(item)}
+                                    className="bg-blue-600 text-white px-3 py-1 rounded text-xs font-semibold hover:bg-blue-700"
+                                >
+                                    Edit
+                                </button>
+                                <button
+                                    onClick={() => handleDelete(item)}
+                                    disabled={deletingId === item.id}
+                                    className="bg-red-600 text-white px-3 py-1 rounded text-xs font-semibold hover:bg-red-700 disabled:opacity-50"
+                                >
+                                    {deletingId === item.id ? 'Deleting...' : 'Delete'}
+                                </button>
+                            </div>
+                        </div>
                     ))}
                 </div>
             )}

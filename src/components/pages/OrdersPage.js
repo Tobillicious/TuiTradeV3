@@ -4,23 +4,24 @@ import { useAuth } from '../../context/AuthContext';
 import { getUserOrders, ORDER_STATUS, PAYMENT_STATUS } from '../../lib/orders';
 import { formatPrice, timeAgo } from '../../lib/utils';
 import { FullPageLoader } from '../ui/Loaders';
-import { 
-    Package, 
-    Clock, 
-    CheckCircle, 
-    XCircle, 
-    Truck, 
-    Home, 
+import {
+    Package,
+    Clock,
+    CheckCircle,
+    XCircle,
+    Truck,
+    Home,
     ChevronRight,
     Eye,
-    MessageCircle
+    MessageCircle,
+    User
 } from 'lucide-react';
 
 const OrdersPage = ({ onNavigate }) => {
     const [orders, setOrders] = useState([]);
     const [loading, setLoading] = useState(true);
     const [activeTab, setActiveTab] = useState('buyer'); // 'buyer' or 'seller'
-    
+
     const { currentUser } = useAuth();
 
     const fetchOrders = useCallback(async () => {
@@ -121,21 +122,19 @@ const OrdersPage = ({ onNavigate }) => {
                         <nav className="-mb-px flex space-x-8">
                             <button
                                 onClick={() => setActiveTab('buyer')}
-                                className={`py-2 px-1 border-b-2 font-medium text-sm ${
-                                    activeTab === 'buyer'
-                                        ? 'border-green-500 text-green-600'
-                                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                                }`}
+                                className={`py-2 px-1 border-b-2 font-medium text-sm ${activeTab === 'buyer'
+                                    ? 'border-green-500 text-green-600'
+                                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                                    }`}
                             >
                                 My Purchases
                             </button>
                             <button
                                 onClick={() => setActiveTab('seller')}
-                                className={`py-2 px-1 border-b-2 font-medium text-sm ${
-                                    activeTab === 'seller'
-                                        ? 'border-green-500 text-green-600'
-                                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                                }`}
+                                className={`py-2 px-1 border-b-2 font-medium text-sm ${activeTab === 'seller'
+                                    ? 'border-green-500 text-green-600'
+                                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                                    }`}
                             >
                                 My Sales
                             </button>
@@ -151,7 +150,7 @@ const OrdersPage = ({ onNavigate }) => {
                             No {activeTab === 'buyer' ? 'purchases' : 'sales'} yet
                         </h3>
                         <p className="text-gray-500 mb-6">
-                            {activeTab === 'buyer' 
+                            {activeTab === 'buyer'
                                 ? "Start shopping to see your orders here"
                                 : "List items to start selling"
                             }
@@ -189,7 +188,18 @@ const OrdersPage = ({ onNavigate }) => {
                                             </p>
                                         </div>
                                     </div>
-
+                                    <div className="flex flex-wrap gap-4 items-center mb-4">
+                                        {order.itemImages && order.itemImages.length > 0 && (
+                                            <img src={order.itemImages[0]} alt={order.itemTitle} className="w-16 h-16 object-cover rounded" loading="lazy" />
+                                        )}
+                                        <div>
+                                            <p className="text-sm font-medium text-gray-700">{activeTab === 'buyer' ? 'Seller' : 'Buyer'}</p>
+                                            <div className="flex items-center gap-2">
+                                                <User className="w-4 h-4 text-gray-400" />
+                                                <span className="text-gray-800 font-semibold">{activeTab === 'buyer' ? order.sellerEmail : order.buyerEmail}</span>
+                                            </div>
+                                        </div>
+                                    </div>
                                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                                         <div>
                                             <p className="text-sm font-medium text-gray-700">Order Status</p>
@@ -204,62 +214,32 @@ const OrdersPage = ({ onNavigate }) => {
                                             </span>
                                         </div>
                                         <div>
-                                            <p className="text-sm font-medium text-gray-700">
-                                                {activeTab === 'buyer' ? 'Seller' : 'Buyer'}
-                                            </p>
-                                            <p className="text-sm text-gray-900">
-                                                {activeTab === 'buyer' ? order.sellerEmail : order.buyerEmail}
-                                            </p>
+                                            <p className="text-sm font-medium text-gray-700">Shipping</p>
+                                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                                                {order.shippingMethod || 'N/A'}
+                                            </span>
                                         </div>
                                     </div>
-
-                                    {order.trackingNumber && (
-                                        <div className="mb-4 p-3 bg-blue-50 rounded-lg">
-                                            <p className="text-sm font-medium text-blue-900">Tracking Information</p>
-                                            <p className="text-sm text-blue-700">
-                                                Tracking Number: {order.trackingNumber}
-                                            </p>
-                                            {order.carrier && (
-                                                <p className="text-sm text-blue-700">
-                                                    Carrier: {order.carrier}
-                                                </p>
-                                            )}
+                                    {order.notes && (
+                                        <div className="bg-gray-50 rounded p-3 text-sm text-gray-700 mb-2">
+                                            <span className="font-semibold">Notes:</span> {order.notes}
                                         </div>
                                     )}
-
-                                    {order.shippingAddress && (
-                                        <div className="mb-4">
-                                            <p className="text-sm font-medium text-gray-700 mb-1">Shipping Address</p>
-                                            <div className="text-sm text-gray-600">
-                                                <p>{order.shippingAddress.line1}</p>
-                                                <p>
-                                                    {order.shippingAddress.city}, {order.shippingAddress.postal_code}
-                                                </p>
-                                                <p>{order.shippingAddress.country}</p>
-                                            </div>
-                                        </div>
-                                    )}
-
-                                    <div className="flex items-center justify-between pt-4 border-t border-gray-200">
-                                        <div className="flex space-x-3">
-                                            <button
-                                                onClick={() => onNavigate('item-detail', { itemId: order.itemId })}
-                                                className="flex items-center space-x-1 text-sm text-blue-600 hover:text-blue-700"
-                                            >
-                                                <Eye size={16} />
-                                                <span>View Item</span>
-                                            </button>
-                                            <button
-                                                onClick={() => onNavigate('messages')}
-                                                className="flex items-center space-x-1 text-sm text-green-600 hover:text-green-700"
-                                            >
-                                                <MessageCircle size={16} />
-                                                <span>Message {activeTab === 'buyer' ? 'Seller' : 'Buyer'}</span>
-                                            </button>
-                                        </div>
-                                        <div className="text-xs text-gray-500">
-                                            Last updated: {order.updatedAt ? timeAgo(order.updatedAt) : 'Recently'}
-                                        </div>
+                                    <div className="flex justify-end gap-2 mt-4">
+                                        <button
+                                            onClick={() => onNavigate('messages')}
+                                            className="bg-blue-100 text-blue-700 px-4 py-2 rounded-lg font-semibold hover:bg-blue-200 flex items-center gap-2"
+                                        >
+                                            <MessageCircle className="w-4 h-4" />
+                                            Message {activeTab === 'buyer' ? 'Seller' : 'Buyer'}
+                                        </button>
+                                        <button
+                                            onClick={() => onNavigate('item-detail', { id: order.itemId })}
+                                            className="bg-gray-100 text-gray-700 px-4 py-2 rounded-lg font-semibold hover:bg-gray-200 flex items-center gap-2"
+                                        >
+                                            <Eye className="w-4 h-4" />
+                                            View Listing
+                                        </button>
                                     </div>
                                 </div>
                             </div>

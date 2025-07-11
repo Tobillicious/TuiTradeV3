@@ -4,7 +4,7 @@ import { doc, updateDoc, increment, getDoc } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
 import { formatPrice, timeAgo, CATEGORIES } from '../../lib/utils';
 import { FullPageLoader } from '../ui/Loaders';
-import { Heart, ShoppingCart, MessageCircle, MapPin, Calendar, Eye, Shield, Home, ChevronRight } from 'lucide-react';
+import { Heart, ShoppingCart, MessageCircle, MapPin, Calendar, Eye, Shield, Home, ChevronRight, Download, Zap, CheckCircle } from 'lucide-react';
 import { StarRating, ReviewList } from '../ui/ReviewSystem';
 import { AuctionInterface } from '../ui/AuctionSystem';
 
@@ -136,9 +136,9 @@ const ItemDetailPage = ({ item, onNavigate, onWatchToggle, watchedItems, onConta
                                     <p className="text-3xl font-bold text-green-600 mb-2">{formatPrice(item.price)}</p>
                                     {item.condition && (
                                         <span className={`inline-block px-3 py-1 rounded-full text-sm font-medium ${item.condition === 'New' ? 'bg-green-100 text-green-800' :
-                                                item.condition === 'Used - Like New' ? 'bg-blue-100 text-blue-800' :
-                                                    item.condition === 'Used - Good' ? 'bg-yellow-100 text-yellow-800' :
-                                                        'bg-orange-100 text-orange-800'
+                                            item.condition === 'Used - Like New' ? 'bg-blue-100 text-blue-800' :
+                                                item.condition === 'Used - Good' ? 'bg-yellow-100 text-yellow-800' :
+                                                    'bg-orange-100 text-orange-800'
                                             }`}>
                                             {item.condition}
                                         </span>
@@ -146,20 +146,64 @@ const ItemDetailPage = ({ item, onNavigate, onWatchToggle, watchedItems, onConta
                                 </div>
 
                                 <div className="space-y-3">
-                                    <button
-                                        onClick={() => onContactSeller(item)}
-                                        className="w-full bg-green-600 text-white py-3 px-6 rounded-lg hover:bg-green-700 transition-colors font-semibold flex items-center justify-center"
-                                    >
-                                        <MessageCircle size={20} className="mr-2" />
-                                        Contact Seller
-                                    </button>
+                                    {item.isDigital ? (
+                                        <>
+                                            <button
+                                                onClick={() => onAddToCart(item)}
+                                                disabled={isInCart}
+                                                className={`w-full py-3 px-6 rounded-lg font-semibold transition-colors flex items-center justify-center ${isInCart
+                                                    ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
+                                                    : 'bg-purple-600 text-white hover:bg-purple-700'
+                                                    }`}
+                                            >
+                                                <Download size={20} className="mr-2" />
+                                                {isInCart ? 'In Cart' : 'Buy Now - Instant Download'}
+                                            </button>
+
+                                            <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
+                                                <div className="flex items-center mb-2">
+                                                    <Zap size={16} className="text-purple-600 mr-2" />
+                                                    <span className="font-semibold text-purple-800">Digital Delivery</span>
+                                                </div>
+                                                <div className="text-sm text-purple-700 space-y-1">
+                                                    <div className="flex justify-between">
+                                                        <span>Delivery:</span>
+                                                        <span className="font-medium">
+                                                            {item.deliveryMethod === 'instant' ? 'Instant Download' :
+                                                                item.deliveryMethod === 'email' ? 'Email Delivery' : 'Download Link'}
+                                                        </span>
+                                                    </div>
+                                                    <div className="flex justify-between">
+                                                        <span>License:</span>
+                                                        <span className="font-medium">
+                                                            {item.licenseType === 'single-use' ? 'Single Use' : 'Perpetual'}
+                                                        </span>
+                                                    </div>
+                                                    {item.downloadLimit && (
+                                                        <div className="flex justify-between">
+                                                            <span>Downloads:</span>
+                                                            <span className="font-medium">{item.downloadLimit} time{item.downloadLimit > 1 ? 's' : ''}</span>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        </>
+                                    ) : (
+                                        <button
+                                            onClick={() => onContactSeller(item)}
+                                            className="w-full bg-green-600 text-white py-3 px-6 rounded-lg hover:bg-green-700 transition-colors font-semibold flex items-center justify-center"
+                                        >
+                                            <MessageCircle size={20} className="mr-2" />
+                                            Contact Seller
+                                        </button>
+                                    )}
 
                                     <button
                                         onClick={() => onAddToCart(item)}
                                         disabled={isInCart}
                                         className={`w-full py-3 px-6 rounded-lg font-semibold transition-colors flex items-center justify-center ${isInCart
-                                                ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
-                                                : 'bg-blue-600 text-white hover:bg-blue-700'
+                                            ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
+                                            : 'bg-blue-600 text-white hover:bg-blue-700'
                                             }`}
                                     >
                                         <ShoppingCart size={20} className="mr-2" />
@@ -169,8 +213,8 @@ const ItemDetailPage = ({ item, onNavigate, onWatchToggle, watchedItems, onConta
                                     <button
                                         onClick={() => onWatchToggle(item.id)}
                                         className={`w-full py-3 px-6 rounded-lg transition-colors font-semibold flex items-center justify-center ${isWatched
-                                                ? 'bg-red-500 text-white hover:bg-red-600'
-                                                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                                            ? 'bg-red-500 text-white hover:bg-red-600'
+                                            : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
                                             }`}
                                     >
                                         <Heart size={20} fill={isWatched ? 'currentColor' : 'none'} className="mr-2" />
@@ -199,6 +243,15 @@ const ItemDetailPage = ({ item, onNavigate, onWatchToggle, watchedItems, onConta
                                     <span className="text-gray-600">Views:</span>
                                     <span className="ml-auto font-medium">{item.views || 0}</span>
                                 </div>
+
+                                {/* Digital Goods Info */}
+                                {item.isDigital && (
+                                    <div className="flex items-center text-sm">
+                                        <Download size={16} className="text-gray-400 mr-2" />
+                                        <span className="text-gray-600">Type:</span>
+                                        <span className="ml-auto font-medium text-purple-600">Digital Good</span>
+                                    </div>
+                                )}
                                 {CategoryIcon && (
                                     <div className="flex items-center text-sm">
                                         <CategoryIcon size={16} className="text-gray-400 mr-2" />

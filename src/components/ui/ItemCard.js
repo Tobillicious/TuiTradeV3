@@ -1,32 +1,51 @@
 // src/components/ui/ItemCard.js
-import { Heart, MapPin, User } from 'lucide-react';
+import React, { memo, useMemo, useCallback } from 'react';
+import { Heart, Eye, MapPin, User, Tag, Download, Zap } from 'lucide-react';
 import { formatPrice, timeAgo } from '../../lib/utils';
 
-const ItemCard = ({ item, isWatched, onWatchToggle, onItemClick, onAddToCart, onBuyNow, isInCart, viewMode = 'grid', onNavigate }) => {
-    const createdDate = item.createdAt?.toDate ? item.createdAt.toDate() : new Date();
+const ItemCard = memo(({ item, isWatched, onWatchToggle, onItemClick, onAddToCart, onBuyNow, isInCart, viewMode = 'grid', onNavigate }) => {
+    const createdDate = useMemo(() => 
+        item.createdAt?.toDate ? item.createdAt.toDate() : new Date()
+    , [item.createdAt]);
+
+    const handleWatchToggle = useCallback((e) => {
+        e.stopPropagation();
+        onWatchToggle(item.id);
+    }, [item.id, onWatchToggle]);
+
+    const handleItemClick = useCallback(() => {
+        onItemClick(item);
+    }, [item, onItemClick]);
+
+    const formattedPrice = useMemo(() => formatPrice(item.price), [item.price]);
+    const timeAgoText = useMemo(() => timeAgo(createdDate), [createdDate]);
+    const sellerName = useMemo(() => 
+        item.userEmail ? item.userEmail.split('@')[0] : ''
+    , [item.userEmail]);
 
     if (viewMode === 'list') {
         return (
-            <div className="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 group cursor-pointer" onClick={() => onItemClick(item)}>
+            <div className="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 group cursor-pointer" onClick={handleItemClick}>
                 <div className="flex">
                     <div className="w-32 h-32 flex-shrink-0">
                         <img
                             src={item.imageUrl || 'https://placehold.co/400x400/f3f4f6/9ca3af?text=TuiTrade'}
                             alt={item.title}
                             className="w-full h-full object-cover"
+                            loading="lazy"
                         />
                     </div>
                     <div className="flex-1 p-4 flex flex-col justify-between">
                         <div>
                             <h4 className="font-semibold text-gray-900 mb-1 line-clamp-1">{item.title}</h4>
-                            <p className="text-lg font-bold text-gray-900">{formatPrice(item.price)}</p>
+                            <p className="text-lg font-bold text-gray-900">{formattedPrice}</p>
                         </div>
                         <div className="flex items-center justify-between text-sm text-gray-500">
                             <span className="flex items-center">
                                 <MapPin size={12} className="mr-1" />
                                 {item.location}
                             </span>
-                            <span>{timeAgo(createdDate)}</span>
+                            <span>{timeAgoText}</span>
                         </div>
                     </div>
                 </div>
@@ -36,21 +55,32 @@ const ItemCard = ({ item, isWatched, onWatchToggle, onItemClick, onAddToCart, on
 
     // Professional auction-style feed card
     return (
-        <div className="bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 group cursor-pointer border border-gray-100" onClick={() => onItemClick(item)}>
+        <div className="bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 group cursor-pointer border border-gray-100" onClick={handleItemClick}>
             <div className="relative aspect-[4/5]">
                 <img
                     src={item.imageUrl || 'https://placehold.co/320x400/f8fafc/64748b?text=TuiTrade+Item'}
                     alt={item.title}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    loading="lazy"
                 />
-                
+
                 {/* Professional overlay elements */}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                
+
+                {/* Digital Goods Badge */}
+                {item.isDigital && (
+                    <div className="absolute top-2 left-2">
+                        <div className="bg-purple-500 text-white px-2 py-1 rounded-md text-xs font-bold uppercase tracking-wide flex items-center">
+                            <Download size={10} className="mr-1" />
+                            Digital
+                        </div>
+                    </div>
+                )}
+
                 {/* Watch button */}
                 <div className="absolute top-2 right-2">
                     <button
-                        onClick={(e) => { e.stopPropagation(); onWatchToggle(item.id); }}
+                        onClick={handleWatchToggle}
                         className={`p-2 rounded-full transition-all shadow-lg ${isWatched ? 'bg-red-500 text-white' : 'bg-white/90 text-gray-700 hover:bg-white hover:scale-110'}`}
                     >
                         <Heart size={14} fill={isWatched ? 'currentColor' : 'none'} />
@@ -68,11 +98,11 @@ const ItemCard = ({ item, isWatched, onWatchToggle, onItemClick, onAddToCart, on
                 <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-3">
                     <div className="text-white">
                         <h4 className="font-bold text-lg mb-1 line-clamp-1">{item.title}</h4>
-                        
+
                         {/* Price and activity */}
                         <div className="flex items-center justify-between mb-2">
                             <div>
-                                <p className="text-2xl font-bold">{formatPrice(item.price)}</p>
+                                <p className="text-2xl font-bold">{formattedPrice}</p>
                             </div>
                             <div className="text-right">
                                 <div className="text-xs text-white/80 mb-1">Activity</div>
@@ -82,29 +112,43 @@ const ItemCard = ({ item, isWatched, onWatchToggle, onItemClick, onAddToCart, on
                                 </div>
                             </div>
                         </div>
-                        
+
                         {/* Time and views */}
                         <div className="flex items-center justify-between mb-2">
                             <span className="text-xs bg-white/20 px-2 py-1 rounded-full">
-                                {timeAgo(createdDate)}
+                                {timeAgoText}
                             </span>
                             <span className="text-xs text-white/80">
                                 {item.views || 0} views
                             </span>
                         </div>
-                        
+
                         <div className="flex items-center justify-between text-xs text-white/90">
                             <span className="flex items-center">
                                 <MapPin size={10} className="mr-1" />
                                 {item.location}
                             </span>
-                            {item.userEmail && (
+                            {sellerName && (
                                 <span className="flex items-center">
                                     <User size={10} className="mr-1" />
-                                    {item.userEmail.split('@')[0]}
+                                    {sellerName}
                                 </span>
                             )}
                         </div>
+
+                        {/* Digital Goods Info */}
+                        {item.isDigital && (
+                            <div className="flex items-center justify-between text-xs text-white/90 mt-1">
+                                <span className="flex items-center text-purple-300">
+                                    <Zap size={10} className="mr-1" />
+                                    {item.deliveryMethod === 'instant' ? 'Instant Delivery' :
+                                        item.deliveryMethod === 'email' ? 'Email Delivery' : 'Download Link'}
+                                </span>
+                                <span className="text-purple-300">
+                                    {item.licenseType === 'single-use' ? 'Single Use' : 'Perpetual'} License
+                                </span>
+                            </div>
+                        )}
                     </div>
                 </div>
 
@@ -117,6 +161,19 @@ const ItemCard = ({ item, isWatched, onWatchToggle, onItemClick, onAddToCart, on
             </div>
         </div>
     );
-};
+}, (prevProps, nextProps) => {
+    // Custom comparison for performance optimization
+    return (
+        prevProps.item.id === nextProps.item.id &&
+        prevProps.item.price === nextProps.item.price &&
+        prevProps.item.title === nextProps.item.title &&
+        prevProps.item.imageUrl === nextProps.item.imageUrl &&
+        prevProps.isWatched === nextProps.isWatched &&
+        prevProps.viewMode === nextProps.viewMode &&
+        prevProps.isInCart === nextProps.isInCart
+    );
+});
+
+ItemCard.displayName = 'ItemCard';
 
 export default ItemCard;

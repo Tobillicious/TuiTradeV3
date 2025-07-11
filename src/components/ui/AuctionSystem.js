@@ -88,9 +88,8 @@ const BidHistory = ({ auctionId }) => {
                     {bids.map((bid, index) => (
                         <div key={bid.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                             <div className="flex items-center space-x-3">
-                                <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                                    index === 0 ? 'bg-green-100 text-green-600' : 'bg-gray-200 text-gray-600'
-                                }`}>
+                                <div className={`w-8 h-8 rounded-full flex items-center justify-center ${index === 0 ? 'bg-green-100 text-green-600' : 'bg-gray-200 text-gray-600'
+                                    }`}>
                                     {index === 0 ? <Trophy size={16} /> : index + 1}
                                 </div>
                                 <div>
@@ -292,7 +291,7 @@ const AuctionInterface = ({ auction, onBidPlaced }) => {
 const AuctionCard = ({ auction, onItemClick, onWatchToggle, watchedItems = [], onNavigate }) => {
     const { currentUser } = useAuth();
     const { showNotification } = useNotification();
-    
+
     const timeLeft = new Date(auction.endTime) > new Date();
     const currentBid = auction.currentBid || auction.startingBid;
     const isWatched = watchedItems.includes(auction.id);
@@ -316,11 +315,12 @@ const AuctionCard = ({ auction, onItemClick, onWatchToggle, watchedItems = [], o
                     src={auction.imageUrl || 'https://placehold.co/320x400/fef2f2/dc2626?text=Auction+Item'}
                     alt={auction.title}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    loading="lazy"
                 />
-                
+
                 {/* Professional overlay elements */}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                
+
                 {/* Watch button */}
                 <div className="absolute top-2 right-2">
                     <button
@@ -353,7 +353,7 @@ const AuctionCard = ({ auction, onItemClick, onWatchToggle, watchedItems = [], o
                 <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 to-transparent p-3">
                     <div className="text-white">
                         <h4 className="font-bold text-lg mb-1 line-clamp-1">{auction.title}</h4>
-                        
+
                         {/* Current bid and activity */}
                         <div className="flex items-center justify-between mb-2">
                             <div>
@@ -372,11 +372,10 @@ const AuctionCard = ({ auction, onItemClick, onWatchToggle, watchedItems = [], o
                         {/* Reserve status if applicable */}
                         {auction.reservePrice && (
                             <div className="mb-2">
-                                <div className={`text-xs px-2 py-1 rounded-full inline-block ${
-                                    currentBid >= auction.reservePrice 
-                                        ? 'bg-green-500/20 text-green-300' 
+                                <div className={`text-xs px-2 py-1 rounded-full inline-block ${currentBid >= auction.reservePrice
+                                        ? 'bg-green-500/20 text-green-300'
                                         : 'bg-orange-500/20 text-orange-300'
-                                }`}>
+                                    }`}>
                                     {currentBid >= auction.reservePrice ? '✓ Reserve Met' : 'Reserve Not Met'}
                                 </div>
                             </div>

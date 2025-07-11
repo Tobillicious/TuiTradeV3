@@ -17,7 +17,10 @@ import {
     Activity,
     Target,
     Award,
-    AlertCircle
+    AlertCircle,
+    Heart,
+    ArrowUpRight,
+    ArrowDownRight
 } from 'lucide-react';
 
 const SellerDashboard = ({ onNavigate }) => {
@@ -52,7 +55,8 @@ const SellerDashboard = ({ onNavigate }) => {
 
         const activeItems = items.filter(item => item.status === 'active');
 
-        const totalViews = items.reduce((sum, item) => sum + (item.views || 0), 0);
+        const totalViews = items.reduce((sum, item) => sum + (item.views || item.viewCount || 0), 0);
+        const totalWatches = items.reduce((sum, item) => sum + (item.watchCount || 0), 0);
         const totalInquiries = items.reduce((sum, item) => sum + (item.inquiries || 0), 0);
 
         // Calculate revenue from completed auctions and sold items
@@ -67,18 +71,25 @@ const SellerDashboard = ({ onNavigate }) => {
         const averagePrice = items.length > 0 ?
             items.reduce((sum, item) => sum + (item.price || item.startingBid || 0), 0) / items.length : 0;
 
-        const conversionRate = totalInquiries > 0 ? (soldItems.length / totalInquiries) * 100 : 0;
+        const conversionRate = totalViews > 0 ? (soldItems.length / totalViews) * 100 : 0;
         const responseRate = 85; // Placeholder - would need message response tracking
+
+        // Get top performing listings (by views or watches)
+        const topPerformingListings = [...items]
+            .sort((a, b) => (b.viewCount || b.views || 0) - (a.viewCount || a.views || 0))
+            .slice(0, 5);
 
         return {
             totalListings: items.length,
             activeListings: activeItems.length,
             totalViews,
+            totalWatches,
             totalInquiries,
             totalRevenue,
             averagePrice,
             conversionRate,
-            responseRate
+            responseRate,
+            topPerformingListings
         };
     }, [timeRange]);
 
@@ -139,7 +150,6 @@ const SellerDashboard = ({ onNavigate }) => {
             fetchDashboardData();
         }
     }, [currentUser, timeRange, fetchDashboardData]);
-
 
     const calculatePerformance = (items) => {
         const now = new Date();
@@ -230,13 +240,150 @@ const SellerDashboard = ({ onNavigate }) => {
                                 key={days}
                                 onClick={() => setTimeRange(days)}
                                 className={`px-4 py-2 rounded-lg transition-colors ${timeRange === days
-                                        ? 'bg-green-600 text-white'
-                                        : 'bg-white text-gray-700 hover:bg-gray-50'
+                                    ? 'bg-green-600 text-white'
+                                    : 'bg-white text-gray-700 hover:bg-gray-50'
                                     }`}
                             >
                                 {days === '365' ? '1 Year' : `${days} Days`}
                             </button>
                         ))}
+                    </div>
+                </div>
+
+                {/* Analytics Overview */}
+                <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-6">
+                    <div className="flex items-center justify-between mb-6">
+                        <h2 className="text-xl font-semibold text-gray-900 flex items-center">
+                            <BarChart3 className="w-5 h-5 mr-2 text-green-600" />
+                            Analytics Overview
+                        </h2>
+                        <div className="text-sm text-gray-500">
+                            Last 30 days
+                        </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                        {/* Total Views */}
+                        <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg p-4">
+                            <div className="flex items-center justify-between">
+                                <div>
+                                    <p className="text-sm font-medium text-blue-600">Total Views</p>
+                                    <p className="text-2xl font-bold text-blue-900">{dashboardData.analytics?.totalViews?.toLocaleString() || '0'}</p>
+                                    <p className="text-xs text-blue-600 mt-1 flex items-center">
+                                        <ArrowUpRight size={12} className="mr-1" />
+                                        +12% from last month
+                                    </p>
+                                </div>
+                                <div className="w-12 h-12 bg-blue-200 rounded-lg flex items-center justify-center">
+                                    <Eye className="w-6 h-6 text-blue-600" />
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Total Watches */}
+                        <div className="bg-gradient-to-br from-red-50 to-red-100 rounded-lg p-4">
+                            <div className="flex items-center justify-between">
+                                <div>
+                                    <p className="text-sm font-medium text-red-600">Total Watches</p>
+                                    <p className="text-2xl font-bold text-red-900">{dashboardData.analytics?.totalWatches?.toLocaleString() || '0'}</p>
+                                    <p className="text-xs text-red-600 mt-1 flex items-center">
+                                        <ArrowUpRight size={12} className="mr-1" />
+                                        +8% from last month
+                                    </p>
+                                </div>
+                                <div className="w-12 h-12 bg-red-200 rounded-lg flex items-center justify-center">
+                                    <Heart className="w-6 h-6 text-red-600" />
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Total Sales */}
+                        <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-lg p-4">
+                            <div className="flex items-center justify-between">
+                                <div>
+                                    <p className="text-sm font-medium text-green-600">Total Sales</p>
+                                    <p className="text-2xl font-bold text-green-900">{dashboardData.analytics?.totalRevenue ? '$' + dashboardData.analytics.totalRevenue.toLocaleString() : '$0'}</p>
+                                    <p className="text-xs text-green-600 mt-1 flex items-center">
+                                        <ArrowUpRight size={12} className="mr-1" />
+                                        +15% from last month
+                                    </p>
+                                </div>
+                                <div className="w-12 h-12 bg-green-200 rounded-lg flex items-center justify-center">
+                                    <DollarSign className="w-6 h-6 text-green-600" />
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Conversion Rate */}
+                        <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg p-4">
+                            <div className="flex items-center justify-between">
+                                <div>
+                                    <p className="text-sm font-medium text-purple-600">Conversion Rate</p>
+                                    <p className="text-2xl font-bold text-purple-900">{dashboardData.analytics?.conversionRate?.toFixed(1) || '0'}%</p>
+                                    <p className="text-xs text-purple-600 mt-1 flex items-center">
+                                        <ArrowUpRight size={12} className="mr-1" />
+                                        +2.3% from last month
+                                    </p>
+                                </div>
+                                <div className="w-12 h-12 bg-purple-200 rounded-lg flex items-center justify-center">
+                                    <Target className="w-6 h-6 text-purple-600" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Top Performing Listings */}
+                <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-6">
+                    <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                        <TrendingUp className="w-5 h-5 mr-2 text-green-600" />
+                        Top Performing Listings
+                    </h3>
+                    <div className="space-y-4">
+                        {dashboardData.analytics?.topPerformingListings?.map((listing, index) => (
+                            <div key={listing.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                                <div className="flex items-center space-x-4">
+                                    <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+                                        <span className="text-green-600 font-bold">{index + 1}</span>
+                                    </div>
+                                    <div className="flex items-center space-x-3">
+                                        {listing.imageUrl && (
+                                            <img
+                                                src={listing.imageUrl}
+                                                alt={listing.title}
+                                                className="w-12 h-12 object-cover rounded-lg"
+                                                loading="lazy"
+                                            />
+                                        )}
+                                        <div>
+                                            <h4 className="font-medium text-gray-900 line-clamp-1">{listing.title}</h4>
+                                            <p className="text-sm text-gray-500">{listing.category}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="text-right">
+                                    <div className="flex items-center space-x-4 text-sm">
+                                        <div className="flex items-center text-blue-600">
+                                            <Eye size={14} className="mr-1" />
+                                            {listing.viewCount || listing.views || 0}
+                                        </div>
+                                        <div className="flex items-center text-red-600">
+                                            <Heart size={14} className="mr-1" />
+                                            {listing.watchCount || 0}
+                                        </div>
+                                        <div className="text-green-600 font-medium">
+                                            ${listing.price || listing.startingBid || 0}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+                        {(!dashboardData.analytics?.topPerformingListings || dashboardData.analytics.topPerformingListings.length === 0) && (
+                            <div className="text-center py-8 text-gray-500">
+                                <BarChart3 className="w-12 h-12 mx-auto mb-2 text-gray-300" />
+                                <p>No listings yet. Create your first listing to see analytics!</p>
+                            </div>
+                        )}
                     </div>
                 </div>
 

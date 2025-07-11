@@ -6,30 +6,33 @@ import { LISTINGS_LIMIT, CATEGORIES } from '../../lib/utils';
 import ItemCard from '../ui/ItemCard';
 import { AuctionCard } from '../ui/AuctionSystem';
 import { FullPageLoader } from '../ui/Loaders';
-import { Tag, Shield, Star, MessageCircle } from 'lucide-react';
+import { Tag, Shield, Star, MessageCircle, ChevronDown } from 'lucide-react';
 
 const HomePage = ({ onWatchToggle, watchedItems, onNavigate, onItemClick, onAddToCart, cartItems }) => {
     const [listings, setListings] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [featuredItems, setFeaturedItems] = useState([]);
     const [hasMoreItems, setHasMoreItems] = useState(true);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [itemsPerPage] = useState(12);
+    const [isLoadingMore, setIsLoadingMore] = useState(false);
 
     const fetchListings = useCallback(async (loadMore = false) => {
         setIsLoading(true);
         try {
             // Fetch from both listings and auctions collections
             const promises = [];
-            
+
             // Get regular listings
             const listingsQuery = query(collection(db, 'listings'), orderBy('createdAt', 'desc'), limit(LISTINGS_LIMIT));
             promises.push(getDocs(listingsQuery));
-            
+
             // Get auctions
             const auctionsQuery = query(collection(db, 'auctions'), orderBy('createdAt', 'desc'), limit(LISTINGS_LIMIT));
             promises.push(getDocs(auctionsQuery));
-            
+
             const [listingsSnapshot, auctionsSnapshot] = await Promise.all(promises);
-            
+
             // Process listings
             let allItems = listingsSnapshot.docs.map(doc => ({
                 id: doc.id,
@@ -37,7 +40,7 @@ const HomePage = ({ onWatchToggle, watchedItems, onNavigate, onItemClick, onAddT
                 createdAt: doc.data().createdAt?.toDate(),
                 listingType: doc.data().listingType || 'fixed-price'
             }));
-            
+
             // Process auctions
             const auctions = auctionsSnapshot.docs.map(doc => ({
                 id: doc.id,
@@ -46,7 +49,7 @@ const HomePage = ({ onWatchToggle, watchedItems, onNavigate, onItemClick, onAddT
                 endTime: doc.data().endTime?.toDate(),
                 listingType: 'auction'
             }));
-            
+
             // Combine and sort by creation date
             allItems = [...allItems, ...auctions].sort((a, b) => b.createdAt - a.createdAt);
 
@@ -79,14 +82,84 @@ const HomePage = ({ onWatchToggle, watchedItems, onNavigate, onItemClick, onAddT
         fetchListings();
     }, [fetchListings]);
 
-    const handleLoadMore = () => {
-        if (hasMoreItems && !isLoading) {
-            fetchListings(true);
+    const handleLoadMore = async () => {
+        if (hasMoreItems && !isLoadingMore) {
+            setIsLoadingMore(true);
+            await fetchListings(true);
+            setCurrentPage(prev => prev + 1);
+            setIsLoadingMore(false);
         }
     };
 
+    const handlePageChange = (page) => {
+        setCurrentPage(page);
+        // For now, we'll just scroll to top since we're using infinite scroll
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
     if (isLoading && listings.length === 0) {
-        return <FullPageLoader message="Loading latest listings..." />;
+        return (
+            <div className="flex-grow">
+                {/* Hero Section Skeleton */}
+                <div className="bg-gradient-to-r from-green-600 to-green-700 text-white">
+                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+                        <div className="text-center">
+                            <div className="h-12 bg-white/20 rounded animate-pulse mb-4"></div>
+                            <div className="h-6 bg-white/20 rounded animate-pulse mb-8 w-2/3 mx-auto"></div>
+                            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                                <div className="h-12 bg-white/20 rounded animate-pulse w-32"></div>
+                                <div className="h-12 bg-white/20 rounded animate-pulse w-32"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Categories Skeleton */}
+                <div className="bg-white py-16">
+                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                        <div className="h-8 bg-gray-200 rounded animate-pulse mb-12 w-1/3 mx-auto"></div>
+                        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
+                            {[...Array(6)].map((_, i) => (
+                                <div key={i} className="p-6 rounded-xl border-2 border-gray-200">
+                                    <div className="w-12 h-12 bg-gray-200 rounded-lg animate-pulse mx-auto mb-3"></div>
+                                    <div className="h-4 bg-gray-200 rounded animate-pulse mb-2"></div>
+                                    <div className="h-3 bg-gray-200 rounded animate-pulse w-2/3 mx-auto"></div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+
+                {/* Listings Skeleton */}
+                <div className="bg-gray-50 min-h-screen py-8">
+                    <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+                        <div className="text-center mb-8">
+                            <div className="h-6 bg-gray-200 rounded animate-pulse mb-2 w-1/4 mx-auto"></div>
+                            <div className="h-4 bg-gray-200 rounded animate-pulse w-1/2 mx-auto"></div>
+                        </div>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                            {[...Array(8)].map((_, i) => (
+                                <div key={i} className="bg-white rounded-xl overflow-hidden shadow-sm border border-gray-100">
+                                    <div className="relative aspect-[4/5]">
+                                        <div className="w-full h-full bg-gray-200 animate-pulse"></div>
+                                        <div className="absolute top-2 right-2">
+                                            <div className="w-8 h-8 bg-gray-200 rounded-full animate-pulse"></div>
+                                        </div>
+                                        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-3">
+                                            <div className="space-y-2">
+                                                <div className="h-4 bg-gray-300 rounded animate-pulse"></div>
+                                                <div className="h-6 bg-gray-300 rounded animate-pulse w-1/2"></div>
+                                                <div className="h-3 bg-gray-300 rounded animate-pulse w-3/4"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
     }
 
     return (
@@ -205,8 +278,7 @@ const HomePage = ({ onWatchToggle, watchedItems, onNavigate, onItemClick, onAddT
                         </div>
                     ) : (
                         <>
-                            {/* Masonry-style infinite grid */}
-                            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                                 {listings.map(item => (
                                     item.listingType === 'auction' ? (
                                         <AuctionCard
@@ -232,32 +304,49 @@ const HomePage = ({ onWatchToggle, watchedItems, onNavigate, onItemClick, onAddT
                                 ))}
                             </div>
 
-                            {/* Infinite scroll load more */}
+                            {/* Load More Button */}
                             {hasMoreItems && (
                                 <div className="text-center mt-8">
                                     <button
                                         onClick={handleLoadMore}
-                                        disabled={isLoading}
-                                        className="bg-white text-gray-700 px-8 py-3 rounded-xl font-semibold hover:bg-gray-50 transition-all shadow-sm border border-gray-200 disabled:opacity-50"
+                                        disabled={isLoadingMore}
+                                        className="bg-green-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors flex items-center mx-auto"
                                     >
-                                        {isLoading ? (
-                                            <div className="flex items-center">
-                                                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-700 mr-2"></div>
-                                                Loading more...
-                                            </div>
+                                        {isLoadingMore ? (
+                                            <>
+                                                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+                                                Loading...
+                                            </>
                                         ) : (
-                                            'Load More Items'
+                                            <>
+                                                <ChevronDown className="w-5 h-5 mr-2" />
+                                                Load More Items
+                                            </>
                                         )}
                                     </button>
                                 </div>
                             )}
 
-                            {/* End of feed indicator */}
-                            {!hasMoreItems && listings.length > 0 && (
-                                <div className="text-center mt-12 py-8">
-                                    <div className="inline-flex items-center px-4 py-2 rounded-full bg-white border border-gray-200 text-gray-500 text-sm">
-                                        <span>You've reached the end of the feed</span>
-                                    </div>
+                            {/* Skeleton Loaders for Loading More */}
+                            {isLoadingMore && (
+                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mt-6">
+                                    {[...Array(4)].map((_, i) => (
+                                        <div key={i} className="bg-white rounded-xl overflow-hidden shadow-sm border border-gray-100">
+                                            <div className="relative aspect-[4/5]">
+                                                <div className="w-full h-full bg-gray-200 animate-pulse"></div>
+                                                <div className="absolute top-2 right-2">
+                                                    <div className="w-8 h-8 bg-gray-200 rounded-full animate-pulse"></div>
+                                                </div>
+                                                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-3">
+                                                    <div className="space-y-2">
+                                                        <div className="h-4 bg-gray-300 rounded animate-pulse"></div>
+                                                        <div className="h-6 bg-gray-300 rounded animate-pulse w-1/2"></div>
+                                                        <div className="h-3 bg-gray-300 rounded animate-pulse w-3/4"></div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
                                 </div>
                             )}
                         </>
