@@ -15,6 +15,7 @@ const CreateJobPage = ({ onNavigate, currentUser }) => {
   const { getText } = useTeReo();
   
   const [currentStep, setCurrentStep] = useState(1);
+  const [savedJobId, setSavedJobId] = useState(null);
   const [isPreviewMode, setIsPreviewMode] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [saveStatus, setSaveStatus] = useState(null);
@@ -167,13 +168,20 @@ const CreateJobPage = ({ onNavigate, currentUser }) => {
       const jobId = await createJob(jobPosting, currentUser?.uid || 'demo-company');
 
       console.log('Job posting saved with ID:', jobId);
+      setSavedJobId(jobId);
       
-      setSaveStatus('success');
-      
-      // Auto-redirect after success
-      setTimeout(() => {
-        onNavigate('employer-dashboard');
-      }, 2000);
+      if (status === 'draft') {
+        // If saving as draft, stay on current step
+        alert('Job saved as draft successfully!');
+      } else {
+        // If publishing, show success
+        setSaveStatus('success');
+        
+        // Auto-redirect after success
+        setTimeout(() => {
+          onNavigate('employer-dashboard');
+        }, 2000);
+      }
 
     } catch (error) {
       console.error('Error saving job posting:', error);
@@ -186,7 +194,12 @@ const CreateJobPage = ({ onNavigate, currentUser }) => {
   // Step navigation
   const nextStep = () => {
     if (validateStep(currentStep)) {
-      setCurrentStep(prev => Math.min(prev + 1, 4));
+      if (currentStep === 4 && !savedJobId) {
+        // Save as draft before going to form builder
+        handleSave('draft');
+      } else {
+        setCurrentStep(prev => Math.min(prev + 1, 5));
+      }
     }
   };
 
@@ -753,9 +766,79 @@ const CreateJobPage = ({ onNavigate, currentUser }) => {
     </div>
   );
 
+  const renderStep5 = () => (
+    <div className="space-y-6">
+      <h2 className="text-2xl font-bold text-gray-900">Custom Application Form</h2>
+      
+      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+        <div className="flex items-start">
+          <AlertCircle className="text-blue-600 mt-0.5 mr-3" size={20} />
+          <div>
+            <h3 className="font-medium text-blue-900">Customize Your Application Process</h3>
+            <p className="text-blue-700 text-sm mt-1">
+              Create a custom application form to collect exactly the information you need from candidates.
+              You can always use the default form or customize it later.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="bg-white border border-gray-200 rounded-lg p-6 hover:border-green-300 transition-colors">
+          <h3 className="text-lg font-semibold text-gray-900 mb-2">Use Default Form</h3>
+          <p className="text-gray-600 mb-4">
+            Use our standard application form with essential fields like name, email, CV upload, and cover letter.
+          </p>
+          <ul className="text-sm text-gray-600 space-y-1 mb-4">
+            <li>• Personal information</li>
+            <li>• CV/Resume upload</li>
+            <li>• Cover letter</li>
+            <li>• Work rights and availability</li>
+          </ul>
+          <button
+            onClick={() => {
+              // Job is already saved, just go to dashboard
+              onNavigate('employer-dashboard');
+            }}
+            className="w-full bg-gray-600 text-white py-2 px-4 rounded-lg hover:bg-gray-700 transition-colors"
+          >
+            Use Default Form
+          </button>
+        </div>
+
+        <div className="bg-white border border-green-200 rounded-lg p-6 hover:border-green-400 transition-colors border-2">
+          <h3 className="text-lg font-semibold text-gray-900 mb-2">Custom Application Form</h3>
+          <p className="text-gray-600 mb-4">
+            Create a custom form with specific questions, file uploads, and requirements tailored to your role.
+          </p>
+          <ul className="text-sm text-gray-600 space-y-1 mb-4">
+            <li>• Drag & drop form builder</li>
+            <li>• Custom questions and fields</li>
+            <li>• Conditional logic</li>
+            <li>• File upload requirements</li>
+          </ul>
+          <button
+            onClick={() => onNavigate('application-form-builder', { jobId: savedJobId })}
+            className="w-full bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700 transition-colors"
+          >
+            Customize Application Form
+          </button>
+        </div>
+      </div>
+
+      <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+        <h4 className="font-medium text-gray-900 mb-2">Need inspiration?</h4>
+        <p className="text-sm text-gray-600">
+          You can add questions like "Why are you interested in this role?", "What's your salary expectation?", 
+          or request specific portfolios and certifications relevant to your industry.
+        </p>
+      </div>
+    </div>
+  );
+
   const renderStepIndicator = () => (
     <div className="flex items-center justify-center mb-8">
-      {[1, 2, 3, 4].map((step) => (
+      {[1, 2, 3, 4, 5].map((step) => (
         <React.Fragment key={step}>
           <div className={`flex items-center justify-center w-8 h-8 rounded-full ${
             step === currentStep
@@ -766,7 +849,7 @@ const CreateJobPage = ({ onNavigate, currentUser }) => {
           }`}>
             {step < currentStep ? <CheckCircle size={16} /> : step}
           </div>
-          {step < 4 && (
+          {step < 5 && (
             <div className={`w-12 h-1 mx-2 ${
               step < currentStep ? 'bg-green-600' : 'bg-gray-200'
             }`} />
@@ -818,7 +901,7 @@ const CreateJobPage = ({ onNavigate, currentUser }) => {
                 <h1 className="text-2xl font-bold text-gray-900">
                   <TeReoText english="Create Job Posting" teReoKey="post_a_job" />
                 </h1>
-                <p className="text-gray-600">Step {currentStep} of 4</p>
+                <p className="text-gray-600">Step {currentStep} of 5</p>
               </div>
             </div>
             <div className="flex items-center space-x-3">
@@ -851,6 +934,7 @@ const CreateJobPage = ({ onNavigate, currentUser }) => {
           {currentStep === 2 && renderStep2()}
           {currentStep === 3 && renderStep3()}
           {currentStep === 4 && renderStep4()}
+          {currentStep === 5 && renderStep5()}
 
           {/* Navigation Buttons */}
           <div className="flex items-center justify-between mt-8 pt-6 border-t border-gray-200">
@@ -873,13 +957,17 @@ const CreateJobPage = ({ onNavigate, currentUser }) => {
                     Save as Draft
                   </button>
                   <button
-                    onClick={() => handleSave('active')}
+                    onClick={nextStep}
                     disabled={isSaving}
                     className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50"
                   >
-                    {isSaving ? 'Publishing...' : 'Publish Job'}
+                    Continue to Form Builder
                   </button>
                 </>
+              ) : currentStep === 5 ? (
+                <div className="text-sm text-gray-600">
+                  Your job posting has been created! Choose how you want to handle applications above.
+                </div>
               ) : (
                 <button
                   onClick={nextStep}
