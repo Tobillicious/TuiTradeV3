@@ -8,6 +8,7 @@ import {
   X, Download, Eye, Trash2, Plus
 } from 'lucide-react';
 import { useTeReo, TeReoText } from '../ui/TeReoToggle';
+import { submitApplication } from '../../lib/jobsService';
 
 const JobApplicationPage = ({ job, onNavigate, currentUser }) => {
   const { getText } = useTeReo();
@@ -161,40 +162,21 @@ const JobApplicationPage = ({ job, onNavigate, currentUser }) => {
     setIsSubmitting(true);
     
     try {
-      // Simulate API call - in real app, upload files to storage and save application data
-      await new Promise((resolve, reject) => {
-        // Simulate success most of the time, but occasionally fail for demo
-        setTimeout(() => {
-          // 90% success rate for demo purposes
-          if (Math.random() > 0.1) {
-            resolve();
-          } else {
-            reject(new Error('Simulated network error'));
-          }
-        }, 1500);
-      });
-
       // Create application object
-      const application = {
+      const applicationSubmission = {
         jobId: job.id,
         jobTitle: job.title,
         company: job.company,
         applicantId: currentUser?.uid || 'demo-user',
-        applicationData,
-        files: uploadedFiles.map(file => ({
-          name: file.name,
-          size: file.size,
-          type: file.type,
-          uploadedAt: file.uploadedAt
-        })),
-        appliedAt: new Date().toISOString(),
-        status: 'submitted'
+        candidateName: `${applicationData.firstName} ${applicationData.lastName}`,
+        candidateEmail: applicationData.email,
+        ...applicationData
       };
 
-      console.log('Job application submitted successfully:', application);
-      
-      // In real app, save to Firestore:
-      // await setDoc(doc(db, 'jobApplications', `${currentUser.uid}_${job.id}_${Date.now()}`), application);
+      // Submit application with file uploads using real service
+      const applicationId = await submitApplication(applicationSubmission, uploadedFiles);
+
+      console.log('Job application submitted successfully with ID:', applicationId);
       
       setSubmitStatus('success');
       

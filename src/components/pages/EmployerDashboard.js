@@ -9,7 +9,13 @@ import {
   BarChart3, Target, Star, MessageCircle, Building
 } from 'lucide-react';
 import { useTeReo, TeReoText } from '../ui/TeReoToggle';
-import { MOCK_JOBS } from '../../lib/jobsData';
+import { 
+  getCompanyJobs, 
+  getCompanyApplications, 
+  getCompanyDashboardStats,
+  subscribeToCompanyJobs,
+  subscribeToCompanyApplications 
+} from '../../lib/jobsService';
 
 const EmployerDashboard = ({ onNavigate, currentUser }) => {
   const { getText } = useTeReo();
@@ -41,74 +47,74 @@ const EmployerDashboard = ({ onNavigate, currentUser }) => {
   });
 
   useEffect(() => {
-    // Simulate loading company data
     loadDashboardData();
-  }, []);
-
-  const loadDashboardData = async () => {
-    // In real app, fetch from Firestore:
-    // - Company jobs: where('companyId', '==', currentUser.uid)
-    // - Applications: where('companyId', '==', currentUser.uid)
     
-    // Mock data for demonstration
-    const mockCompanyJobs = MOCK_JOBS.slice(0, 3).map(job => ({
-      ...job,
-      companyId: currentUser?.uid || 'demo-company',
-      status: Math.random() > 0.3 ? 'active' : 'draft',
-      applicationsCount: Math.floor(Math.random() * 50) + 5,
-      viewsCount: Math.floor(Math.random() * 500) + 50,
-      createdAt: new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000)
-    }));
-
-    const mockApplications = [
-      {
-        id: 'app1',
-        jobId: mockCompanyJobs[0]?.id,
-        jobTitle: mockCompanyJobs[0]?.title,
-        candidateName: 'Sarah Wilson',
-        candidateEmail: 'sarah.wilson@email.com',
-        appliedAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
-        status: 'new',
-        coverLetter: 'I am excited to apply for this role...',
-        experience: '5+ years',
-        location: 'Auckland'
-      },
-      {
-        id: 'app2', 
-        jobId: mockCompanyJobs[0]?.id,
-        jobTitle: mockCompanyJobs[0]?.title,
-        candidateName: 'Michael Chen',
-        candidateEmail: 'michael.chen@email.com',
-        appliedAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000),
-        status: 'reviewing',
-        coverLetter: 'With my background in software development...',
-        experience: '3+ years',
-        location: 'Wellington'
-      },
-      {
-        id: 'app3',
-        jobId: mockCompanyJobs[1]?.id,
-        jobTitle: mockCompanyJobs[1]?.title,
-        candidateName: 'Emma Thompson',
-        candidateEmail: 'emma.thompson@email.com',
-        appliedAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000),
-        status: 'interviewed',
-        coverLetter: 'I would love to bring my marketing expertise...',
-        experience: '7+ years',
-        location: 'Christchurch'
+    // Set up real-time subscriptions for live updates
+    const unsubscribeJobs = subscribeToCompanyJobs(
+      currentUser?.uid || 'demo-company', 
+      (jobs) => {
+        setCompanyJobs(jobs);
+        updateStats(jobs, applications);
       }
-    ];
+    );
 
-    setCompanyJobs(mockCompanyJobs);
-    setApplications(mockApplications);
+    const unsubscribeApplications = subscribeToCompanyApplications(
+      currentUser?.uid || 'demo-company', 
+      (apps) => {
+        setApplications(apps);
+        updateStats(companyJobs, apps);
+      }
+    );
+
+    // Cleanup subscriptions on unmount
+    return () => {
+      unsubscribeJobs();
+      unsubscribeApplications();
+    };
+  }, [currentUser]);
+
+  const updateStats = (jobs, apps) => {
+    const activeJobs = jobs.filter(job => job.status === 'active');
+    const newApplications = apps.filter(app => app.status === 'new');
+
     setDashboardStats({
-      totalJobs: mockCompanyJobs.length,
-      activeJobs: mockCompanyJobs.filter(job => job.status === 'active').length,
-      totalApplications: mockApplications.length,
-      newApplications: mockApplications.filter(app => app.status === 'new').length,
+      totalJobs: jobs.length,
+      activeJobs: activeJobs.length,
+      totalApplications: apps.length,
+      newApplications: newApplications.length,
       averageTimeToHire: '14 days',
       responseRate: '89%'
     });
+  };
+
+  const loadDashboardData = async () => {
+    try {
+      const companyId = currentUser?.uid || 'demo-company';
+      
+      // Load initial data
+      const [jobs, apps, stats] = await Promise.all([
+        getCompanyJobs(companyId),
+        getCompanyApplications(companyId),
+        getCompanyDashboardStats(companyId)
+      ]);
+
+      setCompanyJobs(jobs);
+      setApplications(apps);
+      setDashboardStats(stats);
+    } catch (error) {
+      console.error('Error loading dashboard data:', error);
+      // Fallback to empty data rather than crashing
+      setCompanyJobs([]);
+      setApplications([]);
+      setDashboardStats({
+        totalJobs: 0,
+        activeJobs: 0,
+        totalApplications: 0,
+        newApplications: 0,
+        averageTimeToHire: '0 days',
+        responseRate: '0%'
+      });
+    }
   };
 
   const getStatusBadge = (status) => {
@@ -148,16 +154,20 @@ const EmployerDashboard = ({ onNavigate, currentUser }) => {
   };
 
   const formatDate = (date) => {
+    // Handle Firestore timestamp or regular Date
+    const dateObj = date?.toDate ? date.toDate() : new Date(date);
     return new Intl.DateTimeFormat('en-NZ', {
       year: 'numeric',
       month: 'short',
       day: 'numeric'
-    }).format(date);
+    }).format(dateObj);
   };
 
   const formatTimeAgo = (date) => {
+    // Handle Firestore timestamp or regular Date
+    const dateObj = date?.toDate ? date.toDate() : new Date(date);
     const now = new Date();
-    const diffInHours = Math.floor((now - date) / (1000 * 60 * 60));
+    const diffInHours = Math.floor((now - dateObj) / (1000 * 60 * 60));
     
     if (diffInHours < 24) {
       return `${diffInHours}h ago`;

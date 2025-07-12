@@ -9,6 +9,7 @@ import {
 } from 'lucide-react';
 import { useTeReo, TeReoText } from '../ui/TeReoToggle';
 import { JOB_CATEGORIES, JOB_TYPES, SALARY_RANGES, NZ_LOCATIONS, EXPERIENCE_LEVELS } from '../../lib/jobsData';
+import { createJob } from '../../lib/jobsService';
 
 const CreateJobPage = ({ onNavigate, currentUser }) => {
   const { getText } = useTeReo();
@@ -157,19 +158,15 @@ const CreateJobPage = ({ onNavigate, currentUser }) => {
     try {
       const jobPosting = {
         ...jobData,
-        id: `job_${Date.now()}`,
-        companyId: currentUser?.uid || 'demo-company',
         status,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
         applicationsCount: 0,
         viewsCount: 0
       };
 
-      // In real app, save to Firestore:
-      // await setDoc(doc(db, 'jobs', jobPosting.id), jobPosting);
+      // Save to Firestore using the real service
+      const jobId = await createJob(jobPosting, currentUser?.uid || 'demo-company');
 
-      console.log('Job posting saved:', jobPosting);
+      console.log('Job posting saved with ID:', jobId);
       
       setSaveStatus('success');
       
