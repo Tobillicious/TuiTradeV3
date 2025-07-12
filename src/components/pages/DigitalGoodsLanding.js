@@ -11,7 +11,7 @@ const DigitalGoodsLanding = ({ onNavigate }) => {
         title: 'Digital Goods',
         description: 'Discover, buy, and sell digital products. From software and courses to NFTs and digital art - the future of commerce is here.',
         heroImage: 'https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=1200&h=600&fit=crop',
-        heroGradient: 'from-indigo-600 to-purple-600',
+        heroGradient: 'from-orange-500 to-orange-600',
 
         stats: {
             totalListings: '6,500+',

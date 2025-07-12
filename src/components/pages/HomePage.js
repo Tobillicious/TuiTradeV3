@@ -7,7 +7,8 @@ import ItemCard from '../ui/ItemCard';
 import { AuctionCard } from '../ui/AuctionSystem';
 import Carousel from '../ui/Carousel';
 import Counter from '../ui/Counter';
-import { Tag, Shield, Star, MessageCircle, ChevronDown, ShoppingCart, Car, Briefcase, Wrench, Gift, Home } from 'lucide-react';
+import SpotlightCard from '../ui/SpotlightCard';
+import { Tag, Shield, Star, MessageCircle, ChevronDown } from 'lucide-react';
 import { getBilingualText, TE_REO_TRANSLATIONS } from '../../lib/nzLocalizationEnhanced';
 
 const HomePage = ({ onWatchToggle, watchedItems, onNavigate, onItemClick, onAddToCart, cartItems }) => {
@@ -357,35 +358,56 @@ const HomePage = ({ onWatchToggle, watchedItems, onNavigate, onItemClick, onAddT
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                        <div className="text-center p-6">
-                            <div className="w-16 h-16 bg-green-600 rounded-full flex items-center justify-center mx-auto mb-4">
-                                <Shield className="w-8 h-8 text-white" />
+                        <SpotlightCard 
+                            className="theme-green"
+                            spotlightColor="rgba(16, 185, 129, 0.25)"
+                            backgroundColor="rgba(255, 255, 255, 0.95)"
+                            borderRadius="1rem"
+                        >
+                            <div className="text-center p-6">
+                                <div className="w-16 h-16 bg-green-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                                    <Shield className="w-8 h-8 text-white" />
+                                </div>
+                                <h3 className="text-xl font-semibold mb-2">Secure Trading</h3>
+                                <p className="text-gray-600">
+                                    All transactions are protected with our secure payment system and buyer protection.
+                                </p>
                             </div>
-                            <h3 className="text-xl font-semibold mb-2">Secure Trading</h3>
-                            <p className="text-gray-600">
-                                All transactions are protected with our secure payment system and buyer protection.
-                            </p>
-                        </div>
+                        </SpotlightCard>
 
-                        <div className="text-center p-6">
-                            <div className="w-16 h-16 bg-yellow-500 rounded-full flex items-center justify-center mx-auto mb-4">
-                                <Star className="w-8 h-8 text-white" />
+                        <SpotlightCard 
+                            className="theme-orange"
+                            spotlightColor="rgba(249, 115, 22, 0.25)"
+                            backgroundColor="rgba(255, 255, 255, 0.95)"
+                            borderRadius="1rem"
+                        >
+                            <div className="text-center p-6">
+                                <div className="w-16 h-16 bg-yellow-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                                    <Star className="w-8 h-8 text-white" />
+                                </div>
+                                <h3 className="text-xl font-semibold mb-2">Quality Guaranteed</h3>
+                                <p className="text-gray-600">
+                                    We verify all listings and provide detailed seller ratings to ensure quality.
+                                </p>
                             </div>
-                            <h3 className="text-xl font-semibold mb-2">Quality Guaranteed</h3>
-                            <p className="text-gray-600">
-                                We verify all listings and provide detailed seller ratings to ensure quality.
-                            </p>
-                        </div>
+                        </SpotlightCard>
 
-                        <div className="text-center p-6">
-                            <div className="w-16 h-16 bg-blue-500 rounded-full flex items-center justify-center mx-auto mb-4">
-                                <MessageCircle className="w-8 h-8 text-white" />
+                        <SpotlightCard 
+                            className="theme-blue"
+                            spotlightColor="rgba(59, 130, 246, 0.25)"
+                            backgroundColor="rgba(255, 255, 255, 0.95)"
+                            borderRadius="1rem"
+                        >
+                            <div className="text-center p-6">
+                                <div className="w-16 h-16 bg-blue-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                                    <MessageCircle className="w-8 h-8 text-white" />
+                                </div>
+                                <h3 className="text-xl font-semibold mb-2">24/7 Support</h3>
+                                <p className="text-gray-600">
+                                    Our dedicated support team is here to help you with any questions or concerns.
+                                </p>
                             </div>
-                            <h3 className="text-xl font-semibold mb-2">24/7 Support</h3>
-                            <p className="text-gray-600">
-                                Our dedicated support team is here to help you with any questions or concerns.
-                            </p>
-                        </div>
+                        </SpotlightCard>
                     </div>
                 </div>
             </div>

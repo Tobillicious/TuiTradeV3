@@ -11,7 +11,7 @@ const RealEstateLanding = ({ onNavigate }) => {
         title: 'Real Estate',
         description: 'Discover your next home or investment property. From Auckland apartments to Queenstown lifestyle blocks - find it all here.',
         heroImage: 'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=1200&h=600&fit=crop',
-        heroGradient: 'from-purple-600 to-pink-600',
+        heroGradient: 'from-green-500 to-green-600',
 
         stats: {
             totalListings: '8,500+',

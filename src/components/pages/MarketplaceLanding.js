@@ -12,7 +12,7 @@ const MarketplaceLanding = ({ onNavigate }) => {
         description: 'Aotearoa\'s premier online marketplace. Buy, sell, and discover unique items from trusted sellers across the country.',
         subtitle: 'Kōrero mai, kōrero atu - Let\'s trade together!',
         heroImage: 'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=1200&h=600&fit=crop',
-        heroGradient: 'from-blue-600 to-green-600',
+        heroGradient: 'from-blue-500 to-blue-600',
 
         stats: {
             totalListings: '25,000+',

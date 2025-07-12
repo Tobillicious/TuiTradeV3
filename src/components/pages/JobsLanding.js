@@ -77,16 +77,16 @@ const JobsLanding = ({ onNavigate }) => {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Hero Section with Search */}
-      <div className="bg-gradient-to-br from-green-600 to-teal-600 text-white">
+      <div className="bg-gradient-to-br from-purple-500 to-purple-600 text-white">
         <div className="max-w-7xl mx-auto px-4 py-16">
           <div className="text-center mb-8">
             <h1 className="text-4xl md:text-5xl font-bold mb-4">
               {getBilingualText('Find Your Dream Job', 'find_your_next_role')}
             </h1>
-            <p className="text-xl md:text-2xl text-green-100 mb-2">
+            <p className="text-xl md:text-2xl text-purple-100 mb-2">
               Discover thousands of opportunities across Aotearoa New Zealand
             </p>
-            <p className="text-lg text-green-200">
+            <p className="text-lg text-purple-200">
               {TE_REO_TRANSLATIONS.phrases.find_your_next_role} - Kia kaha, kia maia!
             </p>
           </div>
@@ -100,13 +100,13 @@ const JobsLanding = ({ onNavigate }) => {
                   <input
                     type="text"
                     placeholder="Job title, keywords, or company"
-                    className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 text-gray-900 text-lg"
+                    className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 text-gray-900 text-lg"
                   />
                 </div>
                 
                 <div className="lg:w-64 relative">
                   <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
-                  <select className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 text-gray-900 appearance-none">
+                  <select className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 text-gray-900 appearance-none">
                     <option>All New Zealand</option>
                     {Object.entries(NZ_LOCATIONS).map(([key, location]) => (
                       <option key={key} value={key}>{location.name}</option>
@@ -116,7 +116,7 @@ const JobsLanding = ({ onNavigate }) => {
 
                 <button 
                   onClick={() => handleSearch({})}
-                  className="bg-green-600 hover:bg-green-700 text-white px-8 py-3 rounded-lg font-semibold transition-colors flex items-center justify-center"
+                  className="bg-purple-600 hover:bg-purple-700 text-white px-8 py-3 rounded-lg font-semibold transition-colors flex items-center justify-center"
                 >
                   <Search size={20} className="mr-2" />
                   Search Jobs
@@ -144,19 +144,19 @@ const JobsLanding = ({ onNavigate }) => {
         <div className="max-w-7xl mx-auto px-4 py-8">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
             <div>
-              <div className="text-3xl font-bold text-green-600">15,000+</div>
+              <div className="text-3xl font-bold text-purple-600">15,000+</div>
               <div className="text-gray-600">Active Jobs</div>
             </div>
             <div>
-              <div className="text-3xl font-bold text-green-600">2,500+</div>
+              <div className="text-3xl font-bold text-purple-600">2,500+</div>
               <div className="text-gray-600">Companies</div>
             </div>
             <div>
-              <div className="text-3xl font-bold text-green-600">50K+</div>
+              <div className="text-3xl font-bold text-purple-600">50K+</div>
               <div className="text-gray-600">Daily Views</div>
             </div>
             <div>
-              <div className="text-3xl font-bold text-green-600">89%</div>
+              <div className="text-3xl font-bold text-purple-600">89%</div>
               <div className="text-gray-600">Success Rate</div>
             </div>
           </div>
@@ -173,7 +173,7 @@ const JobsLanding = ({ onNavigate }) => {
               </h2>
               <p className="text-gray-600">Find opportunities in your field of expertise</p>
             </div>
-            <button className="text-green-600 hover:text-green-700 font-semibold flex items-center">
+            <button className="text-purple-600 hover:text-purple-700 font-semibold flex items-center">
               View All Categories <ChevronRight size={20} />
             </button>
           </div>
@@ -183,10 +183,10 @@ const JobsLanding = ({ onNavigate }) => {
               <button
                 key={category.key}
                 onClick={() => handleCategoryClick(category.key)}
-                className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md hover:border-green-300 transition-all group"
+                className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md hover:border-purple-300 transition-all group"
               >
                 <div className="text-3xl mb-3">{category.icon}</div>
-                <h3 className="font-semibold text-gray-900 mb-1 group-hover:text-green-600 text-sm">
+                <h3 className="font-semibold text-gray-900 mb-1 group-hover:text-purple-600 text-sm">
                   {category.name}
                 </h3>
                 <p className="text-xs text-gray-500">
@@ -207,7 +207,7 @@ const JobsLanding = ({ onNavigate }) => {
                 </h2>
                 <p className="text-gray-600">Premium opportunities from top employers</p>
               </div>
-              <button className="text-green-600 hover:text-green-700 font-semibold flex items-center">
+              <button className="text-purple-600 hover:text-purple-700 font-semibold flex items-center">
                 View All Featured <ChevronRight size={20} />
               </button>
             </div>
@@ -236,7 +236,7 @@ const JobsLanding = ({ onNavigate }) => {
               </h2>
               <p className="text-gray-600">Fresh opportunities posted today</p>
             </div>
-            <button className="text-green-600 hover:text-green-700 font-semibold flex items-center">
+            <button className="text-purple-600 hover:text-purple-700 font-semibold flex items-center">
               View All Recent <ChevronRight size={20} />
             </button>
           </div>
@@ -268,8 +268,8 @@ const JobsLanding = ({ onNavigate }) => {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             <div className="text-center">
-              <div className="bg-green-100 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
-                <Target className="text-green-600" size={32} />
+              <div className="bg-purple-100 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
+                <Target className="text-purple-600" size={32} />
               </div>
               <h3 className="text-xl font-semibold mb-2">Smart Job Matching</h3>
               <p className="text-gray-600">
@@ -278,8 +278,8 @@ const JobsLanding = ({ onNavigate }) => {
             </div>
 
             <div className="text-center">
-              <div className="bg-green-100 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
-                <Award className="text-green-600" size={32} />
+              <div className="bg-purple-100 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
+                <Award className="text-purple-600" size={32} />
               </div>
               <h3 className="text-xl font-semibold mb-2">Verified Employers</h3>
               <p className="text-gray-600">
@@ -288,8 +288,8 @@ const JobsLanding = ({ onNavigate }) => {
             </div>
 
             <div className="text-center">
-              <div className="bg-green-100 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
-                <Bell className="text-green-600" size={32} />
+              <div className="bg-purple-100 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
+                <Bell className="text-purple-600" size={32} />
               </div>
               <h3 className="text-xl font-semibold mb-2">Real-time Alerts</h3>
               <p className="text-gray-600">
@@ -311,26 +311,26 @@ const JobsLanding = ({ onNavigate }) => {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <button className="text-left p-4 border border-gray-200 rounded-lg hover:shadow-md hover:border-green-300 transition-all">
-              <BookmarkPlus className="text-green-600 mb-3" size={24} />
+            <button className="text-left p-4 border border-gray-200 rounded-lg hover:shadow-md hover:border-purple-300 transition-all">
+              <BookmarkPlus className="text-purple-600 mb-3" size={24} />
               <h3 className="font-semibold mb-2">Resume Builder</h3>
               <p className="text-sm text-gray-600">Create a professional CV that stands out</p>
             </button>
 
-            <button className="text-left p-4 border border-gray-200 rounded-lg hover:shadow-md hover:border-green-300 transition-all">
-              <BarChart3 className="text-green-600 mb-3" size={24} />
+            <button className="text-left p-4 border border-gray-200 rounded-lg hover:shadow-md hover:border-purple-300 transition-all">
+              <BarChart3 className="text-purple-600 mb-3" size={24} />
               <h3 className="font-semibold mb-2">Salary Guide</h3>
               <p className="text-sm text-gray-600">Discover salary ranges for your role</p>
             </button>
 
-            <button className="text-left p-4 border border-gray-200 rounded-lg hover:shadow-md hover:border-green-300 transition-all">
-              <Users className="text-green-600 mb-3" size={24} />
+            <button className="text-left p-4 border border-gray-200 rounded-lg hover:shadow-md hover:border-purple-300 transition-all">
+              <Users className="text-purple-600 mb-3" size={24} />
               <h3 className="font-semibold mb-2">Interview Tips</h3>
               <p className="text-sm text-gray-600">Ace your next job interview</p>
             </button>
 
-            <button className="text-left p-4 border border-gray-200 rounded-lg hover:shadow-md hover:border-green-300 transition-all">
-              <Zap className="text-green-600 mb-3" size={24} />
+            <button className="text-left p-4 border border-gray-200 rounded-lg hover:shadow-md hover:border-purple-300 transition-all">
+              <Zap className="text-purple-600 mb-3" size={24} />
               <h3 className="font-semibold mb-2">Career Advice</h3>
               <p className="text-sm text-gray-600">Expert guidance for career growth</p>
             </button>
