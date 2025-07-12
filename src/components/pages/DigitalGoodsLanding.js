@@ -2,7 +2,7 @@
 // Software, eBooks, courses, digital art, and NFTs
 
 import React from 'react';
-import { Monitor, Download, Shield, Zap, Users, Star, Globe, Sparkles } from 'lucide-react';
+import { Download, Shield, Globe } from 'lucide-react';
 import CategoryLandingPage from './CategoryLandingPage';
 
 const DigitalGoodsLanding = ({ onNavigate }) => {
@@ -12,7 +12,7 @@ const DigitalGoodsLanding = ({ onNavigate }) => {
         description: 'Discover, buy, and sell digital products. From software and courses to NFTs and digital art - the future of commerce is here.',
         heroImage: 'https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=1200&h=600&fit=crop',
         heroGradient: 'from-indigo-600 to-purple-600',
-        
+
         stats: {
             totalListings: '6,500+',
             totalSellers: '1,800+',

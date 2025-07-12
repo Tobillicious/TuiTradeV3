@@ -19,8 +19,7 @@ import {
     Award,
     AlertCircle,
     Heart,
-    ArrowUpRight,
-    ArrowDownRight
+    ArrowUpRight
 } from 'lucide-react';
 
 const SellerDashboard = ({ onNavigate }) => {

@@ -2,17 +2,18 @@
 // Career opportunities across New Zealand
 
 import React from 'react';
-import { Briefcase, TrendingUp, Users, MapPin, Clock, DollarSign, Award, Target } from 'lucide-react';
+import { Target, Award, Clock } from 'lucide-react';
 import CategoryLandingPage from './CategoryLandingPage';
 
 const JobsLanding = ({ onNavigate }) => {
     const jobsData = {
         category: 'jobs',
         title: 'Jobs',
-        description: 'Your next career opportunity awaits! Discover thousands of job openings from New Zealand\'s top employers.',
+        description: 'Your next career opportunity awaits! Discover thousands of job openings from Aotearoa\'s top employers.',
+        subtitle: 'Kia kaha, kia maia - Be strong, be brave in your career journey!',
         heroImage: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=1200&h=600&fit=crop',
         heroGradient: 'from-green-600 to-teal-600',
-        
+
         stats: {
             totalListings: '12,000+',
             totalSellers: '2,500+',
@@ -110,17 +111,17 @@ const JobsLanding = ({ onNavigate }) => {
 
         successStories: [
             {
-                user: 'Alex from Auckland',
+                user: 'Alex from Tāmaki Makaurau (Auckland)',
                 story: 'Landed my dream software developer role within 2 weeks of signing up. The skill matching was spot on!',
                 rating: 5
             },
             {
-                user: 'Maria from Wellington',
+                user: 'Maria from Te Whanganui-a-Tara (Wellington)',
                 story: 'Found a great nursing position with excellent benefits. The employer verification gave me confidence.',
                 rating: 5
             },
             {
-                user: 'John from Christchurch',
+                user: 'John from Ōtautahi (Christchurch)',
                 story: 'Switched careers into tech at age 40. The platform helped me find employers open to career changers.',
                 rating: 5
             }

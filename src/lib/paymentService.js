@@ -408,7 +408,7 @@ export const TRANSACTION_TYPES = {
     DISPUTE: 'dispute'
 };
 
-export default {
+const paymentService = {
     PAYMENT_METHODS,
     NZ_BANK_DETAILS,
     AFTERPAY_LIMITS,
@@ -426,3 +426,5 @@ export default {
     PAYMENT_STATUS,
     TRANSACTION_TYPES
 };
+
+export default paymentService;

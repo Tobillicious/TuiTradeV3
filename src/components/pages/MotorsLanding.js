@@ -2,17 +2,18 @@
 // Cars, motorcycles, boats, and automotive parts
 
 import React from 'react';
-import { Car, Shield, Wrench, Users, Award, CheckCircle, FileText, MapPin } from 'lucide-react';
+import { FileText, Award, MapPin } from 'lucide-react';
 import CategoryLandingPage from './CategoryLandingPage';
 
 const MotorsLanding = ({ onNavigate }) => {
     const motorsData = {
         category: 'motors',
         title: 'Motors',
-        description: 'Find your perfect ride! Cars, motorcycles, boats, and parts from trusted dealers and private sellers across New Zealand.',
+        description: 'Find your perfect ride! Cars, motorcycles, boats, and parts from trusted dealers and private sellers across Aotearoa.',
+        subtitle: 'Haere mai ki te hoko waka - Come and buy your vehicle!',
         heroImage: 'https://images.unsplash.com/photo-1494976688754-90f929ac2c0e?w=1200&h=600&fit=crop',
         heroGradient: 'from-red-600 to-orange-600',
-        
+
         stats: {
             totalListings: '15,000+',
             totalSellers: '3,200+',
@@ -110,17 +111,17 @@ const MotorsLanding = ({ onNavigate }) => {
 
         successStories: [
             {
-                user: 'Mike from Hamilton',
+                user: 'Mike from Kirikiriroa (Hamilton)',
                 story: 'Sold my Toyota Hilux for asking price within 3 days. The vehicle verification system gave buyers confidence.',
                 rating: 5
             },
             {
-                user: 'Sarah from Tauranga',
+                user: 'Sarah from Tauranga Moana',
                 story: 'Found my dream classic Mustang through the platform. The detailed history report was invaluable.',
                 rating: 5
             },
             {
-                user: 'David from Dunedin',
+                user: 'David from Ōtepoti (Dunedin)',
                 story: 'Great experience buying my first motorcycle. The seller was verified and the bike was exactly as described.',
                 rating: 5
             }

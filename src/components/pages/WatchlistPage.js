@@ -4,7 +4,7 @@ import { collection, query, where, getDocs } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
 import { useAuth } from '../../context/AuthContext';
 import { FullPageLoader } from '../ui/Loaders';
-import ItemCard from '../ui/ItemCard';
+// Removed unused import
 import { formatPrice } from '../../lib/utils';
 import { Eye, Home, ChevronRight, Bell, BellOff, AlertTriangle, Clock, TrendingUp, TrendingDown, Download, X, MapPin, User } from 'lucide-react';
 
@@ -256,8 +256,8 @@ const WatchlistPage = ({ onNavigate, onItemClick, onWatchToggle, watchedItems, o
                                                 <div className="text-right">
                                                     <p className="text-xs text-white/80 mb-1">Status</p>
                                                     <div className={`text-xs px-2 py-1 rounded-full ${item.listingType === 'auction'
-                                                            ? 'bg-red-500/20 text-red-300'
-                                                            : 'bg-green-500/20 text-green-300'
+                                                        ? 'bg-red-500/20 text-red-300'
+                                                        : 'bg-green-500/20 text-green-300'
                                                         }`}>
                                                         {item.listingType === 'auction' ? 'Live Auction' : 'Fixed Price'}
                                                     </div>

@@ -1,6 +1,6 @@
 // src/components/ui/Loaders.js
 import React from 'react';
-import { Loader2, AlertCircle, CheckCircle, Package, ShoppingBag } from 'lucide-react';
+import { Loader2, AlertCircle, CheckCircle } from 'lucide-react';
 
 export const LoadingSpinner = ({ size = 'default' }) => {
     const sizeClasses = {

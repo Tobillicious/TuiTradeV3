@@ -2,7 +2,7 @@
 // Properties for sale and rent across New Zealand
 
 import React from 'react';
-import { Home, MapPin, TrendingUp, Users, Calculator, Camera, Calendar, Key } from 'lucide-react';
+import { Calculator, Camera, Calendar } from 'lucide-react';
 import CategoryLandingPage from './CategoryLandingPage';
 
 const RealEstateLanding = ({ onNavigate }) => {
@@ -12,7 +12,7 @@ const RealEstateLanding = ({ onNavigate }) => {
         description: 'Discover your next home or investment property. From Auckland apartments to Queenstown lifestyle blocks - find it all here.',
         heroImage: 'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=1200&h=600&fit=crop',
         heroGradient: 'from-purple-600 to-pink-600',
-        
+
         stats: {
             totalListings: '8,500+',
             totalSellers: '1,200+',

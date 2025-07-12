@@ -2,17 +2,18 @@
 // General marketplace with everything from electronics to home goods
 
 import React from 'react';
-import { ShoppingCart, Shield, Zap, Users, Heart, Star, TrendingUp, Package } from 'lucide-react';
+import { Shield, Zap, Users } from 'lucide-react';
 import CategoryLandingPage from './CategoryLandingPage';
 
 const MarketplaceLanding = ({ onNavigate }) => {
     const marketplaceData = {
         category: 'marketplace',
         title: 'Marketplace',
-        description: 'New Zealand\'s premier online marketplace. Buy, sell, and discover unique items from trusted sellers across the country.',
+        description: 'Aotearoa\'s premier online marketplace. Buy, sell, and discover unique items from trusted sellers across the country.',
+        subtitle: 'Kōrero mai, kōrero atu - Let\'s trade together!',
         heroImage: 'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=1200&h=600&fit=crop',
         heroGradient: 'from-blue-600 to-green-600',
-        
+
         stats: {
             totalListings: '25,000+',
             totalSellers: '8,500+',
@@ -110,17 +111,17 @@ const MarketplaceLanding = ({ onNavigate }) => {
 
         successStories: [
             {
-                user: 'Emma from Auckland',
+                user: 'Emma from Tāmaki Makaurau (Auckland)',
                 story: 'Sold my entire wardrobe within a week! The platform made it so easy to reach genuine buyers.',
                 rating: 5
             },
             {
-                user: 'James from Christchurch',
+                user: 'James from Ōtautahi (Christchurch)',
                 story: 'Found rare vintage camera gear that I\'ve been searching for years. Great community here!',
                 rating: 5
             },
             {
-                user: 'Sophie from Wellington',
+                user: 'Sophie from Te Whanganui-a-Tara (Wellington)',
                 story: 'Made over $2,000 decluttering my home. The smart pricing suggestions were incredibly helpful.',
                 rating: 5
             }

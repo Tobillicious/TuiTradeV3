@@ -1,14 +1,14 @@
 import React, { useState, useEffect, useCallback, Suspense, lazy } from 'react';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
 import { collection, onSnapshot, doc, deleteDoc, setDoc } from 'firebase/firestore';
-import { Search, Heart, ShoppingCart, User, List, Eye, Lock, Tag, MessageCircle, Shield, Star, BarChart3, Package, Sun, Moon, Menu, X } from 'lucide-react';
+import { Search, Heart, ShoppingCart, User, List, Eye, Lock, Tag, MessageCircle, Shield, Star, BarChart3, Package, Sun, Moon, Menu, X, ChevronDown, Car, Home as HomeIcon, Briefcase, Wrench, Gift } from 'lucide-react';
 
 // Core setup
 import { auth, db } from './lib/firebase';
 import { AuthContext } from './context/AuthContext';
 import { NotificationProvider, useNotification } from './context/NotificationContext';
 import { ThemeProvider, useTheme } from './context/ThemeContext';
-import { trackPageView, trackEvent, trackEngagement, setUserId } from './lib/analytics';
+import { trackPageView, trackEvent, setUserId } from './lib/analytics';
 
 // UI Components & Pages - Lazy loaded for better performance
 import { FullPageLoader } from './components/ui/Loaders';
@@ -33,6 +33,19 @@ const SellerDashboard = lazy(() => import('./components/pages/SellerDashboard'))
 const SellerPage = lazy(() => import('./components/pages/SellerPage'));
 const OrdersPage = lazy(() => import('./components/pages/OrdersPage'));
 const TermsAndPrivacyPage = lazy(() => import('./components/pages/TermsAndPrivacyPage'));
+
+// Buyer and Seller Information Pages
+const HowToBuyPage = lazy(() => import('./components/pages/HowToBuyPage'));
+const PaymentOptionsPage = lazy(() => import('./components/pages/PaymentOptionsPage'));
+const BuyerProtectionPage = lazy(() => import('./components/pages/BuyerProtectionPage'));
+const ShippingInfoPage = lazy(() => import('./components/pages/ShippingInfoPage'));
+const HowToSellPage = lazy(() => import('./components/pages/HowToSellPage'));
+const SellerFeesPage = lazy(() => import('./components/pages/SellerFeesPage'));
+const SellerToolsPage = lazy(() => import('./components/pages/SellerToolsPage'));
+const SuccessTipsPage = lazy(() => import('./components/pages/SuccessTipsPage'));
+const HelpCenterPage = lazy(() => import('./components/pages/HelpCenterPage'));
+const ContactUsPage = lazy(() => import('./components/pages/ContactUsPage'));
+const SafetyTipsPage = lazy(() => import('./components/pages/SafetyTipsPage'));
 
 // Category Landing Pages
 const MarketplaceLanding = lazy(() => import('./components/pages/MarketplaceLanding'));
@@ -66,6 +79,8 @@ function AppContent() {
     const [contactSellerItem, setContactSellerItem] = useState(null);
     const [isCheckoutModalOpen, setIsCheckoutModalOpen] = useState(false);
     const [checkoutItem, setCheckoutItem] = useState(null);
+    const [isTeReoMode, setIsTeReoMode] = useState(false);
+    const [isCategoriesMenuOpen, setIsCategoriesMenuOpen] = useState(false);
     const { showNotification } = useNotification();
     const { isDarkMode, toggleDarkMode } = useTheme();
 
@@ -86,6 +101,20 @@ function AppContent() {
         });
         return () => unsubscribe();
     }, []);
+
+    // Close categories menu when clicking outside
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (isCategoriesMenuOpen && !event.target.closest('.categories-menu')) {
+                setIsCategoriesMenuOpen(false);
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, [isCategoriesMenuOpen]);
 
     useEffect(() => {
         if (!currentUser) {
@@ -268,29 +297,29 @@ function AppContent() {
 
                         // Support pages
                         case 'help-center':
-                            return <PlaceholderPage title="Help Center" />;
+                            return <HelpCenterPage {...pageProps} />;
                         case 'contact-us':
-                            return <PlaceholderPage title="Contact Us" />;
+                            return <ContactUsPage {...pageProps} />;
                         case 'safety-tips':
-                            return <PlaceholderPage title="Safety Tips" />;
+                            return <SafetyTipsPage {...pageProps} />;
                         case 'terms-privacy':
                             return <TermsAndPrivacyPage {...pageProps} />;
                         case 'how-to-buy':
-                            return <PlaceholderPage title="How to Buy" />;
+                            return <HowToBuyPage {...pageProps} />;
                         case 'payment-options':
-                            return <PlaceholderPage title="Payment Options" />;
+                            return <PaymentOptionsPage {...pageProps} />;
                         case 'buyer-protection':
-                            return <PlaceholderPage title="Buyer Protection" />;
+                            return <BuyerProtectionPage {...pageProps} />;
                         case 'shipping-info':
-                            return <PlaceholderPage title="Shipping Info" />;
+                            return <ShippingInfoPage {...pageProps} />;
                         case 'how-to-sell':
-                            return <PlaceholderPage title="How to Sell" />;
+                            return <HowToSellPage {...pageProps} />;
                         case 'seller-fees':
-                            return <PlaceholderPage title="Seller Fees" />;
+                            return <SellerFeesPage {...pageProps} />;
                         case 'seller-tools':
-                            return <PlaceholderPage title="Seller Tools" />;
+                            return <SellerToolsPage {...pageProps} />;
                         case 'success-tips':
-                            return <PlaceholderPage title="Success Tips" />;
+                            return <SuccessTipsPage {...pageProps} />;
                         default:
                             return <HomePage {...pageProps} />;
                     }
@@ -331,52 +360,90 @@ function AppContent() {
                                         type="text"
                                         value={searchQuery}
                                         onChange={(e) => setSearchQuery(e.target.value)}
-                                        placeholder="Search for anything..."
-                                        className="w-full pl-10 md:pl-12 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all text-sm md:text-base"
+                                        placeholder="Rapua mai - Search for anything..."
+                                        className="w-full pl-10 md:pl-12 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all text-sm md:text-base placeholder-gray-400"
                                     />
                                     <Search className="absolute left-3 md:left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
                                 </form>
                             </div>
 
-                            {/* Main Navigation Menu */}
-                            <nav className="hidden lg:flex items-center space-x-6">
+                            {/* Categories Dropdown Menu */}
+                            <div className="hidden lg:relative categories-menu">
                                 <button
-                                    onClick={() => handleNavigate('marketplace-landing')}
-                                    className={`text-sm font-medium transition-colors ${isDarkMode ? 'text-gray-300 hover:text-green-400' : 'text-gray-700 hover:text-green-600'}`}
+                                    onClick={() => setIsCategoriesMenuOpen(!isCategoriesMenuOpen)}
+                                    className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-colors ${isDarkMode ? 'text-gray-300 hover:text-green-400 hover:bg-gray-700' : 'text-gray-700 hover:text-green-600 hover:bg-gray-100'}`}
                                 >
-                                    Marketplace
+                                    <span className="font-medium">Categories</span>
+                                    <ChevronDown className={`w-4 h-4 transition-transform ${isCategoriesMenuOpen ? 'rotate-180' : ''}`} />
                                 </button>
-                                <button
-                                    onClick={() => handleNavigate('motors-landing')}
-                                    className={`text-sm font-medium transition-colors ${isDarkMode ? 'text-gray-300 hover:text-green-400' : 'text-gray-700 hover:text-green-600'}`}
-                                >
-                                    Motors
-                                </button>
-                                <button
-                                    onClick={() => handleNavigate('real-estate-landing')}
-                                    className={`text-sm font-medium transition-colors ${isDarkMode ? 'text-gray-300 hover:text-green-400' : 'text-gray-700 hover:text-green-600'}`}
-                                >
-                                    Property
-                                </button>
-                                <button
-                                    onClick={() => handleNavigate('jobs-landing')}
-                                    className={`text-sm font-medium transition-colors ${isDarkMode ? 'text-gray-300 hover:text-green-400' : 'text-gray-700 hover:text-green-600'}`}
-                                >
-                                    Jobs
-                                </button>
-                                <button
-                                    onClick={() => handleNavigate('digital-goods-landing')}
-                                    className={`text-sm font-medium transition-colors ${isDarkMode ? 'text-gray-300 hover:text-green-400' : 'text-gray-700 hover:text-green-600'}`}
-                                >
-                                    Digital Goods
-                                </button>
-                                <button
-                                    onClick={() => handleNavigate('community-landing')}
-                                    className={`text-sm font-medium transition-colors ${isDarkMode ? 'text-gray-300 hover:text-green-400' : 'text-gray-700 hover:text-green-600'}`}
-                                >
-                                    Community
-                                </button>
-                            </nav>
+
+                                {isCategoriesMenuOpen && (
+                                    <div className={`absolute top-full left-0 mt-2 w-64 rounded-xl shadow-xl py-2 z-50 ring-1 ring-opacity-5 animate-fade-in-up ${isDarkMode ? 'bg-gray-800 ring-gray-700' : 'bg-white ring-black'}`}>
+                                        <div className="grid grid-cols-1 gap-1 p-2">
+                                            <button
+                                                onClick={() => { handleNavigate('marketplace-landing'); setIsCategoriesMenuOpen(false); }}
+                                                className={`w-full text-left px-4 py-3 rounded-lg transition-colors flex items-center ${isDarkMode ? 'text-gray-300 hover:bg-gray-700' : 'text-gray-700 hover:bg-gray-50'}`}
+                                            >
+                                                <ShoppingCart size={16} className="mr-3 text-blue-500" />
+                                                <div>
+                                                    <div className="font-medium">Marketplace</div>
+                                                    <div className="text-xs text-gray-500">(Tauhokohoko)</div>
+                                                </div>
+                                            </button>
+                                            <button
+                                                onClick={() => { handleNavigate('motors-landing'); setIsCategoriesMenuOpen(false); }}
+                                                className={`w-full text-left px-4 py-3 rounded-lg transition-colors flex items-center ${isDarkMode ? 'text-gray-300 hover:bg-gray-700' : 'text-gray-700 hover:bg-gray-50'}`}
+                                            >
+                                                <Car size={16} className="mr-3 text-red-500" />
+                                                <div>
+                                                    <div className="font-medium">Motors</div>
+                                                    <div className="text-xs text-gray-500">(Waka)</div>
+                                                </div>
+                                            </button>
+                                            <button
+                                                onClick={() => { handleNavigate('real-estate-landing'); setIsCategoriesMenuOpen(false); }}
+                                                className={`w-full text-left px-4 py-3 rounded-lg transition-colors flex items-center ${isDarkMode ? 'text-gray-300 hover:bg-gray-700' : 'text-gray-700 hover:bg-gray-50'}`}
+                                            >
+                                                <HomeIcon size={16} className="mr-3 text-green-500" />
+                                                <div>
+                                                    <div className="font-medium">Property</div>
+                                                    <div className="text-xs text-gray-500">(Kāinga)</div>
+                                                </div>
+                                            </button>
+                                            <button
+                                                onClick={() => { handleNavigate('jobs-landing'); setIsCategoriesMenuOpen(false); }}
+                                                className={`w-full text-left px-4 py-3 rounded-lg transition-colors flex items-center ${isDarkMode ? 'text-gray-300 hover:bg-gray-700' : 'text-gray-700 hover:bg-gray-50'}`}
+                                            >
+                                                <Briefcase size={16} className="mr-3 text-purple-500" />
+                                                <div>
+                                                    <div className="font-medium">Jobs</div>
+                                                    <div className="text-xs text-gray-500">(Mahi)</div>
+                                                </div>
+                                            </button>
+                                            <button
+                                                onClick={() => { handleNavigate('digital-goods-landing'); setIsCategoriesMenuOpen(false); }}
+                                                className={`w-full text-left px-4 py-3 rounded-lg transition-colors flex items-center ${isDarkMode ? 'text-gray-300 hover:bg-gray-700' : 'text-gray-700 hover:bg-gray-50'}`}
+                                            >
+                                                <Wrench size={16} className="mr-3 text-orange-500" />
+                                                <div>
+                                                    <div className="font-medium">Services</div>
+                                                    <div className="text-xs text-gray-500">(Ratonga)</div>
+                                                </div>
+                                            </button>
+                                            <button
+                                                onClick={() => { handleNavigate('community-landing'); setIsCategoriesMenuOpen(false); }}
+                                                className={`w-full text-left px-4 py-3 rounded-lg transition-colors flex items-center ${isDarkMode ? 'text-gray-300 hover:bg-gray-700' : 'text-gray-700 hover:bg-gray-50'}`}
+                                            >
+                                                <Gift size={16} className="mr-3 text-pink-500" />
+                                                <div>
+                                                    <div className="font-medium">Community</div>
+                                                    <div className="text-xs text-gray-500">(Hapori)</div>
+                                                </div>
+                                            </button>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
 
                             <div className="flex items-center space-x-2 md:space-x-4">
                                 {/* Mobile menu button */}
@@ -385,6 +452,14 @@ function AppContent() {
                                     className={`lg:hidden p-2 transition-colors ${isDarkMode ? 'text-gray-300 hover:text-green-400' : 'text-gray-600 hover:text-green-600'}`}
                                 >
                                     {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+                                </button>
+
+                                <button
+                                    onClick={() => setIsTeReoMode(!isTeReoMode)}
+                                    className={`p-2 transition-colors ${isTeReoMode ? 'text-green-600 bg-green-100' : isDarkMode ? 'text-gray-300 hover:text-green-400' : 'text-gray-600 hover:text-green-600'} rounded-lg`}
+                                    title={isTeReoMode ? "Switch to English" : "Switch to Te Reo Māori"}
+                                >
+                                    <span className="text-sm font-semibold">{isTeReoMode ? 'MĀ' : 'EN'}</span>
                                 </button>
 
                                 <button
@@ -440,6 +515,7 @@ function AppContent() {
                                                 >
                                                     <User size={16} className="mr-3" />
                                                     My Profile
+                                                    <span className="ml-2 text-xs text-gray-400">(Tō Pūkete)</span>
                                                 </button>
                                                 <button
                                                     onClick={() => handleNavigate('seller-dashboard')}
@@ -447,6 +523,7 @@ function AppContent() {
                                                 >
                                                     <BarChart3 size={16} className="mr-3" />
                                                     Seller Dashboard
+                                                    <span className="ml-2 text-xs text-gray-400">(Tauhokohoko)</span>
                                                 </button>
                                                 <button
                                                     onClick={() => handleNavigate('listings')}
@@ -454,6 +531,7 @@ function AppContent() {
                                                 >
                                                     <List size={16} className="mr-3" />
                                                     My Listings
+                                                    <span className="ml-2 text-xs text-gray-400">(Āku Taonga)</span>
                                                 </button>
                                                 <button
                                                     onClick={() => handleNavigate('watchlist')}
@@ -461,6 +539,7 @@ function AppContent() {
                                                 >
                                                     <Eye size={16} className="mr-3" />
                                                     Watchlist
+                                                    <span className="ml-2 text-xs text-gray-400">(Mātakitaki)</span>
                                                 </button>
                                                 <button
                                                     onClick={() => handleNavigate('messages')}
@@ -468,6 +547,7 @@ function AppContent() {
                                                 >
                                                     <MessageCircle size={16} className="mr-3" />
                                                     Messages
+                                                    <span className="ml-2 text-xs text-gray-400">(Karere)</span>
                                                 </button>
                                                 <button
                                                     onClick={() => handleNavigate('orders')}
@@ -475,6 +555,7 @@ function AppContent() {
                                                 >
                                                     <Package size={16} className="mr-3" />
                                                     Orders
+                                                    <span className="ml-2 text-xs text-gray-400">(Ōta)</span>
                                                 </button>
                                                 <div className={`border-t my-1 ${isDarkMode ? 'border-gray-700' : 'border-gray-200'}`}></div>
                                                 <button
@@ -483,6 +564,7 @@ function AppContent() {
                                                 >
                                                     <Lock size={16} className="mr-3" />
                                                     Log Out
+                                                    <span className="ml-2 text-xs text-gray-400">(Haere atu)</span>
                                                 </button>
                                             </div>
                                         )}
@@ -490,20 +572,20 @@ function AppContent() {
                                 ) : (
                                     <button
                                         onClick={() => setIsAuthModalOpen(true)}
-                                        className="hidden md:inline-flex items-center bg-transparent text-green-600 px-4 py-2 rounded-lg hover:bg-green-50 transition-colors border border-green-600 font-semibold"
+                                        className="hidden md:inline-flex items-center bg-transparent text-green-600 px-4 py-2 rounded-lg hover:bg-green-50 transition-colors border border-green-600 font-semibold text-sm whitespace-nowrap"
                                     >
                                         <User size={18} className="mr-2" />
-                                        Log In / Sign Up
+                                        Kia ora - Log In / Sign Up
                                     </button>
                                 )}
 
                                 <button
                                     onClick={() => currentUser ? handleNavigate('create-listing') : setIsAuthModalOpen(true)}
-                                    className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-all transform hover:scale-105 font-semibold flex items-center shadow-md"
+                                    className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-all transform hover:scale-105 font-semibold flex items-center shadow-md text-sm whitespace-nowrap"
                                 >
                                     <Tag size={18} className="mr-2" />
-                                    <span className="hidden sm:inline">List Item</span>
-                                    <span className="sm:hidden">Sell</span>
+                                    <span className="hidden sm:inline">Hoko mai - List Item</span>
+                                    <span className="sm:hidden">Hoko</span>
                                 </button>
                             </div>
                         </div>
@@ -519,36 +601,42 @@ function AppContent() {
                                 className={`w-full text-left px-3 py-2 rounded-lg transition-colors ${isDarkMode ? 'text-gray-300 hover:bg-gray-700' : 'text-gray-700 hover:bg-gray-50'}`}
                             >
                                 Marketplace
+                                <span className="ml-2 text-xs text-gray-400">(Tauhokohoko)</span>
                             </button>
                             <button
                                 onClick={() => handleNavigate('motors-landing')}
                                 className={`w-full text-left px-3 py-2 rounded-lg transition-colors ${isDarkMode ? 'text-gray-300 hover:bg-gray-700' : 'text-gray-700 hover:bg-gray-50'}`}
                             >
                                 Motors
+                                <span className="ml-2 text-xs text-gray-400">(Waka)</span>
                             </button>
                             <button
                                 onClick={() => handleNavigate('real-estate-landing')}
                                 className={`w-full text-left px-3 py-2 rounded-lg transition-colors ${isDarkMode ? 'text-gray-300 hover:bg-gray-700' : 'text-gray-700 hover:bg-gray-50'}`}
                             >
                                 Property
+                                <span className="ml-2 text-xs text-gray-400">(Kāinga)</span>
                             </button>
                             <button
                                 onClick={() => handleNavigate('jobs-landing')}
                                 className={`w-full text-left px-3 py-2 rounded-lg transition-colors ${isDarkMode ? 'text-gray-300 hover:bg-gray-700' : 'text-gray-700 hover:bg-gray-50'}`}
                             >
                                 Jobs
+                                <span className="ml-2 text-xs text-gray-400">(Mahi)</span>
                             </button>
                             <button
                                 onClick={() => handleNavigate('digital-goods-landing')}
                                 className={`w-full text-left px-3 py-2 rounded-lg transition-colors ${isDarkMode ? 'text-gray-300 hover:bg-gray-700' : 'text-gray-700 hover:bg-gray-50'}`}
                             >
                                 Digital Goods
+                                <span className="ml-2 text-xs text-gray-400">(Taonga Matihiko)</span>
                             </button>
                             <button
                                 onClick={() => handleNavigate('community-landing')}
                                 className={`w-full text-left px-3 py-2 rounded-lg transition-colors ${isDarkMode ? 'text-gray-300 hover:bg-gray-700' : 'text-gray-700 hover:bg-gray-50'}`}
                             >
                                 Community
+                                <span className="ml-2 text-xs text-gray-400">(Hapori)</span>
                             </button>
                         </div>
                     </div>
@@ -571,7 +659,16 @@ function AppContent() {
                                     <h3 className="text-xl font-bold">TuiTrade</h3>
                                 </div>
                                 <p className="text-gray-400">
-                                    New Zealand's most beautiful marketplace. Trade the Kiwi way.
+                                    Aotearoa's most beautiful marketplace. Trade the Kiwi way.
+                                </p>
+                                <p className="text-gray-500 text-sm mt-2 italic">
+                                    He taonga tuku iho - A treasure passed down
+                                </p>
+                                <p className="text-gray-500 text-xs mt-1 italic">
+                                    Whānau friendly, locally owned - e noho rā!
+                                </p>
+                                <p className="text-gray-500 text-xs mt-1 italic">
+                                    Kia kaha, kia maia, kia manawanui - Be strong, be brave, be steadfast
                                 </p>
                                 <div className="mt-4 flex space-x-4">
                                     <Shield className="text-green-500" size={24} />
@@ -582,6 +679,7 @@ function AppContent() {
 
                             <div>
                                 <h4 className="font-semibold mb-4 text-green-400">For Buyers</h4>
+                                <p className="text-gray-500 text-xs mb-3 italic">(Mō ngā Kaihoko)</p>
                                 <ul className="space-y-2 text-gray-400">
                                     <li><button onClick={() => handleNavigate('how-to-buy')} className="hover:text-white transition-colors">How to Buy</button></li>
                                     <li><button onClick={() => handleNavigate('payment-options')} className="hover:text-white transition-colors">Payment Options</button></li>
@@ -592,6 +690,7 @@ function AppContent() {
 
                             <div>
                                 <h4 className="font-semibold mb-4 text-green-400">For Sellers</h4>
+                                <p className="text-gray-500 text-xs mb-3 italic">(Mō ngā Kaihoko)</p>
                                 <ul className="space-y-2 text-gray-400">
                                     <li><button onClick={() => handleNavigate('how-to-sell')} className="hover:text-white transition-colors">How to Sell</button></li>
                                     <li><button onClick={() => handleNavigate('seller-fees')} className="hover:text-white transition-colors">Seller Fees</button></li>
@@ -602,6 +701,7 @@ function AppContent() {
 
                             <div>
                                 <h4 className="font-semibold mb-4 text-green-400">Support & Info</h4>
+                                <p className="text-gray-500 text-xs mb-3 italic">(Tautoko & Mōhiohio)</p>
                                 <ul className="space-y-2 text-gray-400">
                                     <li><button onClick={() => handleNavigate('help-center')} className="hover:text-white transition-colors">Help Center</button></li>
                                     <li><button onClick={() => handleNavigate('contact-us')} className="hover:text-white transition-colors">Contact Us</button></li>
@@ -615,6 +715,12 @@ function AppContent() {
                             <div className="flex flex-col md:flex-row justify-between items-center">
                                 <p className="text-gray-400 text-sm">
                                     &copy; 2025 TuiTrade. Made with ❤️ in Aotearoa New Zealand.
+                                </p>
+                                <p className="text-gray-500 text-xs mt-1 italic">
+                                    Kia ora, e hoa! - Hello, friend!
+                                </p>
+                                <p className="text-gray-500 text-xs italic">
+                                    He aha te mea nui o te ao? He tangata, he tangata, he tangata!
                                 </p>
                                 <p className="text-gray-400 text-sm mt-4 md:mt-0">
                                     Building a better marketplace for Kiwis, by Kiwis.

@@ -151,34 +151,34 @@ export const SHIPPING_ZONES = {
 // NZ Address validation and formatting
 export const validateNZAddress = (address) => {
     const errors = [];
-    
+
     if (!address.streetAddress || address.streetAddress.trim().length < 5) {
         errors.push('Street address must be at least 5 characters');
     }
-    
+
     if (!address.suburb || address.suburb.trim().length < 2) {
         errors.push('Suburb is required');
     }
-    
+
     if (!address.city || address.city.trim().length < 2) {
         errors.push('City is required');
     }
-    
+
     if (!address.region) {
         errors.push('Region is required');
     }
-    
+
     // NZ postcode validation (4 digits)
     if (address.postcode && !/^\d{4}$/.test(address.postcode)) {
         errors.push('Postcode must be 4 digits');
     }
-    
+
     return errors;
 };
 
 export const formatNZAddress = (address) => {
     const parts = [];
-    
+
     if (address.streetAddress) parts.push(address.streetAddress);
     if (address.suburb && address.suburb !== address.city) parts.push(address.suburb);
     if (address.city) {
@@ -186,7 +186,7 @@ export const formatNZAddress = (address) => {
         parts.push(cityPart);
     }
     if (address.region && address.region !== address.city) parts.push(address.region);
-    
+
     return parts.join(', ');
 };
 
@@ -194,28 +194,28 @@ export const formatNZAddress = (address) => {
 export const calculateShippingCost = (fromLocation, toLocation, weight = 1, dimensions = null, express = false) => {
     const fromZone = getShippingZone(fromLocation);
     const toZone = getShippingZone(toLocation);
-    
+
     // Base shipping zone (highest tier between from/to)
     const shippingZone = getHighestTierZone(fromZone, toZone);
     const zone = SHIPPING_ZONES[shippingZone];
-    
+
     let baseCost = express ? zone.expressRate : zone.baseRate;
-    
+
     // Weight multiplier (standard rate up to 5kg)
     if (weight > 5) {
         baseCost += Math.ceil((weight - 5) / 5) * 5.00;
     }
-    
+
     // Size surcharge for large items
     if (dimensions && (dimensions.length > 100 || dimensions.width > 60 || dimensions.height > 60)) {
         baseCost += 15.00; // Large item surcharge
     }
-    
+
     // Rural delivery surcharge
     if (shippingZone === 'rural' || shippingZone === 'islands') {
         baseCost += 10.00;
     }
-    
+
     return {
         cost: baseCost,
         zone: zone.name,
@@ -227,27 +227,27 @@ export const calculateShippingCost = (fromLocation, toLocation, weight = 1, dime
 
 const getShippingZone = (location) => {
     const locationLower = location.toLowerCase();
-    
+
     // Check metro areas
     if (SHIPPING_ZONES.metro.areas.some(area => locationLower.includes(area.toLowerCase()))) {
         return 'metro';
     }
-    
+
     // Check urban areas
     if (SHIPPING_ZONES.urban.areas.some(area => locationLower.includes(area.toLowerCase()))) {
         return 'urban';
     }
-    
+
     // Check regional towns
     if (SHIPPING_ZONES.regional.areas.some(area => locationLower.includes(area.toLowerCase()))) {
         return 'regional';
     }
-    
+
     // Check islands
     if (SHIPPING_ZONES.islands.areas.some(area => locationLower.includes(area.toLowerCase()))) {
         return 'islands';
     }
-    
+
     // Default to rural
     return 'rural';
 };
@@ -332,7 +332,7 @@ export const SAFETY_FEATURES = {
         identification: { name: 'ID Verified', icon: '🆔', points: 50 },
         bankAccount: { name: 'Bank Account Verified', icon: '🏦', points: 40 }
     },
-    
+
     feedbackSystem: {
         ratings: ['positive', 'neutral', 'negative'],
         categories: ['communication', 'itemDescription', 'deliverySpeed', 'packaging'],
@@ -343,7 +343,7 @@ export const SAFETY_FEATURES = {
             poor: { min: 0, label: 'Poor', color: 'red' }
         }
     },
-    
+
     protectionPolicies: {
         buyerProtection: {
             name: 'Buyer Protection',
@@ -400,14 +400,14 @@ export const calculateDistance = (location1, location2) => {
         'wellington-dunedin': 883,
         'christchurch-dunedin': 358
     };
-    
+
     const key = `${location1.toLowerCase()}-${location2.toLowerCase()}`;
     const reverseKey = `${location2.toLowerCase()}-${location1.toLowerCase()}`;
-    
+
     return distances[key] || distances[reverseKey] || 500; // Default 500km
 };
 
-export default {
+const nzLocalization = {
     NZ_REGIONS,
     SHIPPING_ZONES,
     PICKUP_LOCATIONS,
@@ -420,3 +420,5 @@ export default {
     formatNZCurrency,
     calculateDistance
 };
+
+export default nzLocalization;
