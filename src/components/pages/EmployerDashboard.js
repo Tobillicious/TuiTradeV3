@@ -585,6 +585,7 @@ const EmployerDashboard = ({ onNavigate, currentUser }) => {
               { id: 'overview', label: 'Overview', icon: BarChart3 },
               { id: 'jobs', label: 'Jobs', icon: Briefcase },
               { id: 'applications', label: 'Applications', icon: Users },
+              { id: 'analytics', label: 'Analytics', icon: TrendingUp },
               { id: 'company', label: 'Company Profile', icon: Building }
             ].map((tab) => {
               const Icon = tab.icon;
@@ -612,6 +613,20 @@ const EmployerDashboard = ({ onNavigate, currentUser }) => {
         {activeTab === 'overview' && renderOverview()}
         {activeTab === 'jobs' && renderJobs()}
         {activeTab === 'applications' && renderApplications()}
+        {activeTab === 'analytics' && (
+          <div className="text-center py-12">
+            <TrendingUp className="w-16 h-16 text-green-600 mx-auto mb-4" />
+            <h3 className="text-xl font-semibold text-gray-900 mb-2">Advanced Analytics</h3>
+            <p className="text-gray-600 mb-6">Get comprehensive insights into your hiring performance</p>
+            <button
+              onClick={() => onNavigate('analytics-dashboard')}
+              className="bg-green-600 text-white px-8 py-3 rounded-lg hover:bg-green-700 transition-colors inline-flex items-center"
+            >
+              <BarChart3 size={20} className="mr-2" />
+              View Analytics Dashboard
+            </button>
+          </div>
+        )}
         {activeTab === 'company' && renderCompanyProfile()}
       </div>
     </div>

@@ -6,7 +6,7 @@ import {
   Search, Filter, MapPin, Calendar, DollarSign, Briefcase, Star,
   Target, Zap, Brain, TrendingUp, Users, Clock, ArrowRight, Heart,
   Eye, Bookmark, Share2, AlertCircle, CheckCircle, Sliders, X,
-  Sparkles, Robot, BarChart3, Globe, Award, Building
+  Sparkles, Bot, BarChart3, Globe, Award, Building
 } from 'lucide-react';
 import { useTeReo, TeReoText } from '../ui/TeReoToggle';
 import { searchJobs } from '../../lib/jobsService';
@@ -525,7 +525,7 @@ const AdvancedJobSearch = ({ onNavigate, currentUser }) => {
                   onClick={performAISearch}
                   className="absolute right-2 top-2 bg-purple-600 text-white px-6 py-2 rounded-lg hover:bg-purple-700 transition-colors"
                 >
-                  <Robot size={16} className="mr-2 inline" />
+                  <Bot size={16} className="mr-2 inline" />
                   AI Search
                 </button>
               </div>

@@ -4,7 +4,7 @@
 import React, { useState, useEffect } from 'react';
 import { 
   Search, Filter, Download, Mail, Phone, Calendar, CheckCircle, XCircle,
-  Eye, Star, Users, Briefcase, MapPin, Clock, ArrowUpDown, Grid, List,
+  Eye, Star, Users, User, Briefcase, MapPin, Clock, ArrowUpDown, Grid, List,
   MoreHorizontal, Tag, Flag, MessageCircle, Video, FileText, Award,
   TrendingUp, BarChart3, Target, AlertCircle, ThumbsUp, ThumbsDown
 } from 'lucide-react';

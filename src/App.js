@@ -62,6 +62,7 @@ const ApplicationDetailPage = lazy(() => import('./components/pages/ApplicationD
 const ApplicationsManagementPage = lazy(() => import('./components/pages/ApplicationsManagementPage'));
 const ApplicationFormBuilder = lazy(() => import('./components/pages/ApplicationFormBuilder'));
 const AdvancedJobSearch = lazy(() => import('./components/pages/AdvancedJobSearch'));
+const AnalyticsDashboard = lazy(() => import('./components/pages/AnalyticsDashboard'));
 const DigitalGoodsLanding = lazy(() => import('./components/pages/DigitalGoodsLanding'));
 const CommunityLanding = lazy(() => import('./components/pages/CommunityLanding'));
 const AdminDashboard = lazy(() => import('./components/pages/AdminDashboard'));
@@ -311,6 +312,7 @@ function AppContent() {
                         case 'applications-management': return <ApplicationsManagementPage {...pageProps} currentUser={currentUser} />;
                         case 'application-form-builder': return <ApplicationFormBuilder {...pageProps} jobId={pageContext.jobId} currentUser={currentUser} />;
                         case 'advanced-job-search': return <AdvancedJobSearch {...pageProps} currentUser={currentUser} />;
+                        case 'analytics-dashboard': return <AnalyticsDashboard {...pageProps} currentUser={currentUser} />;
                         case 'digital-goods-landing': return <DigitalGoodsLanding {...pageProps} />;
                         case 'community-landing': return <CommunityLanding {...pageProps} />;
                         
