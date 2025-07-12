@@ -5,6 +5,8 @@ import { db } from '../../lib/firebase';
 import { LISTINGS_LIMIT } from '../../lib/utils';
 import ItemCard from '../ui/ItemCard';
 import { AuctionCard } from '../ui/AuctionSystem';
+import Carousel from '../ui/Carousel';
+import Counter from '../ui/Counter';
 import { Tag, Shield, Star, MessageCircle, ChevronDown, ShoppingCart, Car, Briefcase, Wrench, Gift, Home } from 'lucide-react';
 import { getBilingualText, TE_REO_TRANSLATIONS } from '../../lib/nzLocalizationEnhanced';
 
@@ -13,6 +15,7 @@ const HomePage = ({ onWatchToggle, watchedItems, onNavigate, onItemClick, onAddT
     const [isLoading, setIsLoading] = useState(true);
     const [hasMoreItems, setHasMoreItems] = useState(true);
     const [isLoadingMore, setIsLoadingMore] = useState(false);
+    const [pageViews, setPageViews] = useState(42867); // Starting with a demo number
 
     const fetchListings = useCallback(async (loadMore = false) => {
         setIsLoading(true);
@@ -77,6 +80,11 @@ const HomePage = ({ onWatchToggle, watchedItems, onNavigate, onItemClick, onAddT
 
     useEffect(() => {
         fetchListings();
+        // Simulate a page view increment
+        const timer = setTimeout(() => {
+            setPageViews(prev => prev + 1);
+        }, 2000);
+        return () => clearTimeout(timer);
     }, [fetchListings]);
 
     const handleLoadMore = async () => {
@@ -192,7 +200,7 @@ const HomePage = ({ onWatchToggle, watchedItems, onNavigate, onItemClick, onAddT
                 </div>
             </div>
 
-            {/* Enhanced Categories Section */}
+            {/* Enhanced Categories Section with Carousel */}
             <div className="bg-gradient-to-br from-gray-50 to-white py-20">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="text-center mb-16">
@@ -207,186 +215,17 @@ const HomePage = ({ onWatchToggle, watchedItems, onNavigate, onItemClick, onAddT
                         </p>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                        {/* Marketplace Card */}
-                        <div className="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-blue-500 to-blue-600 text-white shadow-xl hover:shadow-2xl transition-all duration-500 transform hover:scale-105">
-                            <div className="absolute inset-0 bg-gradient-to-br from-blue-600/20 to-blue-800/20"></div>
-                            <div className="relative p-8 h-80 flex flex-col justify-between">
-                                <div>
-                                    <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center mb-6 backdrop-blur-sm">
-                                        <ShoppingCart className="w-8 h-8" />
-                                    </div>
-                                    <h3 className="text-3xl font-bold mb-3">Marketplace</h3>
-                                    <p className="text-blue-100 text-lg mb-4">Everything you need, all in one place</p>
-                                    <div className="space-y-2">
-                                        <div className="flex items-center text-blue-100">
-                                            <span className="w-2 h-2 bg-white rounded-full mr-3"></span>
-                                            <span>11 categories</span>
-                                        </div>
-                                        <div className="flex items-center text-blue-100">
-                                            <span className="w-2 h-2 bg-white rounded-full mr-3"></span>
-                                            <span>Auctions & Classified</span>
-                                        </div>
-                                    </div>
-                                </div>
-                                <button
-                                    onClick={() => onNavigate('marketplace-landing')}
-                                    className="bg-white/20 backdrop-blur-sm text-white px-6 py-3 rounded-xl font-semibold hover:bg-white/30 transition-all duration-300 border border-white/30"
-                                >
-                                    Explore Marketplace
-                                </button>
-                            </div>
-                        </div>
-
-                        {/* Motors Card */}
-                        <div className="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-red-500 to-red-600 text-white shadow-xl hover:shadow-2xl transition-all duration-500 transform hover:scale-105">
-                            <div className="absolute inset-0 bg-gradient-to-br from-red-600/20 to-red-800/20"></div>
-                            <div className="relative p-8 h-80 flex flex-col justify-between">
-                                <div>
-                                    <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center mb-6 backdrop-blur-sm">
-                                        <Car className="w-8 h-8" />
-                                    </div>
-                                    <h3 className="text-3xl font-bold mb-3">Motors</h3>
-                                    <p className="text-red-100 text-lg mb-4">Find your perfect ride</p>
-                                    <div className="space-y-2">
-                                        <div className="flex items-center text-red-100">
-                                            <span className="w-2 h-2 bg-white rounded-full mr-3"></span>
-                                            <span>6 categories</span>
-                                        </div>
-                                        <div className="flex items-center text-red-100">
-                                            <span className="w-2 h-2 bg-white rounded-full mr-3"></span>
-                                            <span>Auctions & Classified</span>
-                                        </div>
-                                    </div>
-                                </div>
-                                <button
-                                    onClick={() => onNavigate('motors-landing')}
-                                    className="bg-white/20 backdrop-blur-sm text-white px-6 py-3 rounded-xl font-semibold hover:bg-white/30 transition-all duration-300 border border-white/30"
-                                >
-                                    Browse Motors
-                                </button>
-                            </div>
-                        </div>
-
-                        {/* Property Card */}
-                        <div className="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-green-500 to-green-600 text-white shadow-xl hover:shadow-2xl transition-all duration-500 transform hover:scale-105">
-                            <div className="absolute inset-0 bg-gradient-to-br from-green-600/20 to-green-800/20"></div>
-                            <div className="relative p-8 h-80 flex flex-col justify-between">
-                                <div>
-                                    <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center mb-6 backdrop-blur-sm">
-                                        <Home className="w-8 h-8" />
-                                    </div>
-                                    <h3 className="text-3xl font-bold mb-3">Property</h3>
-                                    <p className="text-green-100 text-lg mb-4">Your dream home awaits</p>
-                                    <div className="space-y-2">
-                                        <div className="flex items-center text-green-100">
-                                            <span className="w-2 h-2 bg-white rounded-full mr-3"></span>
-                                            <span>3 categories</span>
-                                        </div>
-                                        <div className="flex items-center text-green-100">
-                                            <span className="w-2 h-2 bg-white rounded-full mr-3"></span>
-                                            <span>Classified</span>
-                                        </div>
-                                    </div>
-                                </div>
-                                <button
-                                    onClick={() => onNavigate('real-estate-landing')}
-                                    className="bg-white/20 backdrop-blur-sm text-white px-6 py-3 rounded-xl font-semibold hover:bg-white/30 transition-all duration-300 border border-white/30"
-                                >
-                                    Find Property
-                                </button>
-                            </div>
-                        </div>
-
-                        {/* Jobs Card */}
-                        <div className="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-purple-500 to-purple-600 text-white shadow-xl hover:shadow-2xl transition-all duration-500 transform hover:scale-105">
-                            <div className="absolute inset-0 bg-gradient-to-br from-purple-600/20 to-purple-800/20"></div>
-                            <div className="relative p-8 h-80 flex flex-col justify-between">
-                                <div>
-                                    <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center mb-6 backdrop-blur-sm">
-                                        <Briefcase className="w-8 h-8" />
-                                    </div>
-                                    <h3 className="text-3xl font-bold mb-3">Jobs</h3>
-                                    <p className="text-purple-100 text-lg mb-4">Your next career move</p>
-                                    <div className="space-y-2">
-                                        <div className="flex items-center text-purple-100">
-                                            <span className="w-2 h-2 bg-white rounded-full mr-3"></span>
-                                            <span>5 categories</span>
-                                        </div>
-                                        <div className="flex items-center text-purple-100">
-                                            <span className="w-2 h-2 bg-white rounded-full mr-3"></span>
-                                            <span>Classified</span>
-                                        </div>
-                                    </div>
-                                </div>
-                                <button
-                                    onClick={() => onNavigate('jobs-landing')}
-                                    className="bg-white/20 backdrop-blur-sm text-white px-6 py-3 rounded-xl font-semibold hover:bg-white/30 transition-all duration-300 border border-white/30"
-                                >
-                                    Find Jobs
-                                </button>
-                            </div>
-                        </div>
-
-                        {/* Services Card */}
-                        <div className="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-orange-500 to-orange-600 text-white shadow-xl hover:shadow-2xl transition-all duration-500 transform hover:scale-105">
-                            <div className="absolute inset-0 bg-gradient-to-br from-orange-600/20 to-orange-800/20"></div>
-                            <div className="relative p-8 h-80 flex flex-col justify-between">
-                                <div>
-                                    <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center mb-6 backdrop-blur-sm">
-                                        <Wrench className="w-8 h-8" />
-                                    </div>
-                                    <h3 className="text-3xl font-bold mb-3">Services</h3>
-                                    <p className="text-orange-100 text-lg mb-4">Professional services</p>
-                                    <div className="space-y-2">
-                                        <div className="flex items-center text-orange-100">
-                                            <span className="w-2 h-2 bg-white rounded-full mr-3"></span>
-                                            <span>4 categories</span>
-                                        </div>
-                                        <div className="flex items-center text-orange-100">
-                                            <span className="w-2 h-2 bg-white rounded-full mr-3"></span>
-                                            <span>Classified</span>
-                                        </div>
-                                    </div>
-                                </div>
-                                <button
-                                    onClick={() => onNavigate('digital-goods-landing')}
-                                    className="bg-white/20 backdrop-blur-sm text-white px-6 py-3 rounded-xl font-semibold hover:bg-white/30 transition-all duration-300 border border-white/30"
-                                >
-                                    Browse Services
-                                </button>
-                            </div>
-                        </div>
-
-                        {/* Community Card */}
-                        <div className="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-pink-500 to-pink-600 text-white shadow-xl hover:shadow-2xl transition-all duration-500 transform hover:scale-105">
-                            <div className="absolute inset-0 bg-gradient-to-br from-pink-600/20 to-pink-800/20"></div>
-                            <div className="relative p-8 h-80 flex flex-col justify-between">
-                                <div>
-                                    <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center mb-6 backdrop-blur-sm">
-                                        <Gift className="w-8 h-8" />
-                                    </div>
-                                    <h3 className="text-3xl font-bold mb-3">Community</h3>
-                                    <p className="text-pink-100 text-lg mb-4">Connect with Kiwis</p>
-                                    <div className="space-y-2">
-                                        <div className="flex items-center text-pink-100">
-                                            <span className="w-2 h-2 bg-white rounded-full mr-3"></span>
-                                            <span>3 categories</span>
-                                        </div>
-                                        <div className="flex items-center text-pink-100">
-                                            <span className="w-2 h-2 bg-white rounded-full mr-3"></span>
-                                            <span>Classified</span>
-                                        </div>
-                                    </div>
-                                </div>
-                                <button
-                                    onClick={() => onNavigate('community-landing')}
-                                    className="bg-white/20 backdrop-blur-sm text-white px-6 py-3 rounded-xl font-semibold hover:bg-white/30 transition-all duration-300 border border-white/30"
-                                >
-                                    Join Community
-                                </button>
-                            </div>
-                        </div>
+                    {/* Carousel Container */}
+                    <div className="flex justify-center">
+                        <Carousel 
+                            baseWidth={350}
+                            autoplay={true}
+                            autoplayDelay={4000}
+                            pauseOnHover={true}
+                            loop={true}
+                            round={true}
+                            onNavigate={onNavigate}
+                        />
                     </div>
                 </div>
             </div>
@@ -547,6 +386,28 @@ const HomePage = ({ onWatchToggle, watchedItems, onNavigate, onItemClick, onAddT
                                 Our dedicated support team is here to help you with any questions or concerns.
                             </p>
                         </div>
+                    </div>
+                </div>
+            </div>
+
+            {/* Page Views Counter */}
+            <div className="bg-gray-900 py-8">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div className="text-center">
+                        <p className="text-gray-400 text-sm mb-2">Total Page Views</p>
+                        <Counter 
+                            value={pageViews}
+                            places={[100000, 10000, 1000, 100, 10, 1]}
+                            fontSize={42}
+                            padding={12}
+                            gap={8}
+                            textColor="#ffffff"
+                            backgroundColor="#374151"
+                            fontWeight={800}
+                            borderRadius={8}
+                            shadow={true}
+                        />
+                        <p className="text-gray-500 text-xs mt-2 italic">He taonga tuku iho - Community treasures viewed</p>
                     </div>
                 </div>
             </div>

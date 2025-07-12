@@ -1,0 +1,263 @@
+.stepper-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 2rem;
+  background: white;
+  border-radius: 1rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+/* Progress Bar */
+.progress-bar-container {
+  margin-bottom: 2rem;
+}
+
+.progress-bar-background {
+  width: 100%;
+  height: 8px;
+  background-color: #e5e7eb;
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 0.75rem;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #059669, #10b981);
+  border-radius: 4px;
+  transition: width 0.5s ease-in-out;
+}
+
+.progress-text {
+  text-align: center;
+  font-size: 0.875rem;
+  color: #6b7280;
+  font-weight: 500;
+}
+
+/* Step Indicators */
+.step-indicators {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 2.5rem;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.step-indicator {
+  display: flex;
+  align-items: center;
+  position: relative;
+}
+
+.step-indicator.clickable {
+  cursor: pointer;
+}
+
+.step-indicator-circle {
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 0.875rem;
+  transition: all 0.3s ease;
+  border: 2px solid #d1d5db;
+  background-color: white;
+  color: #6b7280;
+  z-index: 1;
+}
+
+.step-indicator.active .step-indicator-circle {
+  background: linear-gradient(135deg, #059669, #10b981);
+  border-color: #059669;
+  color: white;
+  box-shadow: 0 4px 12px rgba(5, 150, 105, 0.3);
+}
+
+.step-indicator.completed .step-indicator-circle {
+  background: linear-gradient(135deg, #059669, #10b981);
+  border-color: #059669;
+  color: white;
+}
+
+.step-number {
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.step-connector {
+  width: 3rem;
+  height: 2px;
+  background-color: #d1d5db;
+  margin: 0 0.5rem;
+  transition: background-color 0.3s ease;
+}
+
+.step-connector.completed {
+  background: linear-gradient(90deg, #059669, #10b981);
+}
+
+/* Step Content */
+.step-content-container {
+  min-height: 200px;
+  margin-bottom: 2rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.step-content-wrapper {
+  width: 100%;
+}
+
+.step-content {
+  padding: 1.5rem 0;
+}
+
+/* Navigation Buttons */
+.stepper-navigation {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.stepper-button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  font-size: 0.875rem;
+  transition: all 0.2s ease;
+  border: none;
+  cursor: pointer;
+  min-width: 120px;
+  justify-content: center;
+}
+
+.stepper-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+.stepper-button-primary {
+  background: linear-gradient(135deg, #059669, #10b981);
+  color: white;
+}
+
+.stepper-button-primary:hover:not(:disabled) {
+  background: linear-gradient(135deg, #047857, #059669);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(5, 150, 105, 0.3);
+}
+
+.stepper-button-secondary {
+  background: white;
+  color: #6b7280;
+  border: 2px solid #d1d5db;
+}
+
+.stepper-button-secondary:hover:not(:disabled) {
+  background: #f9fafb;
+  border-color: #9ca3af;
+  transform: translateY(-1px);
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 640px) {
+  .stepper-container {
+    padding: 1.5rem;
+    margin: 1rem;
+  }
+
+  .step-indicators {
+    gap: 0.25rem;
+  }
+
+  .step-indicator-circle {
+    width: 2rem;
+    height: 2rem;
+    font-size: 0.75rem;
+  }
+
+  .step-connector {
+    width: 2rem;
+    margin: 0 0.25rem;
+  }
+
+  .stepper-navigation {
+    flex-direction: column;
+  }
+
+  .stepper-button {
+    width: 100%;
+  }
+
+  .progress-text {
+    font-size: 0.75rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .step-connector {
+    display: none;
+  }
+
+  .step-indicators {
+    justify-content: center;
+    gap: 0.75rem;
+  }
+}
+
+/* Animation enhancements */
+.step-indicator:hover.clickable .step-indicator-circle {
+  transform: scale(1.1);
+}
+
+.stepper-button:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .stepper-container {
+    background: #1f2937;
+    border-color: #374151;
+  }
+
+  .progress-bar-background {
+    background-color: #374151;
+  }
+
+  .progress-text {
+    color: #d1d5db;
+  }
+
+  .step-indicator-circle {
+    background-color: #1f2937;
+    border-color: #4b5563;
+    color: #d1d5db;
+  }
+
+  .step-connector {
+    background-color: #4b5563;
+  }
+
+  .stepper-button-secondary {
+    background: #1f2937;
+    color: #d1d5db;
+    border-color: #4b5563;
+  }
+
+  .stepper-button-secondary:hover:not(:disabled) {
+    background: #374151;
+    border-color: #6b7280;
+  }
+}
