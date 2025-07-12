@@ -3,10 +3,9 @@
 
 import React from 'react';
 import { 
-    MapPin, Clock, DollarSign, Building, Calendar, 
+    MapPin, Clock, DollarSign, Calendar, 
     Heart, Share2, Star, ChevronRight 
 } from 'lucide-react';
-import { formatPrice } from '../../lib/utils';
 import { JOB_CATEGORIES, JOB_TYPES, SALARY_RANGES, NZ_LOCATIONS } from '../../lib/jobsData';
 
 const JobCard = ({ 
@@ -244,4 +243,4 @@ const JobCard = ({
     );
 };
 
-export default JobCard;
+export default React.memo(JobCard);

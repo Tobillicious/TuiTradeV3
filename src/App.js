@@ -8,7 +8,9 @@ import { auth, db } from './lib/firebase';
 import { AuthContext } from './context/AuthContext';
 import { NotificationProvider, useNotification } from './context/NotificationContext';
 import { ThemeProvider, useTheme } from './context/ThemeContext';
+import { TeReoProvider } from './components/ui/TeReoToggle';
 import { trackPageView, trackEvent, setUserId } from './lib/analytics';
+import { PreloadCriticalResources } from './components/ui/PerformanceOptimizer';
 
 // UI Components & Pages - Lazy loaded for better performance
 import { FullPageLoader } from './components/ui/Loaders';
@@ -52,6 +54,9 @@ const MarketplaceLanding = lazy(() => import('./components/pages/MarketplaceLand
 const MotorsLanding = lazy(() => import('./components/pages/MotorsLanding'));
 const RealEstateLanding = lazy(() => import('./components/pages/RealEstateLanding'));
 const JobsLanding = lazy(() => import('./components/pages/JobsLanding'));
+const JobApplicationPage = lazy(() => import('./components/pages/JobApplicationPage'));
+const EmployerDashboard = lazy(() => import('./components/pages/EmployerDashboard'));
+const CreateJobPage = lazy(() => import('./components/pages/CreateJobPage'));
 const DigitalGoodsLanding = lazy(() => import('./components/pages/DigitalGoodsLanding'));
 const CommunityLanding = lazy(() => import('./components/pages/CommunityLanding'));
 const AdminDashboard = lazy(() => import('./components/pages/AdminDashboard'));
@@ -293,6 +298,9 @@ function AppContent() {
                         case 'motors-landing': return <MotorsLanding {...pageProps} />;
                         case 'real-estate-landing': return <RealEstateLanding {...pageProps} />;
                         case 'jobs-landing': return <JobsLanding {...pageProps} />;
+                        case 'job-application': return <JobApplicationPage {...pageProps} job={pageContext.job} currentUser={currentUser} />;
+                        case 'employer-dashboard': return <EmployerDashboard {...pageProps} currentUser={currentUser} />;
+                        case 'create-job': return <CreateJobPage {...pageProps} currentUser={currentUser} />;
                         case 'digital-goods-landing': return <DigitalGoodsLanding {...pageProps} />;
                         case 'community-landing': return <CommunityLanding {...pageProps} />;
                         
@@ -334,6 +342,7 @@ function AppContent() {
 
     return (
         <AuthContext.Provider value={{ currentUser, isAuthReady }}>
+            <PreloadCriticalResources />
             <div className={`min-h-screen flex flex-col ${isDarkMode ? 'bg-gray-900' : 'bg-gray-50'}`}>
 
                 {/* --- Modals --- */}
@@ -528,6 +537,14 @@ function AppContent() {
                                                     <BarChart3 size={16} className="mr-3" />
                                                     Seller Dashboard
                                                     <span className="ml-2 text-xs text-gray-400">(Tauhokohoko)</span>
+                                                </button>
+                                                <button
+                                                    onClick={() => handleNavigate('employer-dashboard')}
+                                                    className={`w-full text-left px-4 py-2 text-sm flex items-center ${isDarkMode ? 'text-gray-300 hover:bg-gray-700' : 'text-gray-700 hover:bg-gray-50'}`}
+                                                >
+                                                    <Briefcase size={16} className="mr-3" />
+                                                    Employer Dashboard
+                                                    <span className="ml-2 text-xs text-gray-400">(Kaimahi)</span>
                                                 </button>
                                                 <button
                                                     onClick={() => handleNavigate('listings')}
@@ -743,9 +760,11 @@ export default function App() {
     return (
         <ErrorBoundary>
             <ThemeProvider>
-                <NotificationProvider>
-                    <AppContent />
-                </NotificationProvider>
+                <TeReoProvider>
+                    <NotificationProvider>
+                        <AppContent />
+                    </NotificationProvider>
+                </TeReoProvider>
             </ThemeProvider>
         </ErrorBoundary>
     );

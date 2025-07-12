@@ -6,6 +6,7 @@ import { LISTINGS_LIMIT } from '../../lib/utils';
 import ItemCard from '../ui/ItemCard';
 import { AuctionCard } from '../ui/AuctionSystem';
 import { Tag, Shield, Star, MessageCircle, ChevronDown, ShoppingCart, Car, Briefcase, Wrench, Gift, Home } from 'lucide-react';
+import { getBilingualText, TE_REO_TRANSLATIONS } from '../../lib/nzLocalizationEnhanced';
 
 const HomePage = ({ onWatchToggle, watchedItems, onNavigate, onItemClick, onAddToCart, cartItems }) => {
     const [listings, setListings] = useState([]);
@@ -161,16 +162,16 @@ const HomePage = ({ onWatchToggle, watchedItems, onNavigate, onItemClick, onAddT
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
                     <div className="text-center">
                         <h1 className="text-4xl md:text-6xl font-bold mb-4 animate-fade-in-up">
-                            Welcome to TuiTrade
+                            {getBilingualText('Welcome to TuiTrade', 'welcome')}
                         </h1>
                         <p className="text-lg md:text-xl mb-2 text-green-200 animate-fade-in-up animation-delay-100 italic">
-                            Nau mai, haere mai ki TuiTrade
+                            {TE_REO_TRANSLATIONS.greetings.welcome}, haere mai ki TuiTrade
                         </p>
                         <p className="text-xl md:text-2xl mb-8 text-green-100 animate-fade-in-up animation-delay-200">
-                            Aotearoa's most beautiful marketplace
+                            {getBilingualText("Aotearoa's most beautiful marketplace", 'marketplace')}
                         </p>
                         <p className="text-sm text-green-200 animate-fade-in-up animation-delay-300 italic">
-                            Kia ora! Trade the Kiwi way - whānau friendly, locally owned
+                            {TE_REO_TRANSLATIONS.greetings.hello}! Trade the Kiwi way - whānau friendly, locally owned
                         </p>
                         <div className="flex flex-col sm:flex-row gap-4 justify-center animate-fade-in-up animation-delay-400">
                             <button
@@ -178,13 +179,13 @@ const HomePage = ({ onWatchToggle, watchedItems, onNavigate, onItemClick, onAddT
                                 className="bg-white text-green-600 px-8 py-3 rounded-lg font-semibold hover:bg-green-50 transition-all transform hover:scale-105 shadow-lg"
                             >
                                 <Tag className="inline mr-2" size={20} />
-                                Start Selling
+                                {getBilingualText('Start Selling', 'post_a_job')}
                             </button>
                             <button
                                 onClick={() => window.scrollTo({ top: 500, behavior: 'smooth' })}
                                 className="bg-transparent border-2 border-white text-white px-8 py-3 rounded-lg font-semibold hover:bg-white hover:text-green-600 transition-all"
                             >
-                                Browse Items
+                                {getBilingualText('Browse Items', 'browse')}
                             </button>
                         </div>
                     </div>
@@ -196,13 +197,13 @@ const HomePage = ({ onWatchToggle, watchedItems, onNavigate, onItemClick, onAddT
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="text-center mb-16">
                         <h2 className="text-4xl md:text-5xl font-bold mb-4 text-gray-900">
-                            Explore Our Categories
+                            {getBilingualText('Explore Our Categories', 'browse_categories')}
                         </h2>
                         <p className="text-xl text-gray-600 mb-2 italic">
                             Kōrero mai - Tell us what you're looking for
                         </p>
                         <p className="text-lg text-gray-500">
-                            Discover amazing items across Aotearoa's most comprehensive marketplace
+                            Discover amazing items across {TE_REO_TRANSLATIONS.phrases.new_zealand}'s most comprehensive {TE_REO_TRANSLATIONS.interface.marketplace}
                         </p>
                     </div>
 

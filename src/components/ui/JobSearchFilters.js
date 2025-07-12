@@ -8,7 +8,7 @@ import {
 } from 'lucide-react';
 import { 
     JOB_CATEGORIES, JOB_TYPES, SALARY_RANGES, WORK_RIGHTS, 
-    EXPERIENCE_LEVELS, NZ_LOCATIONS, getAllCategories 
+    EXPERIENCE_LEVELS, NZ_LOCATIONS 
 } from '../../lib/jobsData';
 
 const JobSearchFilters = ({ onFiltersChange, initialFilters = {} }) => {
