@@ -9,6 +9,7 @@ import {
 } from 'lucide-react';
 import { useTeReo, TeReoText } from '../ui/TeReoToggle';
 import { submitApplication } from '../../lib/jobsService';
+import { createNewApplicationNotification } from '../../lib/notificationService';
 
 const JobApplicationPage = ({ job, onNavigate, currentUser }) => {
   const { getText } = useTeReo();
@@ -177,6 +178,20 @@ const JobApplicationPage = ({ job, onNavigate, currentUser }) => {
       const applicationId = await submitApplication(applicationSubmission, uploadedFiles);
 
       console.log('Job application submitted successfully with ID:', applicationId);
+
+      // Send notification to employer about new application
+      try {
+        await createNewApplicationNotification(job.companyId || 'demo-company', {
+          id: applicationId,
+          jobId: job.id,
+          jobTitle: job.title,
+          candidateName: `${applicationData.firstName} ${applicationData.lastName}`,
+          candidateEmail: applicationData.email
+        });
+      } catch (notifError) {
+        console.error('Failed to send employer notification:', notifError);
+        // Don't fail the application if notification fails
+      }
       
       setSubmitStatus('success');
       

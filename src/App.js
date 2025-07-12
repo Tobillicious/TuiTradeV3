@@ -57,6 +57,7 @@ const JobsLanding = lazy(() => import('./components/pages/JobsLanding'));
 const JobApplicationPage = lazy(() => import('./components/pages/JobApplicationPage'));
 const EmployerDashboard = lazy(() => import('./components/pages/EmployerDashboard'));
 const CreateJobPage = lazy(() => import('./components/pages/CreateJobPage'));
+const JobSeekerProfile = lazy(() => import('./components/pages/JobSeekerProfile'));
 const DigitalGoodsLanding = lazy(() => import('./components/pages/DigitalGoodsLanding'));
 const CommunityLanding = lazy(() => import('./components/pages/CommunityLanding'));
 const AdminDashboard = lazy(() => import('./components/pages/AdminDashboard'));
@@ -301,6 +302,7 @@ function AppContent() {
                         case 'job-application': return <JobApplicationPage {...pageProps} job={pageContext.job} currentUser={currentUser} />;
                         case 'employer-dashboard': return <EmployerDashboard {...pageProps} currentUser={currentUser} />;
                         case 'create-job': return <CreateJobPage {...pageProps} currentUser={currentUser} />;
+                        case 'job-seeker-profile': return <JobSeekerProfile {...pageProps} currentUser={currentUser} />;
                         case 'digital-goods-landing': return <DigitalGoodsLanding {...pageProps} />;
                         case 'community-landing': return <CommunityLanding {...pageProps} />;
                         
@@ -545,6 +547,14 @@ function AppContent() {
                                                     <Briefcase size={16} className="mr-3" />
                                                     Employer Dashboard
                                                     <span className="ml-2 text-xs text-gray-400">(Kaimahi)</span>
+                                                </button>
+                                                <button
+                                                    onClick={() => handleNavigate('job-seeker-profile')}
+                                                    className={`w-full text-left px-4 py-2 text-sm flex items-center ${isDarkMode ? 'text-gray-300 hover:bg-gray-700' : 'text-gray-700 hover:bg-gray-50'}`}
+                                                >
+                                                    <User size={16} className="mr-3" />
+                                                    Job Seeker Profile
+                                                    <span className="ml-2 text-xs text-gray-400">(Kaitiaki Mahi)</span>
                                                 </button>
                                                 <button
                                                     onClick={() => handleNavigate('listings')}
