@@ -1,12 +1,12 @@
 // src/components/ui/ItemCard.js
 import React, { memo, useMemo, useCallback } from 'react';
-import { Heart, Eye, MapPin, User, Tag, Download, Zap } from 'lucide-react';
+import { Heart, MapPin, User, Download, Zap } from 'lucide-react';
 import { formatPrice, timeAgo } from '../../lib/utils';
 
 const ItemCard = memo(({ item, isWatched, onWatchToggle, onItemClick, onAddToCart, onBuyNow, isInCart, viewMode = 'grid', onNavigate }) => {
-    const createdDate = useMemo(() => 
+    const createdDate = useMemo(() =>
         item.createdAt?.toDate ? item.createdAt.toDate() : new Date()
-    , [item.createdAt]);
+        , [item.createdAt]);
 
     const handleWatchToggle = useCallback((e) => {
         e.stopPropagation();
@@ -19,9 +19,9 @@ const ItemCard = memo(({ item, isWatched, onWatchToggle, onItemClick, onAddToCar
 
     const formattedPrice = useMemo(() => formatPrice(item.price), [item.price]);
     const timeAgoText = useMemo(() => timeAgo(createdDate), [createdDate]);
-    const sellerName = useMemo(() => 
+    const sellerName = useMemo(() =>
         item.userEmail ? item.userEmail.split('@')[0] : ''
-    , [item.userEmail]);
+        , [item.userEmail]);
 
     if (viewMode === 'list') {
         return (

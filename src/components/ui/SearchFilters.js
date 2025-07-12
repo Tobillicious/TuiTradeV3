@@ -1,320 +1,114 @@
 // src/components/ui/SearchFilters.js
-import React, { useState, useEffect, useCallback, useMemo, memo } from 'react';
-import { Filter, SlidersHorizontal, X, Tag, Star, User, MapPin, DollarSign } from 'lucide-react';
-import { CATEGORIES, NZ_REGIONS } from '../../lib/utils';
+import React, { useState, useCallback } from 'react';
+import { Filter, X } from 'lucide-react';
+import { NZ_REGIONS } from '../../lib/nzLocalization';
 
-// Debounce utility function
-const debounce = (func, delay) => {
-    let timeoutId;
-    return (...args) => {
-        clearTimeout(timeoutId);
-        timeoutId = setTimeout(() => func(...args), delay);
-    };
-};
-
-const SearchFilters = memo(({ onFiltersChange, currentFilters = {} }) => {
+const SearchFilters = ({ onApplyFilters, initialFilters = {} }) => {
     const [isOpen, setIsOpen] = useState(false);
-    const [localFilters, setLocalFilters] = useState({
-        category: currentFilters.category || '',
-        priceMin: currentFilters.priceMin || '',
-        priceMax: currentFilters.priceMax || '',
-        location: currentFilters.location || '',
-        condition: currentFilters.condition || '',
-        listingType: currentFilters.listingType || '',
-        tags: currentFilters.tags || [],
-        sortBy: currentFilters.sortBy || 'newest',
-        ...currentFilters
+    const [filters, setFilters] = useState({
+        priceMin: initialFilters.priceMin || '',
+        priceMax: initialFilters.priceMax || '',
+        location: initialFilters.location || '',
+        category: initialFilters.category || '',
+        condition: initialFilters.condition || '',
+        sellerRating: initialFilters.sellerRating || '',
+        sortBy: initialFilters.sortBy || 'relevance'
     });
 
-    // Debounce filter changes to prevent excessive API calls
-    const debouncedOnFiltersChange = useCallback(
-        debounce((filters) => {
-            onFiltersChange(filters);
-        }, 300),
-        [onFiltersChange]
-    );
-
     const handleFilterChange = useCallback((key, value) => {
-        const newFilters = { ...localFilters, [key]: value };
-        setLocalFilters(newFilters);
-        debouncedOnFiltersChange(newFilters);
-    }, [localFilters, debouncedOnFiltersChange]);
+        setFilters(prev => ({ ...prev, [key]: value }));
+    }, []);
 
-    const handleTagToggle = useCallback((tag) => {
-        const newTags = localFilters.tags.includes(tag)
-            ? localFilters.tags.filter(t => t !== tag)
-            : [...localFilters.tags, tag];
-        handleFilterChange('tags', newTags);
-    }, [localFilters.tags, handleFilterChange]);
+    const handleApplyFilters = useCallback(() => {
+        onApplyFilters(filters);
+        setIsOpen(false);
+    }, [filters, onApplyFilters]);
 
-    const clearFilters = useCallback(() => {
+    const handleClearFilters = useCallback(() => {
         const clearedFilters = {
-            category: '',
             priceMin: '',
             priceMax: '',
             location: '',
+            category: '',
             condition: '',
-            listingType: '',
-            tags: [],
-            sortBy: 'newest'
+            sellerRating: '',
+            sortBy: 'relevance'
         };
-        setLocalFilters(clearedFilters);
-        onFiltersChange(clearedFilters);
-    }, [onFiltersChange]);
+        setFilters(clearedFilters);
+        onApplyFilters(clearedFilters);
+    }, [onApplyFilters]);
 
-    const conditionOptions = useMemo(() => [
-        'New',
-        'Used - Like New',
-        'Used - Good',
-        'Used - Fair'
-    ], []);
-
-    const listingTypeOptions = useMemo(() => [
-        { value: 'fixed-price', label: 'Fixed Price' },
-        { value: 'auction', label: 'Auction' }
-    ], []);
-
-    const sortOptions = useMemo(() => [
-        { value: 'newest', label: 'Newest First' },
-        { value: 'oldest', label: 'Oldest First' },
-        { value: 'price-low', label: 'Price: Low to High' },
-        { value: 'price-high', label: 'Price: High to Low' },
-        { value: 'title-az', label: 'Title: A to Z' },
-        { value: 'title-za', label: 'Title: Z to A' },
-        { value: 'popular', label: 'Most Popular' }
-    ], []);
-
-    // Popular tags for quick filtering
-    const popularTags = useMemo(() => [
-        'Electronics', 'Furniture', 'Clothing', 'Books', 'Sports',
-        'Collectibles', 'Tools', 'Garden', 'Kitchen', 'Baby',
-        'Vintage', 'Handmade', 'Local Pickup', 'Free Shipping'
-    ], []);
-
-    const hasActiveFilters = useMemo(() => {
-        return Object.values(localFilters).some(value =>
-            (Array.isArray(value) ? value.length > 0 : value !== '') && value !== 'newest'
-        );
-    }, [localFilters]);
-
-    const activeFilterCount = useMemo(() => {
-        return (
-            localFilters.tags.length +
-            (localFilters.category ? 1 : 0) +
-            (localFilters.priceMin || localFilters.priceMax ? 1 : 0) +
-            (localFilters.location ? 1 : 0) +
-            (localFilters.condition ? 1 : 0) +
-            (localFilters.listingType ? 1 : 0)
-        );
-    }, [localFilters]);
+    const hasActiveFilters = Object.values(filters).some(value => value && value !== 'relevance');
 
     return (
-        <div className="mb-6">
-            <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center space-x-4">
-                    <button
-                        onClick={() => setIsOpen(!isOpen)}
-                        className="flex items-center space-x-2 px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
-                    >
-                        <Filter size={16} />
-                        <span>Filters</span>
-                        {hasActiveFilters && (
-                            <span className="bg-green-600 text-white text-xs rounded-full px-2 py-1">
-                                {activeFilterCount}
-                            </span>
-                        )}
-                    </button>
-
-                    <div className="flex items-center space-x-2">
-                        <SlidersHorizontal size={16} className="text-gray-400" />
-                        <select
-                            value={localFilters.sortBy}
-                            onChange={(e) => handleFilterChange('sortBy', e.target.value)}
-                            className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-500 focus:border-green-500"
-                        >
-                            {sortOptions.map(option => (
-                                <option key={option.value} value={option.value}>
-                                    {option.label}
-                                </option>
-                            ))}
-                        </select>
-                    </div>
-                </div>
-
+        <div className="relative">
+            <button
+                onClick={() => setIsOpen(!isOpen)}
+                className={`flex items-center space-x-2 px-4 py-2 rounded-lg border transition-colors ${hasActiveFilters
+                    ? 'border-green-500 bg-green-50 text-green-700'
+                    : 'border-gray-300 hover:border-gray-400'
+                    }`}
+            >
+                <Filter size={16} />
+                <span className="font-medium">Filters</span>
                 {hasActiveFilters && (
-                    <button
-                        onClick={clearFilters}
-                        className="flex items-center space-x-2 px-3 py-2 text-gray-600 hover:text-gray-800 transition-colors"
-                    >
-                        <X size={16} />
-                        <span>Clear All</span>
-                    </button>
+                    <span className="bg-green-500 text-white text-xs rounded-full px-2 py-1">
+                        {Object.values(filters).filter(v => v && v !== 'relevance').length}
+                    </span>
                 )}
-            </div>
-
-            {/* Active Filter Tags */}
-            {hasActiveFilters && (
-                <div className="mb-4 flex flex-wrap gap-2">
-                    {localFilters.category && (
-                        <span className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-green-100 text-green-800">
-                            Category: {CATEGORIES[localFilters.category]?.name}
-                            <button
-                                onClick={() => handleFilterChange('category', '')}
-                                className="ml-2 hover:text-green-600"
-                            >
-                                <X size={12} />
-                            </button>
-                        </span>
-                    )}
-                    {(localFilters.priceMin || localFilters.priceMax) && (
-                        <span className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-blue-100 text-blue-800">
-                            Price: ${localFilters.priceMin || '0'} - ${localFilters.priceMax || '∞'}
-                            <button
-                                onClick={() => {
-                                    handleFilterChange('priceMin', '');
-                                    handleFilterChange('priceMax', '');
-                                }}
-                                className="ml-2 hover:text-blue-600"
-                            >
-                                <X size={12} />
-                            </button>
-                        </span>
-                    )}
-                    {localFilters.location && (
-                        <span className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-purple-100 text-purple-800">
-                            Location: {localFilters.location}
-                            <button
-                                onClick={() => handleFilterChange('location', '')}
-                                className="ml-2 hover:text-purple-600"
-                            >
-                                <X size={12} />
-                            </button>
-                        </span>
-                    )}
-                    {localFilters.condition && (
-                        <span className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-orange-100 text-orange-800">
-                            Condition: {localFilters.condition}
-                            <button
-                                onClick={() => handleFilterChange('condition', '')}
-                                className="ml-2 hover:text-orange-600"
-                            >
-                                <X size={12} />
-                            </button>
-                        </span>
-                    )}
-                    {localFilters.listingType && (
-                        <span className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-red-100 text-red-800">
-                            Type: {listingTypeOptions.find(opt => opt.value === localFilters.listingType)?.label}
-                            <button
-                                onClick={() => handleFilterChange('listingType', '')}
-                                className="ml-2 hover:text-red-600"
-                            >
-                                <X size={12} />
-                            </button>
-                        </span>
-                    )}
-                    {localFilters.tags.map(tag => (
-                        <span key={tag} className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-gray-100 text-gray-800">
-                            <Tag size={12} className="mr-1" />
-                            {tag}
-                            <button
-                                onClick={() => handleTagToggle(tag)}
-                                className="ml-2 hover:text-gray-600"
-                            >
-                                <X size={12} />
-                            </button>
-                        </span>
-                    ))}
-                </div>
-            )}
+            </button>
 
             {isOpen && (
-                <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                        {/* Category Filter */}
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center">
-                                <Tag size={14} className="mr-1" />
-                                Category
-                            </label>
-                            <select
-                                value={localFilters.category}
-                                onChange={(e) => handleFilterChange('category', e.target.value)}
-                                className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-500 focus:border-green-500"
-                            >
-                                <option value="">All Categories</option>
-                                {Object.entries(CATEGORIES).map(([key, category]) => (
-                                    <option key={key} value={key}>
-                                        {category.name}
-                                    </option>
-                                ))}
-                            </select>
-                        </div>
+                <div className="absolute top-full left-0 mt-2 w-80 bg-white rounded-lg shadow-xl border border-gray-200 p-6 z-50">
+                    <div className="flex items-center justify-between mb-4">
+                        <h3 className="text-lg font-semibold">Search Filters</h3>
+                        <button
+                            onClick={() => setIsOpen(false)}
+                            className="p-1 hover:bg-gray-100 rounded"
+                        >
+                            <X size={16} />
+                        </button>
+                    </div>
 
-                        {/* Listing Type */}
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center">
-                                <DollarSign size={14} className="mr-1" />
-                                Listing Type
-                            </label>
-                            <select
-                                value={localFilters.listingType}
-                                onChange={(e) => handleFilterChange('listingType', e.target.value)}
-                                className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-500 focus:border-green-500"
-                            >
-                                <option value="">All Types</option>
-                                {listingTypeOptions.map(option => (
-                                    <option key={option.value} value={option.value}>
-                                        {option.label}
-                                    </option>
-                                ))}
-                            </select>
-                        </div>
-
+                    <div className="space-y-4">
                         {/* Price Range */}
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center">
-                                <DollarSign size={14} className="mr-1" />
-                                Min Price
+                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                                Price Range | Te Tau Utu
                             </label>
-                            <input
-                                type="number"
-                                placeholder="$0"
-                                value={localFilters.priceMin}
-                                onChange={(e) => handleFilterChange('priceMin', e.target.value)}
-                                className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-500 focus:border-green-500"
-                            />
-                        </div>
-
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center">
-                                <DollarSign size={14} className="mr-1" />
-                                Max Price
-                            </label>
-                            <input
-                                type="number"
-                                placeholder="$999,999"
-                                value={localFilters.priceMax}
-                                onChange={(e) => handleFilterChange('priceMax', e.target.value)}
-                                className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-500 focus:border-green-500"
-                            />
+                            <div className="flex space-x-2">
+                                <input
+                                    type="number"
+                                    placeholder="Min"
+                                    value={filters.priceMin}
+                                    onChange={(e) => handleFilterChange('priceMin', e.target.value)}
+                                    className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                                />
+                                <span className="flex items-center text-gray-500">to</span>
+                                <input
+                                    type="number"
+                                    placeholder="Max"
+                                    value={filters.priceMax}
+                                    onChange={(e) => handleFilterChange('priceMax', e.target.value)}
+                                    className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                                />
+                            </div>
                         </div>
 
                         {/* Location */}
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center">
-                                <MapPin size={14} className="mr-1" />
-                                Location
+                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                                Location | Te Wāhi
                             </label>
                             <select
-                                value={localFilters.location}
+                                value={filters.location}
                                 onChange={(e) => handleFilterChange('location', e.target.value)}
-                                className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent"
                             >
                                 <option value="">All Locations</option>
-                                {NZ_REGIONS.map(region => (
-                                    <option key={region} value={region}>
-                                        {region}
+                                {Object.entries(NZ_REGIONS).map(([key, region]) => (
+                                    <option key={key} value={key}>
+                                        {region.name}
                                     </option>
                                 ))}
                             </select>
@@ -322,58 +116,79 @@ const SearchFilters = memo(({ onFiltersChange, currentFilters = {} }) => {
 
                         {/* Condition */}
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center">
-                                <Star size={14} className="mr-1" />
-                                Condition
+                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                                Condition | Te Āhua
                             </label>
                             <select
-                                value={localFilters.condition}
+                                value={filters.condition}
                                 onChange={(e) => handleFilterChange('condition', e.target.value)}
-                                className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent"
                             >
                                 <option value="">Any Condition</option>
-                                {conditionOptions.map(condition => (
-                                    <option key={condition} value={condition}>
-                                        {condition}
-                                    </option>
-                                ))}
+                                <option value="new">New</option>
+                                <option value="like-new">Like New</option>
+                                <option value="excellent">Excellent</option>
+                                <option value="good">Good</option>
+                                <option value="fair">Fair</option>
+                                <option value="poor">Poor</option>
+                            </select>
+                        </div>
+
+                        {/* Seller Rating */}
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                                Seller Rating | Te Whakatauranga Kaihoko
+                            </label>
+                            <select
+                                value={filters.sellerRating}
+                                onChange={(e) => handleFilterChange('sellerRating', e.target.value)}
+                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                            >
+                                <option value="">Any Rating</option>
+                                <option value="5">5+ Stars</option>
+                                <option value="4">4+ Stars</option>
+                                <option value="3">3+ Stars</option>
+                            </select>
+                        </div>
+
+                        {/* Sort By */}
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                                Sort By | Rārangi Mā
+                            </label>
+                            <select
+                                value={filters.sortBy}
+                                onChange={(e) => handleFilterChange('sortBy', e.target.value)}
+                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                            >
+                                <option value="relevance">Relevance</option>
+                                <option value="price-low">Price: Low to High</option>
+                                <option value="price-high">Price: High to Low</option>
+                                <option value="newest">Newest First</option>
+                                <option value="oldest">Oldest First</option>
+                                <option value="popular">Most Popular</option>
                             </select>
                         </div>
                     </div>
 
-                    {/* Popular Tags */}
-                    <div className="mt-6">
-                        <label className="block text-sm font-medium text-gray-700 mb-3 flex items-center">
-                            <Tag size={14} className="mr-1" />
-                            Popular Tags
-                        </label>
-                        <div className="flex flex-wrap gap-2">
-                            {popularTags.map(tag => (
-                                <button
-                                    key={tag}
-                                    onClick={() => handleTagToggle(tag)}
-                                    className={`px-3 py-1 rounded-full text-sm border transition-colors ${localFilters.tags.includes(tag)
-                                            ? 'bg-green-100 text-green-800 border-green-300'
-                                            : 'bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100'
-                                        }`}
-                                >
-                                    {tag}
-                                </button>
-                            ))}
-                        </div>
+                    <div className="flex space-x-3 mt-6">
+                        <button
+                            onClick={handleApplyFilters}
+                            className="flex-1 bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 transition-colors font-medium"
+                        >
+                            Apply Filters
+                        </button>
+                        <button
+                            onClick={handleClearFilters}
+                            className="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50 transition-colors text-gray-700"
+                        >
+                            Clear
+                        </button>
                     </div>
                 </div>
             )}
         </div>
     );
-}, (prevProps, nextProps) => {
-    // Custom comparison for performance optimization
-    return (
-        JSON.stringify(prevProps.currentFilters) === JSON.stringify(nextProps.currentFilters) &&
-        prevProps.onFiltersChange === nextProps.onFiltersChange
-    );
-});
-
-SearchFilters.displayName = 'SearchFilters';
+};
 
 export default SearchFilters;

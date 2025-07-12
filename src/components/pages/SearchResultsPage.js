@@ -2,7 +2,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { collection, query, orderBy, getDocs } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
-import { FullPageLoader } from '../ui/Loaders';
+// Removed unused import
 import ItemCard from '../ui/ItemCard';
 import SearchFilters from '../ui/SearchFilters';
 import { Search, Grid, List, Home, ChevronRight } from 'lucide-react';

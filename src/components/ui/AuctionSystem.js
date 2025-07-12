@@ -5,7 +5,7 @@ import { db } from '../../lib/firebase';
 import { useAuth } from '../../context/AuthContext';
 import { useNotification } from '../../context/NotificationContext';
 import { formatPrice, timeAgo } from '../../lib/utils';
-import { Clock, Gavel, TrendingUp, Users, DollarSign, AlertCircle, CheckCircle, Trophy, Heart, User, MapPin } from 'lucide-react';
+import { Clock, Gavel, TrendingUp, DollarSign, AlertCircle, CheckCircle, Trophy, Heart, User, MapPin } from 'lucide-react';
 
 const CountdownTimer = ({ endTime }) => {
     const [timeLeft, setTimeLeft] = useState('');

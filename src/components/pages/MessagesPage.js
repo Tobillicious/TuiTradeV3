@@ -4,9 +4,9 @@ import { collection, query, where, orderBy, onSnapshot, addDoc, doc, updateDoc, 
 import { db } from '../../lib/firebase';
 import { useAuth } from '../../context/AuthContext';
 import { useNotification } from '../../context/NotificationContext';
-import { formatPrice, timeAgo } from '../../lib/utils';
+import { timeAgo } from '../../lib/utils';
 import { FullPageLoader } from '../ui/Loaders';
-import { MessageCircle, Send, ArrowLeft, Home, ChevronRight, Clock, Eye } from 'lucide-react';
+import { MessageCircle, Send, ArrowLeft, ChevronRight } from 'lucide-react';
 
 const MessagesPage = ({ onNavigate }) => {
     const [conversations, setConversations] = useState([]);
@@ -21,8 +21,6 @@ const MessagesPage = ({ onNavigate }) => {
 
     // Use refs to track active listeners for proper cleanup
     const listenersRef = useRef(new Set());
-    const conversationsRef = useRef(null);
-    const messagesRef = useRef(null);
 
     // Cleanup function for listeners
     const cleanupListeners = useCallback(() => {
@@ -349,8 +347,8 @@ const MessagesPage = ({ onNavigate }) => {
                                             >
                                                 <div
                                                     className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${message.senderId === currentUser.uid
-                                                            ? 'bg-blue-500 text-white'
-                                                            : 'bg-gray-100 text-gray-900'
+                                                        ? 'bg-blue-500 text-white'
+                                                        : 'bg-gray-100 text-gray-900'
                                                         }`}
                                                 >
                                                     <p className="text-sm">{message.text}</p>

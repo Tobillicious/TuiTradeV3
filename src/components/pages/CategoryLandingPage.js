@@ -1,23 +1,16 @@
 // Reusable Category Landing Page Component
 // Template for all category-specific landing pages
 
-import React, { useState, useEffect, useMemo } from 'react';
-import { 
-    Search, Filter, Grid, List, TrendingUp, Star, Clock, 
-    ArrowRight, ChevronRight, Eye, Heart, MapPin, Users,
-    Award, Shield, Zap, Target, Gift, Sparkles
+import React, { useState, useMemo } from 'react';
+import {
+    Search, Filter, Grid, List, TrendingUp, Star, ArrowRight, ChevronRight, Shield, Zap, Users, Heart
 } from 'lucide-react';
-// Remove React Router import since we're using internal navigation
-import ItemCard from '../ui/ItemCard';
-import SearchFilters from '../ui/SearchFilters';
-import { formatPrice } from '../../lib/utils';
-import { NZ_REGIONS } from '../../lib/nzLocalization';
 
-const CategoryLandingPage = ({ 
-    category, 
-    title, 
-    description, 
-    heroImage, 
+const CategoryLandingPage = ({
+    category,
+    title,
+    description,
+    heroImage,
     heroGradient = "from-green-600 to-blue-600",
     features = [],
     successStories = [],
@@ -26,12 +19,9 @@ const CategoryLandingPage = ({
     featuredListings = [],
     trendingSearches = [],
     sellersHighlights = [],
-    onNavigate = () => {}
+    onNavigate = () => { }
 }) => {
-    const [viewMode, setViewMode] = useState('grid');
-    const [selectedFilters, setSelectedFilters] = useState({});
     const [searchTerm, setSearchTerm] = useState('');
-    const [showFilters, setShowFilters] = useState(false);
 
     // Mock data for demonstration
     const mockListings = useMemo(() => [
@@ -71,19 +61,19 @@ const CategoryLandingPage = ({
         <div className={`bg-gradient-to-r ${heroGradient} text-white relative overflow-hidden`}>
             <div className="absolute inset-0 bg-black/20"></div>
             {heroImage && (
-                <div 
+                <div
                     className="absolute inset-0 bg-cover bg-center opacity-30"
                     style={{ backgroundImage: `url(${heroImage})` }}
                 ></div>
             )}
-            
+
             <div className="relative max-w-6xl mx-auto px-4 py-20 md:py-32">
                 <div className="text-center">
                     <h1 className="text-4xl md:text-6xl font-bold mb-6">{title}</h1>
                     <p className="text-xl md:text-2xl mb-8 max-w-3xl mx-auto opacity-90">
                         {description}
                     </p>
-                    
+
                     {/* Quick Search */}
                     <div className="max-w-2xl mx-auto mb-8">
                         <div className="relative">
@@ -100,14 +90,14 @@ const CategoryLandingPage = ({
 
                     {/* CTA Buttons */}
                     <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-                        <button 
+                        <button
                             onClick={() => onNavigate('category', { categoryKey: category })}
                             className="bg-white text-green-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors flex items-center"
                         >
                             Start Browsing
                             <ArrowRight className="ml-2" size={18} />
                         </button>
-                        <button 
+                        <button
                             onClick={() => onNavigate('create-listing')}
                             className="border-2 border-white text-white px-8 py-3 rounded-lg font-semibold hover:bg-white/10 transition-colors"
                         >
@@ -160,7 +150,7 @@ const CategoryLandingPage = ({
                         <Filter size={20} className="text-gray-600" />
                         <span className="font-medium text-gray-700">Quick Filters:</span>
                     </div>
-                    
+
                     <div className="flex flex-wrap gap-3 flex-1">
                         {['Under $50', '$50-$200', '$200-$500', 'Over $500', 'Auckland', 'Wellington', 'Christchurch'].map((filter) => (
                             <button
@@ -175,14 +165,14 @@ const CategoryLandingPage = ({
                     <div className="flex items-center gap-2">
                         <span className="text-sm text-gray-600">View:</span>
                         <button
-                            onClick={() => setViewMode('grid')}
-                            className={`p-2 rounded ${viewMode === 'grid' ? 'bg-green-100 text-green-600' : 'text-gray-400'}`}
+                            onClick={() => { }}
+                            className={`p-2 rounded ${false ? 'bg-green-100 text-green-600' : 'text-gray-400'}`}
                         >
                             <Grid size={16} />
                         </button>
                         <button
-                            onClick={() => setViewMode('list')}
-                            className={`p-2 rounded ${viewMode === 'list' ? 'bg-green-100 text-green-600' : 'text-gray-400'}`}
+                            onClick={() => { }}
+                            className={`p-2 rounded ${false ? 'bg-green-100 text-green-600' : 'text-gray-400'}`}
                         >
                             <List size={16} />
                         </button>
@@ -197,7 +187,7 @@ const CategoryLandingPage = ({
             <div className="max-w-6xl mx-auto px-4">
                 <div className="flex justify-between items-center mb-8">
                     <h2 className="text-2xl md:text-3xl font-bold text-gray-900">Featured Listings</h2>
-                    <button 
+                    <button
                         onClick={() => onNavigate('category', { categoryKey: category })}
                         className="text-green-600 hover:text-green-700 flex items-center"
                     >
@@ -205,18 +195,30 @@ const CategoryLandingPage = ({
                         <ChevronRight size={16} className="ml-1" />
                     </button>
                 </div>
-                
+
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {mockListings.map((listing) => (
-                        <ItemCard
-                            key={listing.id}
-                            item={listing}
-                            onItemClick={() => {}}
-                            onWatchToggle={() => {}}
-                            isWatched={false}
-                            showLocation={true}
-                            showWatchers={true}
-                        />
+                        <div key={listing.id} className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow">
+                            <div className="relative aspect-[4/5]">
+                                <img
+                                    src={listing.image}
+                                    alt={listing.title}
+                                    className="w-full h-full object-cover"
+                                />
+                                <div className="absolute top-2 right-2">
+                                    <button className="p-2 bg-white/80 rounded-full hover:bg-white transition-colors">
+                                        <Heart size={16} className="text-gray-600" />
+                                    </button>
+                                </div>
+                                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-3">
+                                    <div className="text-white">
+                                        <p className="font-semibold text-sm truncate">{listing.title}</p>
+                                        <p className="text-lg font-bold">${listing.price}</p>
+                                        <p className="text-xs opacity-90">{listing.location}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     ))}
                 </div>
             </div>
@@ -229,7 +231,7 @@ const CategoryLandingPage = ({
                 <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-8 text-center">
                     Popular Categories
                 </h2>
-                
+
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                     {popularSubcategories.length > 0 ? popularSubcategories.map((subcat, index) => (
                         <button
@@ -285,7 +287,7 @@ const CategoryLandingPage = ({
                 <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-12 text-center">
                     Why Choose TuiTrade for {title}?
                 </h2>
-                
+
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                     {features.length > 0 ? features.map((feature, index) => (
                         <div key={index} className="text-center">
@@ -298,30 +300,33 @@ const CategoryLandingPage = ({
                     )) : (
                         // Default features
                         [
-                            { 
-                                icon: Shield, 
-                                title: 'Secure Trading', 
-                                description: 'Advanced verification system and buyer protection for safe transactions' 
+                            {
+                                icon: Shield,
+                                title: 'Secure Trading',
+                                description: 'Advanced verification system and buyer protection for safe transactions'
                             },
-                            { 
-                                icon: Zap, 
-                                title: 'Fast & Easy', 
-                                description: 'List your items in minutes with our streamlined process' 
+                            {
+                                icon: Zap,
+                                title: 'Fast & Easy',
+                                description: 'List your items in minutes with our streamlined process'
                             },
-                            { 
-                                icon: Users, 
-                                title: 'Trusted Community', 
-                                description: 'Join thousands of verified buyers and sellers across New Zealand' 
+                            {
+                                icon: Users,
+                                title: 'Trusted Community',
+                                description: 'Join thousands of verified buyers and sellers across New Zealand'
                             }
-                        ].map((feature, index) => (
-                            <div key={index} className="text-center">
-                                <div className="bg-green-100 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
-                                    <feature.icon className="text-green-600" size={24} />
+                        ].map((feature, index) => {
+                            const IconComponent = feature.icon;
+                            return (
+                                <div key={index} className="text-center">
+                                    <div className="bg-green-100 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
+                                        <IconComponent className="text-green-600" size={24} />
+                                    </div>
+                                    <h3 className="text-xl font-semibold text-gray-900 mb-3">{feature.title}</h3>
+                                    <p className="text-gray-600">{feature.description}</p>
                                 </div>
-                                <h3 className="text-xl font-semibold text-gray-900 mb-3">{feature.title}</h3>
-                                <p className="text-gray-600">{feature.description}</p>
-                            </div>
-                        ))
+                            );
+                        })
                     )}
                 </div>
             </div>
@@ -334,7 +339,7 @@ const CategoryLandingPage = ({
                 <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-8 text-center">
                     Trending Now
                 </h2>
-                
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                     {/* Trending Searches */}
                     <div className="bg-white rounded-lg p-6 border border-gray-200">
@@ -344,7 +349,7 @@ const CategoryLandingPage = ({
                         </h3>
                         <div className="space-y-3">
                             {(trendingSearches.length > 0 ? trendingSearches : [
-                                'iPhone 15 Pro', 'Gaming Chair', 'Vintage Clothing', 'Home Décor', 
+                                'iPhone 15 Pro', 'Gaming Chair', 'Vintage Clothing', 'Home Décor',
                                 'Exercise Equipment', 'Kitchen Appliances'
                             ]).map((search, index) => (
                                 <div key={index} className="flex items-center justify-between">

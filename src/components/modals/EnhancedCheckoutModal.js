@@ -2,21 +2,16 @@
 // Supports Stripe, Bank Transfer, Afterpay, and Escrow
 
 import React, { useState, useEffect } from 'react';
-import { Elements } from '@stripe/react-stripe-js';
 import { 
     X, CreditCard, Building, ShoppingBag, Shield, 
-    AlertCircle, CheckCircle, Clock, DollarSign, Info,
-    User, Mail, Phone, MapPin, Calendar
+    AlertCircle, CheckCircle
 } from 'lucide-react';
 import { 
-    stripePromise, 
     PAYMENT_METHODS, 
     NZ_BANK_DETAILS,
     AFTERPAY_LIMITS,
     calculatePaymentFees,
-    formatNZCurrency,
     validatePaymentMethod,
-    createPaymentIntent,
     initiateBankTransfer,
     createAfterpaySessions,
     createEscrowPayment

@@ -2,17 +2,18 @@
 // Social features, forums, user profiles, and community interactions
 
 import React from 'react';
-import { Users, MessageCircle, Heart, Award, TrendingUp, Shield, Star, Crown } from 'lucide-react';
+import { Shield, Crown, MessageCircle } from 'lucide-react';
 import CategoryLandingPage from './CategoryLandingPage';
 
 const CommunityLanding = ({ onNavigate }) => {
     const communityData = {
         category: 'community',
         title: 'Community',
-        description: 'Connect with fellow Kiwis! Join discussions, share experiences, and build lasting relationships in New Zealand\'s friendliest trading community.',
+        description: 'Connect with fellow Kiwis! Join discussions, share experiences, and build lasting relationships in Aotearoa\'s friendliest trading community.',
+        subtitle: 'Whanaungatanga - Building connections and community!',
         heroImage: 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=1200&h=600&fit=crop',
         heroGradient: 'from-pink-600 to-orange-600',
-        
+
         stats: {
             totalListings: '50,000+',
             totalSellers: '12,000+',
@@ -116,7 +117,7 @@ const CommunityLanding = ({ onNavigate }) => {
             },
             {
                 user: 'Jenny - Collector',
-                story: 'Found my collecting tribe here! We share finds, trade items, and have regular meetups in Wellington.',
+                story: 'Found my collecting tribe here! We share finds, trade items, and have regular meetups in Te Whanganui-a-Tara (Wellington).',
                 rating: 5
             },
             {
