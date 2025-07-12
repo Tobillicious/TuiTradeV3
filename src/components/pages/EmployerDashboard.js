@@ -229,12 +229,20 @@ const EmployerDashboard = ({ onNavigate, currentUser }) => {
           <div className="p-6 border-b border-gray-200">
             <div className="flex items-center justify-between">
               <h3 className="text-lg font-semibold text-gray-900">Recent Applications</h3>
-              <button 
-                onClick={() => setActiveTab('applications')}
-                className="text-green-600 hover:text-green-700 text-sm font-medium"
-              >
-                View All
-              </button>
+              <div className="flex space-x-3">
+                <button 
+                  onClick={() => onNavigate('applications-management')}
+                  className="text-blue-600 hover:text-blue-700 text-sm font-medium"
+                >
+                  Advanced Management
+                </button>
+                <button 
+                  onClick={() => setActiveTab('applications')}
+                  className="text-green-600 hover:text-green-700 text-sm font-medium"
+                >
+                  View All
+                </button>
+              </div>
             </div>
           </div>
           <div className="p-6 space-y-4">

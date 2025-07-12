@@ -58,6 +58,8 @@ const JobApplicationPage = lazy(() => import('./components/pages/JobApplicationP
 const EmployerDashboard = lazy(() => import('./components/pages/EmployerDashboard'));
 const CreateJobPage = lazy(() => import('./components/pages/CreateJobPage'));
 const JobSeekerProfile = lazy(() => import('./components/pages/JobSeekerProfile'));
+const ApplicationDetailPage = lazy(() => import('./components/pages/ApplicationDetailPage'));
+const ApplicationsManagementPage = lazy(() => import('./components/pages/ApplicationsManagementPage'));
 const DigitalGoodsLanding = lazy(() => import('./components/pages/DigitalGoodsLanding'));
 const CommunityLanding = lazy(() => import('./components/pages/CommunityLanding'));
 const AdminDashboard = lazy(() => import('./components/pages/AdminDashboard'));
@@ -303,6 +305,8 @@ function AppContent() {
                         case 'employer-dashboard': return <EmployerDashboard {...pageProps} currentUser={currentUser} />;
                         case 'create-job': return <CreateJobPage {...pageProps} currentUser={currentUser} />;
                         case 'job-seeker-profile': return <JobSeekerProfile {...pageProps} currentUser={currentUser} />;
+                        case 'application-detail': return <ApplicationDetailPage {...pageProps} applicationId={pageContext.applicationId} currentUser={currentUser} />;
+                        case 'applications-management': return <ApplicationsManagementPage {...pageProps} currentUser={currentUser} />;
                         case 'digital-goods-landing': return <DigitalGoodsLanding {...pageProps} />;
                         case 'community-landing': return <CommunityLanding {...pageProps} />;
                         
