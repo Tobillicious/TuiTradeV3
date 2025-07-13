@@ -95,6 +95,8 @@ try {
     db = getFirestore(app);
     storage = getStorage(app);
 
+    // Note: Firestore persistence disabled to prevent React 19 strict mode conflicts
+
     // Connect to emulators in development
     if (isDevelopment && process.env.REACT_APP_USE_EMULATORS === 'true') {
       try {

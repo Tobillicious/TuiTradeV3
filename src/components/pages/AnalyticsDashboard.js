@@ -1,13 +1,11 @@
 // Analytics Dashboard - Comprehensive business intelligence and insights
 // Advanced metrics, trends, and performance analytics for employers and admins
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { 
-  BarChart3, TrendingUp, Users, Briefcase, Target, Eye, Clock, DollarSign,
-  Calendar, Filter, Download, Settings, Zap, Star, MapPin, Building,
-  ArrowUp, ArrowDown, Activity, PieChart, LineChart, BarChart, Globe,
-  Award, Bookmark, MessageCircle, Share2, RefreshCw, AlertTriangle,
-  CheckCircle, UserCheck, Search, FileText, Heart, Layers
+  BarChart3, TrendingUp, Users, Briefcase, Target, Clock, DollarSign,
+  ArrowUp, ArrowDown, Activity, Globe,
+  Star, RefreshCw
 } from 'lucide-react';
 import { useTeReo, TeReoText } from '../ui/TeReoToggle';
 import { 
@@ -17,7 +15,6 @@ import {
 } from '../../lib/jobsService';
 
 const AnalyticsDashboard = ({ onNavigate, currentUser, userRole = 'employer' }) => {
-  const { getText } = useTeReo();
   
   const [timeRange, setTimeRange] = useState('30d'); // 7d, 30d, 90d, 1y
   const [loading, setLoading] = useState(true);
@@ -74,11 +71,7 @@ const AnalyticsDashboard = ({ onNavigate, currentUser, userRole = 'employer' }) 
     categoryPerformance: []
   });
 
-  useEffect(() => {
-    loadAnalyticsData();
-  }, [timeRange, currentUser]);
-
-  const loadAnalyticsData = async () => {
+  const loadAnalyticsData = useCallback(async () => {
     try {
       setLoading(true);
       const companyId = currentUser?.uid || 'demo-company';
@@ -95,7 +88,7 @@ const AnalyticsDashboard = ({ onNavigate, currentUser, userRole = 'employer' }) 
       setAnalytics(processedAnalytics);
       
       // Generate chart data
-      const charts = generateChartData(jobs, applications);
+      const charts = generateChartData(processedAnalytics, jobs, applications);
       setChartData(charts);
       
     } catch (error) {
@@ -103,7 +96,11 @@ const AnalyticsDashboard = ({ onNavigate, currentUser, userRole = 'employer' }) 
     } finally {
       setLoading(false);
     }
-  };
+  }, [currentUser]);
+
+  useEffect(() => {
+    loadAnalyticsData();
+  }, [timeRange, currentUser, loadAnalyticsData]);
 
   const generateAnalytics = (jobs, applications, stats) => {
     // Overview Metrics

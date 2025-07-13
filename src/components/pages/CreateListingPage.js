@@ -10,6 +10,7 @@ import { calculateListingFees, validateCategoryListing, getDefaultListingDuratio
 import { LoadingSpinner } from '../ui/Loaders';
 import { Tag, DollarSign, MapPin, Home, ChevronRight, X, Gavel, Clock, Calculator } from 'lucide-react';
 import { serverTimestamp } from 'firebase/firestore';
+import NeighbourhoodDropdown from '../ui/NeighbourhoodDropdown';
 
 const CreateListingPage = ({ onNavigate, ...props }) => {
     const [formData, setFormData] = useState({
@@ -22,6 +23,8 @@ const CreateListingPage = ({ onNavigate, ...props }) => {
         attributes: {},
         condition: 'Used - Good',
         location: '',
+        neighbourhood: null,
+        neighbourhoodId: '',
         listingType: 'fixed-price',
         auctionDuration: '7',
         startingBid: '',
@@ -114,6 +117,25 @@ const CreateListingPage = ({ onNavigate, ...props }) => {
             ...prev,
             attributes: { ...prev.attributes, [attr]: value }
         }));
+    };
+
+    // Handle neighbourhood selection for listing location
+    const handleNeighbourhoodChange = (neighbourhood) => {
+        if (neighbourhood) {
+            setFormData(prev => ({
+                ...prev,
+                neighbourhood: neighbourhood,
+                neighbourhoodId: neighbourhood.id,
+                location: neighbourhood.region // Use region as the main location
+            }));
+        } else {
+            setFormData(prev => ({
+                ...prev,
+                neighbourhood: null,
+                neighbourhoodId: '',
+                location: ''
+            }));
+        }
     };
 
     const handleImageChange = (e) => {
@@ -238,6 +260,9 @@ const CreateListingPage = ({ onNavigate, ...props }) => {
                 attributes: formData.attributes,
                 condition: formData.condition,
                 location: formData.location,
+                neighbourhood: formData.neighbourhood?.id || null,
+                neighbourhoodName: formData.neighbourhood?.name || null,
+                neighbourhoodData: formData.neighbourhood || null,
                 listingType: formData.listingType,
                 imageUrl: finalImages[0] || 'https://placehold.co/400x300/e2e8f0/cbd5e0?text=TuiTrade',
                 images: finalImages,
@@ -626,24 +651,42 @@ const CreateListingPage = ({ onNavigate, ...props }) => {
                         )}
 
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">
-                                Location <span className="text-red-500">*</span>
-                            </label>
-                            <div className="relative">
-                                <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
-                                <select
-                                    name="location"
-                                    value={formData.location}
-                                    onChange={handleInputChange}
-                                    className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
-                                    required
-                                >
-                                    <option value="">Select region...</option>
-                                    {NZ_REGIONS.map(region => (
-                                        <option key={region} value={region}>{region}</option>
-                                    ))}
-                                </select>
-                            </div>
+                            <NeighbourhoodDropdown
+                                value={formData.neighbourhoodId}
+                                onChange={handleNeighbourhoodChange}
+                                label="Location"
+                                placeholder="Select your neighbourhood or region..."
+                                required={true}
+                                showCurrentLocation={true}
+                                showSearch={true}
+                                size="default"
+                            />
+                            <p className="text-xs text-gray-500 mt-1">
+                                Your neighbourhood helps buyers find local items and enables community features
+                            </p>
+                            
+                            {/* Fallback region selector if neighbourhood not selected */}
+                            {!formData.neighbourhood && (
+                                <div className="mt-3">
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                                        Or select a region
+                                    </label>
+                                    <div className="relative">
+                                        <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+                                        <select
+                                            name="location"
+                                            value={formData.location}
+                                            onChange={handleInputChange}
+                                            className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                                        >
+                                            <option value="">Select region...</option>
+                                            {NZ_REGIONS.map(region => (
+                                                <option key={region} value={region}>{region}</option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                </div>
+                            )}
                         </div>
 
                         {/* Digital Goods Section */}

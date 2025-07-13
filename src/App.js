@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, Suspense, lazy } from 'react';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
 import { collection, onSnapshot, doc, deleteDoc, setDoc } from 'firebase/firestore';
-import { Search, Heart, ShoppingCart, User, List, Eye, Lock, Tag, MessageCircle, Shield, Star, BarChart3, Package, Sun, Moon, Menu, X, ChevronDown, Car, Home as HomeIcon, Briefcase, Wrench, Gift, Monitor } from 'lucide-react';
+import { Search, Heart, ShoppingCart, User, List, Eye, Lock, Tag, MessageCircle, Shield, Star, BarChart3, Package, Sun, Moon, Menu, X, ChevronDown, Car, Home as HomeIcon, Briefcase, Gift } from 'lucide-react';
 
 // Core setup
 import { auth, db } from './lib/firebase';
@@ -68,6 +68,8 @@ const ServicesLanding = lazy(() => import('./components/pages/ServicesLanding'))
 const UsedGoodsLanding = lazy(() => import('./components/pages/UsedGoodsLanding'));
 const NewGoodsLanding = lazy(() => import('./components/pages/NewGoodsLanding'));
 const CommunityLanding = lazy(() => import('./components/pages/CommunityLanding'));
+const NeighbourhoodsPage = lazy(() => import('./components/pages/NeighbourhoodsPage'));
+const NeighbourhoodDetailPage = lazy(() => import('./components/pages/NeighbourhoodDetailPage'));
 const AdminDashboard = lazy(() => import('./components/pages/AdminDashboard'));
 function AppContent() {
     const [currentUser, setCurrentUser] = useState(null);
@@ -313,6 +315,8 @@ function AppContent() {
                         case 'used-goods-landing': return <UsedGoodsLanding {...pageProps} />;
                         case 'new-goods-landing': return <NewGoodsLanding {...pageProps} />;
                         case 'community-landing': return <CommunityLanding {...pageProps} />;
+                        case 'neighbourhoods': return <NeighbourhoodsPage {...pageProps} currentUser={currentUser} />;
+                        case 'neighbourhood-detail': return <NeighbourhoodDetailPage {...pageProps} neighbourhoodId={pageContext.id} currentUser={currentUser} />;
 
                         // Admin Dashboard (admin access only)
                         case 'admin': return <AdminDashboard {...pageProps} />;
@@ -451,6 +455,16 @@ function AppContent() {
                                                 <div>
                                                     <div className="font-medium">Community</div>
                                                     <div className="text-xs text-gray-500">(Hapori)</div>
+                                                </div>
+                                            </button>
+                                            <button
+                                                onClick={() => { handleNavigate('neighbourhoods'); setIsCategoriesMenuOpen(false); }}
+                                                className={`w-full text-left px-4 py-3 rounded-lg transition-colors flex items-center ${isDarkMode ? 'text-gray-300 hover:bg-gray-700' : 'text-gray-700 hover:bg-gray-50'}`}
+                                            >
+                                                <HomeIcon size={16} className="mr-3 text-orange-500" />
+                                                <div>
+                                                    <div className="font-medium">Neighbourhoods</div>
+                                                    <div className="text-xs text-gray-500">(Taiao)</div>
                                                 </div>
                                             </button>
                                         </div>
@@ -659,6 +673,13 @@ function AppContent() {
                             >
                                 Community
                                 <span className="ml-2 text-xs text-gray-400">(Hapori)</span>
+                            </button>
+                            <button
+                                onClick={() => handleNavigate('neighbourhoods')}
+                                className={`w-full text-left px-3 py-2 rounded-lg transition-colors ${isDarkMode ? 'text-gray-300 hover:bg-gray-700' : 'text-gray-700 hover:bg-gray-50'}`}
+                            >
+                                Neighbourhoods
+                                <span className="ml-2 text-xs text-gray-400">(Taiao)</span>
                             </button>
                         </div>
                     </div>

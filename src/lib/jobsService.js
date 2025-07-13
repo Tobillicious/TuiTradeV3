@@ -503,27 +503,25 @@ class JobService {
 const jobService = new JobService();
 
 // Export individual methods for direct import
-export const {
-  createJob,
-  updateJob,
-  deleteJob,
-  getJob,
-  searchJobs,
-  getEmployerJobs,
-  getCompanyJobs,
-  getCompanyApplications,
-  getCompanyDashboardStats,
-  subscribeToCompanyJobs,
-  subscribeToCompanyApplications,
-  applyForJob,
-  submitApplication,
-  getApplication,
-  getJobApplications,
-  getApplicantApplications,
-  updateApplicationStatus,
-  trackJobView,
-  subscribeToJobUpdates,
-  subscribeToJobApplications
-} = jobService;
+export const createJob = (...args) => jobService.createJob(...args);
+export const updateJob = (...args) => jobService.updateJob(...args);
+export const deleteJob = (...args) => jobService.deleteJob(...args);
+export const getJob = (...args) => jobService.getJob(...args);
+export const searchJobs = (...args) => jobService.searchJobs(...args);
+export const getEmployerJobs = (...args) => jobService.getEmployerJobs(...args);
+export const getCompanyJobs = (...args) => jobService.getCompanyJobs(...args);
+export const getCompanyApplications = (...args) => jobService.getCompanyApplications(...args);
+export const getCompanyDashboardStats = (...args) => jobService.getCompanyDashboardStats(...args);
+export const subscribeToCompanyJobs = (...args) => jobService.subscribeToCompanyJobs(...args);
+export const subscribeToCompanyApplications = (...args) => jobService.subscribeToCompanyApplications(...args);
+export const applyForJob = (...args) => jobService.applyForJob(...args);
+export const submitApplication = (...args) => jobService.submitApplication(...args);
+export const getApplication = (...args) => jobService.getApplication(...args);
+export const getJobApplications = (...args) => jobService.getJobApplications(...args);
+export const getApplicantApplications = (...args) => jobService.getApplicantApplications(...args);
+export const updateApplicationStatus = (...args) => jobService.updateApplicationStatus(...args);
+export const trackJobView = (...args) => jobService.trackJobView(...args);
+export const subscribeToJobUpdates = (...args) => jobService.subscribeToJobUpdates(...args);
+export const subscribeToJobApplications = (...args) => jobService.subscribeToJobApplications(...args);
 
 export default jobService;

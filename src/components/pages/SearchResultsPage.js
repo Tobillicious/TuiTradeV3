@@ -1,31 +1,24 @@
 // src/components/pages/SearchResultsPage.js
 import { useState, useEffect, useMemo } from 'react';
-import { collection, query, orderBy, getDocs } from 'firebase/firestore';
-import { db } from '../../lib/firebase';
-// Removed unused import
+// Removed unused Firebase imports
 import ItemCard from '../ui/ItemCard';
 import JobCard from '../ui/JobCard';
-import SearchFilters from '../ui/SearchFilters';
 import JobSearchFilters from '../ui/JobSearchFilters';
-import { searchJobs, MOCK_JOBS } from '../../lib/jobsData';
 import { Search, Grid, List, Home, ChevronRight, Briefcase } from 'lucide-react';
 import { useTeReo, TeReoText } from '../ui/TeReoToggle';
-import { FullPageLoader } from '../ui/Loaders';
-import { JOB_CATEGORIES, JOB_TYPES, SALARY_RANGES, EXPERIENCE_LEVELS, WORK_RIGHTS, NZ_LOCATIONS } from '../../lib/jobsData';
 import jobService from '../../lib/jobsService';
 
 const SearchResultsPage = ({ searchParams, onNavigate }) => {
     const { getText } = useTeReo();
     const [loading, setLoading] = useState(true);
     const [jobs, setJobs] = useState([]);
-    const [items, setItems] = useState([]);
+    const [items] = useState([]);
     const [searchType, setSearchType] = useState('jobs');
     const [viewMode, setViewMode] = useState('grid');
-    const [showFilters, setShowFilters] = useState(false);
     const [jobFilters, setJobFilters] = useState({});
     const [watchedItems, setWatchedItems] = useState([]);
     const [cartItems, setCartItems] = useState([]);
-    const [filters, setFilters] = useState({
+    const [filters] = useState({
         category: searchParams?.category || '',
         subcategory: searchParams?.subcategory || '',
         location: searchParams?.location || '',
@@ -99,9 +92,6 @@ const SearchResultsPage = ({ searchParams, onNavigate }) => {
         setCartItems(prev => [...prev, item]);
     };
 
-    const updateFilters = (newFilters) => {
-        setFilters(prev => ({ ...prev, ...newFilters }));
-    };
 
     if (loading) {
         return (

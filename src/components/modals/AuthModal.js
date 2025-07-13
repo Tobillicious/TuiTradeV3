@@ -6,6 +6,7 @@ import { doc, setDoc, getDoc } from 'firebase/firestore';
 import { auth, db } from '../../lib/firebase';
 import { useNotification } from '../../context/NotificationContext';
 import { LoadingSpinner, ErrorMessage, SuccessMessage } from '../ui/Loaders';
+import NeighbourhoodDropdown from '../ui/NeighbourhoodDropdown';
 
 const AuthModal = ({ isOpen, onClose }) => {
     const [isSignIn, setIsSignIn] = useState(true);
@@ -24,12 +25,41 @@ const AuthModal = ({ isOpen, onClose }) => {
         postcode: '',
         country: 'New Zealand'
     });
+    const [selectedNeighbourhood, setSelectedNeighbourhood] = useState(null);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
     const { showNotification } = useNotification();
 
-    // Function to determine neighborhood/community from address
+    // Handle neighbourhood selection from dropdown
+    const handleNeighbourhoodChange = (neighbourhood) => {
+        setSelectedNeighbourhood(neighbourhood);
+        if (neighbourhood) {
+            setAddress(prev => ({
+                ...prev,
+                suburb: neighbourhood.suburbs?.[0] || prev.suburb,
+                city: neighbourhood.suburbs?.[0] || neighbourhood.name,
+                region: neighbourhood.region
+            }));
+        }
+    };
+
+    // Handle location detection from neighbourhood dropdown
+    const handleLocationDetected = (neighbourhood, detectedAddress) => {
+        setSelectedNeighbourhood(neighbourhood);
+        if (detectedAddress) {
+            setAddress(prev => ({
+                ...prev,
+                suburb: detectedAddress.suburb || prev.suburb,
+                city: detectedAddress.city || prev.city,
+                region: detectedAddress.region || prev.region,
+                postcode: detectedAddress.postcode || prev.postcode,
+                street: prev.street // Keep manually entered street address
+            }));
+        }
+    };
+
+    // Function to determine neighborhood/community from address (legacy fallback)
     const determineNeighborhood = (userAddress) => {
         const { suburb, city, region } = userAddress;
         // Create a unique community identifier based on suburb or city
@@ -106,13 +136,15 @@ const AuthModal = ({ isOpen, onClose }) => {
                 onClose();
             } else {
                 // Step 2: Create account with full profile
-                if (!address.street || !address.city || !address.region) {
-                    setError('Please complete your address information');
+                if (!address.street || (!address.city && !selectedNeighbourhood)) {
+                    setError('Please complete your address information or select a neighbourhood');
                     return;
                 }
 
                 const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-                const neighborhood = determineNeighborhood(address);
+                
+                // Use selected neighbourhood or fallback to address-based neighbourhood
+                const neighborhood = selectedNeighbourhood || determineNeighborhood(address);
                 
                 // Create comprehensive user profile
                 await setDoc(doc(db, 'users', userCredential.user.uid), {
@@ -125,6 +157,13 @@ const AuthModal = ({ isOpen, onClose }) => {
                         avatar: null
                     },
                     address: address,
+                    neighbourhood: selectedNeighbourhood ? {
+                        id: selectedNeighbourhood.id,
+                        name: selectedNeighbourhood.name,
+                        maoriName: selectedNeighbourhood.maoriName,
+                        region: selectedNeighbourhood.region,
+                        suburbs: selectedNeighbourhood.suburbs
+                    } : null,
                     community: neighborhood,
                     joinedCommunity: new Date(),
                     settings: {
@@ -353,7 +392,7 @@ const AuthModal = ({ isOpen, onClose }) => {
                             <div className="border-t pt-4">
                                 <h3 className="text-lg font-semibold text-gray-900 mb-2 flex items-center">
                                     <Home className="mr-2 text-green-600" size={20} />
-                                    Your Address
+                                    Your Location
                                 </h3>
                                 <p className="text-sm text-gray-600 mb-4">
                                     We'll automatically add you to your local community page where you can connect with neighbors, discover local events, and support local businesses.
@@ -361,6 +400,25 @@ const AuthModal = ({ isOpen, onClose }) => {
                             </div>
 
                             <div className="space-y-4">
+                                {/* Neighbourhood Selection */}
+                                <div>
+                                    <NeighbourhoodDropdown
+                                        value={selectedNeighbourhood?.id || ''}
+                                        onChange={handleNeighbourhoodChange}
+                                        onLocationDetected={handleLocationDetected}
+                                        label="Neighbourhood"
+                                        placeholder="Select or detect your neighbourhood..."
+                                        showCurrentLocation={true}
+                                        showSearch={true}
+                                        size="default"
+                                        className="mb-2"
+                                    />
+                                    <p className="text-xs text-gray-500">
+                                        Auto-detect or search for your neighbourhood to join your local community
+                                    </p>
+                                </div>
+
+                                {/* Street Address - always shown */}
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-2">
                                         Street Address *
@@ -377,6 +435,15 @@ const AuthModal = ({ isOpen, onClose }) => {
                                         />
                                     </div>
                                 </div>
+
+                                {/* Manual Address Fields (shown when neighbourhood not selected) */}
+                                {!selectedNeighbourhood && (
+                                    <>
+                                        <div className="border-t pt-4">
+                                            <p className="text-sm text-gray-600 mb-4">
+                                                Complete your address details:
+                                            </p>
+                                        </div>
 
                                 <div className="grid grid-cols-2 gap-4">
                                     <div>
@@ -453,6 +520,8 @@ const AuthModal = ({ isOpen, onClose }) => {
                                         </select>
                                     </div>
                                 </div>
+                                    </>
+                                )}
 
                                 <div className="bg-green-50 border border-green-200 rounded-lg p-4">
                                     <div className="flex">

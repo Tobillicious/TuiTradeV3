@@ -1,24 +1,22 @@
 // Advanced Job Search - AI-powered job matching and intelligent search
 // Smart search with machine learning-based candidate-job matching
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { 
-  Search, Filter, MapPin, Calendar, DollarSign, Briefcase, Star,
-  Target, Zap, Brain, TrendingUp, Users, Clock, ArrowRight, Heart,
-  Eye, Bookmark, Share2, AlertCircle, CheckCircle, Sliders, X,
-  Sparkles, Bot, BarChart3, Globe, Award, Building
+  Search, MapPin, DollarSign,
+  Target, Brain, Clock, Heart,
+  Eye, Bookmark, AlertCircle, CheckCircle, X,
+  Sparkles, Bot, BarChart3, Building
 } from 'lucide-react';
 import { useTeReo, TeReoText } from '../ui/TeReoToggle';
 import { searchJobs } from '../../lib/jobsService';
-import { JOB_CATEGORIES, JOB_TYPES, NZ_LOCATIONS, SALARY_RANGES } from '../../lib/jobsData';
+import { JOB_CATEGORIES, JOB_TYPES, NZ_LOCATIONS } from '../../lib/jobsData';
 
 const AdvancedJobSearch = ({ onNavigate, currentUser }) => {
-  const { getText } = useTeReo();
   
   const [jobs, setJobs] = useState([]);
   const [loading, setLoading] = useState(false);
   const [searchMode, setSearchMode] = useState('standard'); // standard, ai, smart
-  const [viewMode, setViewMode] = useState('list'); // list, grid, smart-feed
   
   // AI Matching State
   const [userProfile, setUserProfile] = useState({
@@ -51,8 +49,6 @@ const AdvancedJobSearch = ({ onNavigate, currentUser }) => {
   // AI Search State
   const [aiSearchQuery, setAiSearchQuery] = useState('');
   const [matchingScore, setMatchingScore] = useState({});
-  const [smartRecommendations, setSmartRecommendations] = useState([]);
-  const [searchSuggestions, setSearchSuggestions] = useState([]);
 
   // Search Analytics
   const [searchAnalytics, setSearchAnalytics] = useState({
@@ -63,105 +59,9 @@ const AdvancedJobSearch = ({ onNavigate, currentUser }) => {
     locationTrends: []
   });
 
-  useEffect(() => {
-    // Load initial job data and user profile
-    loadInitialData();
-  }, []);
-
-  useEffect(() => {
-    // Perform search when filters change
-    if (searchMode === 'standard') {
-      performStandardSearch();
-    } else if (searchMode === 'ai') {
-      performAISearch();
-    }
-  }, [filters, searchMode]);
-
-  const loadInitialData = async () => {
-    try {
-      setLoading(true);
-      
-      // Load all jobs initially
-      const allJobs = await searchJobs({});
-      setJobs(allJobs);
-      
-      // Load user profile for AI matching
-      if (currentUser) {
-        await loadUserProfile();
-      }
-      
-      // Generate search analytics
-      generateSearchAnalytics(allJobs);
-      
-    } catch (error) {
-      console.error('Error loading initial data:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const loadUserProfile = async () => {
-    // In a real app, this would load from Firestore
-    // For now, we'll use mock data
-    const mockProfile = {
-      skills: ['JavaScript', 'React', 'Node.js', 'Python'],
-      experience: 'intermediate',
-      location: 'Auckland',
-      salaryRange: { min: '50000', max: '80000' },
-      preferredRoles: ['Software Engineer', 'Frontend Developer'],
-      workPreferences: {
-        remote: true,
-        hybrid: true,
-        office: false
-      }
-    };
-    setUserProfile(mockProfile);
-  };
-
-  const performStandardSearch = async () => {
-    try {
-      setLoading(true);
-      const searchResults = await searchJobs(filters);
-      setJobs(searchResults);
-      generateSearchAnalytics(searchResults);
-    } catch (error) {
-      console.error('Error performing search:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const performAISearch = async () => {
-    try {
-      setLoading(true);
-      
-      // Combine user query with AI analysis
-      const enhancedFilters = enhanceFiltersWithAI(aiSearchQuery, userProfile);
-      const searchResults = await searchJobs(enhancedFilters);
-      
-      // Calculate matching scores for each job
-      const jobsWithScores = searchResults.map(job => ({
-        ...job,
-        matchScore: calculateMatchScore(job, userProfile, aiSearchQuery)
-      }));
-      
-      // Sort by match score
-      jobsWithScores.sort((a, b) => b.matchScore - a.matchScore);
-      
-      setJobs(jobsWithScores);
-      generateMatchingScores(jobsWithScores);
-      generateSearchAnalytics(jobsWithScores);
-      
-    } catch (error) {
-      console.error('Error performing AI search:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const enhanceFiltersWithAI = (query, profile) => {
     // AI-enhanced search logic
-    const filters = { ...filters };
+    const newFilters = { ...filters };
     
     // Parse natural language query
     const queryLower = query.toLowerCase();
@@ -170,38 +70,38 @@ const AdvancedJobSearch = ({ onNavigate, currentUser }) => {
     Object.keys(NZ_LOCATIONS).forEach(locationKey => {
       const location = NZ_LOCATIONS[locationKey];
       if (queryLower.includes(location.name.toLowerCase())) {
-        filters.location = location.name;
+        newFilters.location = location.name;
       }
     });
     
     // Extract job types from query
     Object.entries(JOB_TYPES).forEach(([key, type]) => {
       if (queryLower.includes(type.toLowerCase())) {
-        filters.jobType = key;
+        newFilters.jobType = key;
       }
     });
     
     // Extract categories from query
     Object.entries(JOB_CATEGORIES).forEach(([key, category]) => {
       if (queryLower.includes(category.name.toLowerCase())) {
-        filters.category = key;
+        newFilters.category = key;
       }
     });
     
     // Use user profile for intelligent defaults
-    if (profile.location && !filters.location) {
-      filters.location = profile.location;
+    if (profile.location && !newFilters.location) {
+      newFilters.location = profile.location;
     }
     
-    if (profile.salaryRange.min && !filters.salaryMin) {
-      filters.salaryMin = profile.salaryRange.min;
+    if (profile.salaryRange.min && !newFilters.salaryMin) {
+      newFilters.salaryMin = profile.salaryRange.min;
     }
     
-    if (profile.salaryRange.max && !filters.salaryMax) {
-      filters.salaryMax = profile.salaryRange.max;
+    if (profile.salaryRange.max && !newFilters.salaryMax) {
+      newFilters.salaryMax = profile.salaryRange.max;
     }
     
-    return filters;
+    return newFilters;
   };
 
   const calculateMatchScore = (job, profile, query) => {
@@ -256,6 +156,101 @@ const AdvancedJobSearch = ({ onNavigate, currentUser }) => {
     }
     
     return Math.min(Math.round(score), 100);
+  };
+  
+  const performStandardSearch = useCallback(async () => {
+    try {
+      setLoading(true);
+      const searchResults = await searchJobs(filters);
+      setJobs(searchResults);
+      generateSearchAnalytics(searchResults);
+    } catch (error) {
+      console.error('Error performing search:', error);
+    } finally {
+      setLoading(false);
+    }
+  }, [filters]);
+
+  const performAISearch = useCallback(async () => {
+    try {
+      setLoading(true);
+      
+      // Combine user query with AI analysis
+      const enhancedFilters = enhanceFiltersWithAI(aiSearchQuery, userProfile);
+      const searchResults = await searchJobs(enhancedFilters);
+      
+      // Calculate matching scores for each job
+      const jobsWithScores = searchResults.map(job => ({
+        ...job,
+        matchScore: calculateMatchScore(job, userProfile, aiSearchQuery)
+      }));
+      
+      // Sort by match score
+      jobsWithScores.sort((a, b) => b.matchScore - a.matchScore);
+      
+      setJobs(jobsWithScores);
+      generateMatchingScores(jobsWithScores);
+      generateSearchAnalytics(jobsWithScores);
+      
+    } catch (error) {
+      console.error('Error performing AI search:', error);
+    } finally {
+      setLoading(false);
+    }
+  }, [aiSearchQuery, userProfile, filters]);
+
+  useEffect(() => {
+    // Load initial job data and user profile
+    const loadInitialData = async () => {
+      try {
+        setLoading(true);
+        
+        // Load all jobs initially
+        const allJobs = await searchJobs({});
+        setJobs(allJobs);
+        
+        // Load user profile for AI matching
+        if (currentUser) {
+          await loadUserProfile();
+        }
+        
+        // Generate search analytics
+        generateSearchAnalytics(allJobs);
+        
+      } catch (error) {
+        console.error('Error loading initial data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadInitialData();
+  }, [currentUser]);
+
+  useEffect(() => {
+    // Perform search when filters change
+    if (searchMode === 'standard') {
+      performStandardSearch();
+    } else if (searchMode === 'ai') {
+      performAISearch();
+    }
+  }, [filters, searchMode, performStandardSearch, performAISearch]);
+
+  const loadUserProfile = async () => {
+    // In a real app, this would load from Firestore
+    // For now, we'll use mock data
+    const mockProfile = {
+      skills: ['JavaScript', 'React', 'Node.js', 'Python'],
+      experience: 'intermediate',
+      location: 'Auckland',
+      salaryRange: { min: '50000', max: '80000' },
+      preferredRoles: ['Software Engineer', 'Frontend Developer'],
+      workPreferences: {
+        remote: true,
+        hybrid: true,
+        office: false
+      }
+    };
+    setUserProfile(mockProfile);
   };
 
   const generateMatchingScores = (jobsWithScores) => {

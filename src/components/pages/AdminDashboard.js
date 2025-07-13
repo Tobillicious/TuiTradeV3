@@ -1,16 +1,15 @@
 // Admin Dashboard - Analytics and User Tracking
 // Real-time metrics, user analytics, and system monitoring
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { 
     Users, Activity, ShoppingCart, DollarSign, 
-    TrendingUp, Eye, MessageCircle, Star,
-    Calendar, Clock, Globe, Smartphone,
-    BarChart3, PieChart, ArrowUp, ArrowDown,
-    RefreshCw, Download, Filter, Search
+    TrendingUp, Eye,
+    Clock, Globe, Smartphone,
+    ArrowUp, ArrowDown,
+    RefreshCw
 } from 'lucide-react';
-import { db } from '../../lib/firebase';
-import { collection, query, where, getDocs, onSnapshot, orderBy, limit } from 'firebase/firestore';
+
 
 const AdminDashboard = () => {
     const [metrics, setMetrics] = useState({
@@ -42,16 +41,7 @@ const AdminDashboard = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [lastUpdated, setLastUpdated] = useState(new Date());
 
-    useEffect(() => {
-        fetchDashboardData();
-        setupRealtimeListeners();
-        
-        // Refresh data every 5 minutes
-        const interval = setInterval(fetchDashboardData, 5 * 60 * 1000);
-        return () => clearInterval(interval);
-    }, [timeRange]);
-
-    const fetchDashboardData = async () => {
+    const fetchDashboardData = useCallback(async () => {
         setIsLoading(true);
         try {
             await Promise.all([
@@ -67,7 +57,16 @@ const AdminDashboard = () => {
             setIsLoading(false);
             setLastUpdated(new Date());
         }
-    };
+    }, []);
+
+    useEffect(() => {
+        fetchDashboardData();
+        setupRealtimeListeners();
+        
+        // Refresh data every 5 minutes
+        const interval = setInterval(fetchDashboardData, 5 * 60 * 1000);
+        return () => clearInterval(interval);
+    }, [timeRange, fetchDashboardData]);
 
     const fetchUserMetrics = async () => {
         try {

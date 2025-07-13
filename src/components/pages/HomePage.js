@@ -1,5 +1,5 @@
 // src/components/pages/HomePage.js
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { collection, query, orderBy, limit, getDocs } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
@@ -19,8 +19,10 @@ const HomePage = ({ onWatchToggle, watchedItems, onNavigate, onItemClick, onAddT
     const [hasMoreItems, setHasMoreItems] = useState(true);
     const [isLoadingMore, setIsLoadingMore] = useState(false);
     const [pageViews, setPageViews] = useState(0);
+    const isMountedRef = useRef(true);
 
     const fetchListings = useCallback(async (loadMore = false) => {
+        if (!isMountedRef.current) return;
         setIsLoading(true);
         try {
             // Fetch from both listings and auctions collections
@@ -65,6 +67,8 @@ const HomePage = ({ onWatchToggle, watchedItems, onNavigate, onItemClick, onAddT
 
             console.log('HomePage: Items found:', itemsWithWatchCounts.length);
 
+            if (!isMountedRef.current) return;
+            
             if (loadMore) {
                 setListings(prev => [...prev, ...itemsWithWatchCounts]);
             } else {
@@ -77,12 +81,15 @@ const HomePage = ({ onWatchToggle, watchedItems, onNavigate, onItemClick, onAddT
         } catch (error) {
             console.error('Error fetching listings:', error);
         } finally {
-            setIsLoading(false);
+            if (isMountedRef.current) setIsLoading(false);
         }
     }, []);
 
     useEffect(() => {
         fetchListings();
+        return () => {
+            isMountedRef.current = false;
+        };
     }, [fetchListings]);
 
     // Calculate real-time page views based on actual data

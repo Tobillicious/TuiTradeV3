@@ -4,6 +4,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { MapPin, Calculator, Info } from 'lucide-react';
 import { NZ_REGIONS, validateNZAddress, formatNZAddress, calculateShippingCost } from '../../lib/nzLocalization';
+import NeighbourhoodDropdown from '../ui/NeighbourhoodDropdown';
 
 const NZAddressForm = ({ 
     address = {}, 
@@ -23,6 +24,8 @@ const NZAddressForm = ({
         country: 'New Zealand',
         addressType: 'residential', // residential, business, pobox
         deliveryInstructions: '',
+        neighbourhood: null, // For neighbourhood-specific delivery
+        neighbourhoodId: '',
         ...address
     });
     
@@ -96,6 +99,41 @@ const NZAddressForm = ({
         }
     };
 
+    // Handle neighbourhood selection
+    const handleNeighbourhoodChange = (neighbourhood) => {
+        if (neighbourhood) {
+            setFormData(prev => ({
+                ...prev,
+                neighbourhood: neighbourhood,
+                neighbourhoodId: neighbourhood.id,
+                region: neighbourhood.region,
+                city: neighbourhood.suburbs?.[0] || prev.city,
+                suburb: neighbourhood.suburbs?.[0] || prev.suburb
+            }));
+        } else {
+            setFormData(prev => ({
+                ...prev,
+                neighbourhood: null,
+                neighbourhoodId: ''
+            }));
+        }
+    };
+
+    // Handle location detection from neighbourhood dropdown
+    const handleLocationDetected = (neighbourhood, detectedAddress) => {
+        if (neighbourhood && detectedAddress) {
+            setFormData(prev => ({
+                ...prev,
+                neighbourhood: neighbourhood,
+                neighbourhoodId: neighbourhood.id,
+                suburb: detectedAddress.suburb || prev.suburb,
+                city: detectedAddress.city || prev.city,
+                region: detectedAddress.region || neighbourhood.region,
+                postcode: detectedAddress.postcode || prev.postcode
+            }));
+        }
+    };
+
     const validatePostcode = async (postcode) => {
         if (!postcode || postcode.length !== 4) return false;
         
@@ -128,6 +166,25 @@ const NZAddressForm = ({
         }));
         setSuggestions([]);
     };
+
+    const renderNeighbourhoodSelection = () => (
+        <div>
+            <NeighbourhoodDropdown
+                value={formData.neighbourhoodId}
+                onChange={handleNeighbourhoodChange}
+                onLocationDetected={handleLocationDetected}
+                label="Neighbourhood (Optional)"
+                placeholder="Select or detect your neighbourhood..."
+                showCurrentLocation={true}
+                showSearch={true}
+                size="default"
+                className="mb-2"
+            />
+            <p className="text-xs text-gray-500">
+                Selecting your neighbourhood helps with local delivery options and community features
+            </p>
+        </div>
+    );
 
     const renderBasicFields = () => (
         <>
@@ -382,6 +439,8 @@ const NZAddressForm = ({
             </div>
 
             {mode === 'full' && renderAddressTypeSelector()}
+            
+            {renderNeighbourhoodSelection()}
             
             {renderBasicFields()}
             

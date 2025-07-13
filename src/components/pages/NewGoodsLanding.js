@@ -1,12 +1,12 @@
 import React from 'react';
-import { Smartphone, Laptop, Watch, Shirt, Toy, Home } from 'lucide-react';
+import { Smartphone, Laptop, Watch, Shirt, Puzzle, Home } from 'lucide-react';
 
 const subcategories = [
   { name: 'Electronics', icon: Smartphone, color: 'text-blue-500' },
   { name: 'Computers', icon: Laptop, color: 'text-green-500' },
   { name: 'Fashion', icon: Shirt, color: 'text-purple-500' },
   { name: 'Home & Kitchen', icon: Home, color: 'text-red-500' },
-  { name: 'Toys & Games', icon: Toy, color: 'text-orange-500' },
+  { name: 'Toys & Games', icon: Puzzle, color: 'text-orange-500' },
   { name: 'Accessories', icon: Watch, color: 'text-pink-500' },
 ];
 
