@@ -3,7 +3,7 @@ import { useState, useEffect, useMemo } from 'react';
 // Removed unused Firebase imports
 import ItemCard from '../ui/ItemCard';
 import JobCard from '../ui/JobCard';
-import JobSearchFilters from '../ui/JobSearchFilters';
+import EnhancedSearchFilters from '../ui/EnhancedSearchFilters';
 import { Search, Grid, List, Home, ChevronRight, Briefcase } from 'lucide-react';
 import { useTeReo, TeReoText } from '../ui/TeReoToggle';
 import jobService from '../../lib/jobsService';
@@ -173,36 +173,19 @@ const SearchResultsPage = ({ searchParams, onNavigate }) => {
                     <span className="font-semibold text-gray-700">Search Results</span>
                 </div>
 
-                {/* Search Type Toggle */}
-                <div className="mb-6 bg-white rounded-lg shadow-sm p-4">
-                    <div className="flex items-center space-x-4">
-                        <span className="text-sm font-medium text-gray-700">
-                            <TeReoText english="Search Type" teReoKey="search" />:
-                        </span>
-                        <div className="flex rounded-lg border border-gray-300 overflow-hidden">
-                            <button
-                                onClick={() => setSearchType('items')}
-                                className={`px-4 py-2 text-sm font-medium flex items-center ${searchType === 'items'
-                                    ? 'bg-green-600 text-white'
-                                    : 'bg-white text-gray-700 hover:bg-gray-50'
-                                    }`}
-                            >
-                                <Grid className="mr-2" size={16} />
-                                <TeReoText english="Items" teReoKey="marketplace" />
-                            </button>
-                            <button
-                                onClick={() => setSearchType('jobs')}
-                                className={`px-4 py-2 text-sm font-medium flex items-center ${searchType === 'jobs'
-                                    ? 'bg-green-600 text-white'
-                                    : 'bg-white text-gray-700 hover:bg-gray-50'
-                                    }`}
-                            >
-                                <Briefcase className="mr-2" size={16} />
-                                <TeReoText english="Jobs" teReoKey="jobs" />
-                            </button>
-                        </div>
-                    </div>
-                </div>
+                {/* Enhanced Search Filters */}
+                <EnhancedSearchFilters
+                    onApplyFilters={(filters) => {
+                        // Update search parameters based on filters
+                        setJobFilters(filters);
+                        // You can add more logic here to filter items as well
+                    }}
+                    initialFilters={filters}
+                    searchType={searchType}
+                    onSearchTypeChange={setSearchType}
+                    onViewModeChange={setViewMode}
+                    viewMode={viewMode}
+                />
 
                 <div className="mb-6">
                     <h1 className="text-3xl font-bold text-gray-900 mb-2">
@@ -218,42 +201,12 @@ const SearchResultsPage = ({ searchParams, onNavigate }) => {
                     </p>
                 </div>
 
-                {/* Filters */}
-                {searchType === 'jobs' && (
-                    <div className="mb-6">
-                        <JobSearchFilters
-                            onFiltersChange={setJobFilters}
-                            initialFilters={jobFilters}
-                        />
-                    </div>
-                )}
-
-                {/* View Controls */}
-                <div className="flex justify-between items-center mb-6">
-                    <div className="flex items-center gap-4">
+                {/* Results Summary */}
+                <div className="mb-6">
+                    <div className="flex items-center justify-between">
                         <span className="text-sm text-gray-600">
-                            {filteredResults.length} results
+                            {filteredResults.length} results found
                         </span>
-                        <div className="flex rounded-lg border border-gray-300 overflow-hidden">
-                            <button
-                                onClick={() => setViewMode('grid')}
-                                className={`p-2 ${viewMode === 'grid'
-                                    ? 'bg-green-600 text-white'
-                                    : 'bg-white text-gray-700 hover:bg-gray-50'
-                                    }`}
-                            >
-                                <Grid size={16} />
-                            </button>
-                            <button
-                                onClick={() => setViewMode('list')}
-                                className={`p-2 ${viewMode === 'list'
-                                    ? 'bg-green-600 text-white'
-                                    : 'bg-white text-gray-700 hover:bg-gray-50'
-                                    }`}
-                            >
-                                <List size={16} />
-                            </button>
-                        </div>
                     </div>
                 </div>
 

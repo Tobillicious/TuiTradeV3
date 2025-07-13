@@ -448,6 +448,26 @@ function AppContent() {
                                                 </div>
                                             </button>
                                             <button
+                                                onClick={() => { handleNavigate('digital-goods-landing'); setIsCategoriesMenuOpen(false); }}
+                                                className={`w-full text-left px-4 py-3 rounded-lg transition-colors flex items-center ${isDarkMode ? 'text-gray-300 hover:bg-gray-700' : 'text-gray-700 hover:bg-gray-50'}`}
+                                            >
+                                                <Gift size={16} className="mr-3 text-indigo-500" />
+                                                <div>
+                                                    <div className="font-medium">Digital Goods</div>
+                                                    <div className="text-xs text-gray-500">(Taonga Matihiko)</div>
+                                                </div>
+                                            </button>
+                                            <button
+                                                onClick={() => { handleNavigate('services-landing'); setIsCategoriesMenuOpen(false); }}
+                                                className={`w-full text-left px-4 py-3 rounded-lg transition-colors flex items-center ${isDarkMode ? 'text-gray-300 hover:bg-gray-700' : 'text-gray-700 hover:bg-gray-50'}`}
+                                            >
+                                                <Briefcase size={16} className="mr-3 text-teal-500" />
+                                                <div>
+                                                    <div className="font-medium">Services</div>
+                                                    <div className="text-xs text-gray-500">(Ratonga)</div>
+                                                </div>
+                                            </button>
+                                            <button
                                                 onClick={() => { handleNavigate('community-landing'); setIsCategoriesMenuOpen(false); }}
                                                 className={`w-full text-left px-4 py-3 rounded-lg transition-colors flex items-center ${isDarkMode ? 'text-gray-300 hover:bg-gray-700' : 'text-gray-700 hover:bg-gray-50'}`}
                                             >
@@ -666,6 +686,20 @@ function AppContent() {
                             >
                                 Jobs
                                 <span className="ml-2 text-xs text-gray-400">(Mahi)</span>
+                            </button>
+                            <button
+                                onClick={() => handleNavigate('digital-goods-landing')}
+                                className={`w-full text-left px-3 py-2 rounded-lg transition-colors ${isDarkMode ? 'text-gray-300 hover:bg-gray-700' : 'text-gray-700 hover:bg-gray-50'}`}
+                            >
+                                Digital Goods
+                                <span className="ml-2 text-xs text-gray-400">(Taonga Matihiko)</span>
+                            </button>
+                            <button
+                                onClick={() => handleNavigate('services-landing')}
+                                className={`w-full text-left px-3 py-2 rounded-lg transition-colors ${isDarkMode ? 'text-gray-300 hover:bg-gray-700' : 'text-gray-700 hover:bg-gray-50'}`}
+                            >
+                                Services
+                                <span className="ml-2 text-xs text-gray-400">(Ratonga)</span>
                             </button>
                             <button
                                 onClick={() => handleNavigate('community-landing')}
