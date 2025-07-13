@@ -10,17 +10,7 @@ import { db } from './firebase';
  */
 export const fetchUserReputation = async (userId) => {
   if (!userId) {
-    // Return a default reputation for guests or in development
-    return {
-      averageSellerRating: 4.5,
-      totalTrades: 23,
-      badges: [
-        { id: 'powerSeller', name: 'Power Seller', description: 'Completed 10+ successful trades', color: '#FFD700' },
-        { id: 'fastShipper', name: 'Fast Shipper', description: 'Consistently ships within 24 hours', color: '#00FF00' }
-      ],
-      memberSince: new Date(new Date().setFullYear(new Date().getFullYear() - 1)),
-      error: 'Mock data returned for guest user.',
-    };
+    return null;
   }
 
   try {
