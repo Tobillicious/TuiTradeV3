@@ -36,6 +36,34 @@ export const TE_REO_TRANSLATIONS = {
     'experience': 'wheako', // experience
     'education': 'mātauranga', // education/knowledge
     'skills': 'pūkenga', // skills
+    // Additional marketplace terms
+    'buy': 'hoko', // buy
+    'sell': 'hoko atu', // sell
+    'price': 'utu', // price
+    'negotiable': 'whiriwhiri', // negotiable
+    'condition': 'āhua', // condition
+    'description': 'whakaahuatanga', // description
+    'shipping': 'kawe', // shipping
+    'delivery': 'tuku', // delivery
+    'pickup': 'tiki', // pickup
+    'payment': 'utu', // payment
+    'secure': 'haumaru', // secure
+    'verified': 'whakamana', // verified
+    'rating': 'whakatauranga', // rating
+    'review': 'arotake', // review
+    'favorite': 'pai', // favorite
+    'share': 'tiri', // share
+    'report': 'pūrongo', // report
+    'message': 'karere', // message
+    'offer': 'tuku', // offer
+    'bid': 'tuku', // bid
+    'auction': 'hokohoko', // auction
+    'reserve': 'taapiri', // reserve
+    'sold': 'hokona', // sold
+    'available': 'wātea', // available
+    'cart': 'kāta', // cart
+    'watchlist': 'mātakitaki', // watchlist
+    'categories': 'kāwai', // categories
   },
 
   // Job-related terms
