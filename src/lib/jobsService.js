@@ -1,671 +1,529 @@
-// Jobs Service - Real data integration for TuiTrade jobs system
-// Handles all Firestore operations for jobs, applications, and employer data
+// Real Job Service - Firestore integration for job listings and applications
+// Replaces mock data with actual database operations
 
-import { 
-  collection, 
-  doc, 
-  addDoc, 
-  setDoc, 
-  getDoc, 
-  getDocs, 
-  query, 
-  where, 
-  orderBy, 
-  limit, 
-  onSnapshot,
+import {
+  collection,
+  doc,
+  addDoc,
   updateDoc,
   deleteDoc,
+  getDoc,
+  getDocs,
+  query,
+  where,
+  orderBy,
+  limit,
+  startAfter,
+  onSnapshot,
   serverTimestamp,
-  increment
+  arrayUnion,
+  arrayRemove,
+  runTransaction,
+  writeBatch
 } from 'firebase/firestore';
-import { 
-  ref, 
-  uploadBytes, 
-  getDownloadURL, 
-  deleteObject 
-} from 'firebase/storage';
-import { db, storage } from './firebase';
+import { db } from './firebase';
 
-// Collection names
-export const COLLECTIONS = {
-  JOBS: 'jobs',
-  APPLICATIONS: 'jobApplications',
-  COMPANIES: 'companies',
-  USERS: 'users',
-  NOTIFICATIONS: 'notifications'
-};
-
-// Job status types
+// Job status constants
 export const JOB_STATUS = {
   DRAFT: 'draft',
   ACTIVE: 'active',
   PAUSED: 'paused',
-  EXPIRED: 'expired',
-  FILLED: 'filled'
+  CLOSED: 'closed',
+  EXPIRED: 'expired'
 };
 
-// Application status types
+// Application status constants
 export const APPLICATION_STATUS = {
-  NEW: 'new',
+  PENDING: 'pending',
   REVIEWING: 'reviewing',
-  INTERVIEWED: 'interviewed',
+  SHORTLISTED: 'shortlisted',
+  INTERVIEWING: 'interviewing',
   OFFERED: 'offered',
   HIRED: 'hired',
-  REJECTED: 'rejected'
+  REJECTED: 'rejected',
+  WITHDRAWN: 'withdrawn'
 };
 
-// ===== JOB MANAGEMENT =====
-
-/**
- * Create a new job posting
- * @param {Object} jobData - Job data object
- * @param {string} companyId - Company/employer ID
- * @returns {Promise<string>} - Created job ID
- */
-export const createJob = async (jobData, companyId) => {
-  try {
-    const jobDoc = {
-      ...jobData,
-      companyId,
-      status: JOB_STATUS.ACTIVE,
-      createdAt: serverTimestamp(),
-      updatedAt: serverTimestamp(),
-      applicationsCount: 0,
-      viewsCount: 0,
-      featured: jobData.featured || false,
-      urgent: jobData.urgent || false
-    };
-
-    const docRef = await addDoc(collection(db, COLLECTIONS.JOBS), jobDoc);
-    console.log('Job created with ID:', docRef.id);
-    return docRef.id;
-  } catch (error) {
-    console.error('Error creating job:', error);
-    throw new Error('Failed to create job posting');
+class JobService {
+  constructor() {
+    this.isInitialized = false;
   }
-};
 
-/**
- * Update an existing job posting
- * @param {string} jobId - Job ID
- * @param {Object} updates - Fields to update
- * @returns {Promise<void>}
- */
-export const updateJob = async (jobId, updates) => {
-  try {
-    const jobRef = doc(db, COLLECTIONS.JOBS, jobId);
-    await updateDoc(jobRef, {
-      ...updates,
-      updatedAt: serverTimestamp()
-    });
-    console.log('Job updated successfully');
-  } catch (error) {
-    console.error('Error updating job:', error);
-    throw new Error('Failed to update job posting');
+  initialize() {
+    this.isInitialized = true;
+    console.log('JobService initialized');
   }
-};
 
-/**
- * Delete a job posting
- * @param {string} jobId - Job ID
- * @returns {Promise<void>}
- */
-export const deleteJob = async (jobId) => {
-  try {
-    await deleteDoc(doc(db, COLLECTIONS.JOBS, jobId));
-    console.log('Job deleted successfully');
-  } catch (error) {
-    console.error('Error deleting job:', error);
-    throw new Error('Failed to delete job posting');
-  }
-};
-
-/**
- * Get a single job by ID
- * @param {string} jobId - Job ID
- * @returns {Promise<Object|null>} - Job data or null if not found
- */
-export const getJob = async (jobId) => {
-  try {
-    const jobRef = doc(db, COLLECTIONS.JOBS, jobId);
-    const jobSnap = await getDoc(jobRef);
-    
-    if (jobSnap.exists()) {
-      return { id: jobSnap.id, ...jobSnap.data() };
-    }
-    return null;
-  } catch (error) {
-    console.error('Error getting job:', error);
-    throw new Error('Failed to fetch job details');
-  }
-};
-
-/**
- * Get jobs for a specific company
- * @param {string} companyId - Company ID
- * @param {Object} options - Query options
- * @returns {Promise<Array>} - Array of job objects
- */
-export const getCompanyJobs = async (companyId, options = {}) => {
-  try {
-    const {
-      status = null,
-      limitCount = 50,
-      orderByField = 'createdAt',
-      orderDirection = 'desc'
-    } = options;
-
-    let q = query(
-      collection(db, COLLECTIONS.JOBS),
-      where('companyId', '==', companyId),
-      orderBy(orderByField, orderDirection),
-      limit(limitCount)
-    );
-
-    if (status) {
-      q = query(
-        collection(db, COLLECTIONS.JOBS),
-        where('companyId', '==', companyId),
-        where('status', '==', status),
-        orderBy(orderByField, orderDirection),
-        limit(limitCount)
-      );
-    }
-
-    const querySnapshot = await getDocs(q);
-    const jobs = [];
-    
-    querySnapshot.forEach((doc) => {
-      jobs.push({ id: doc.id, ...doc.data() });
-    });
-
-    return jobs;
-  } catch (error) {
-    console.error('Error getting company jobs:', error);
-    throw new Error('Failed to fetch company jobs');
-  }
-};
-
-/**
- * Search jobs with filters
- * @param {Object} filters - Search filters
- * @returns {Promise<Array>} - Array of matching jobs
- */
-export const searchJobs = async (filters = {}) => {
-  try {
-    const {
-      keywords = '',
-      category = '',
-      location = '',
-      jobType = '',
-      salaryMin = null,
-      salaryMax = null,
-      limitCount = 50
-    } = filters;
-
-    let q = query(
-      collection(db, COLLECTIONS.JOBS),
-      where('status', '==', JOB_STATUS.ACTIVE),
-      orderBy('createdAt', 'desc'),
-      limit(limitCount)
-    );
-
-    // Apply filters
-    if (category) {
-      q = query(q, where('category', '==', category));
-    }
-    if (location) {
-      q = query(q, where('location', '==', location));
-    }
-    if (jobType) {
-      q = query(q, where('type', '==', jobType));
-    }
-
-    const querySnapshot = await getDocs(q);
-    let jobs = [];
-    
-    querySnapshot.forEach((doc) => {
-      jobs.push({ id: doc.id, ...doc.data() });
-    });
-
-    // Client-side filtering for complex searches
-    if (keywords) {
-      const keywordLower = keywords.toLowerCase();
-      jobs = jobs.filter(job => 
-        job.title?.toLowerCase().includes(keywordLower) ||
-        job.description?.toLowerCase().includes(keywordLower) ||
-        job.company?.toLowerCase().includes(keywordLower)
-      );
-    }
-
-    if (salaryMin || salaryMax) {
-      jobs = jobs.filter(job => {
-        const jobMin = parseInt(job.salaryMin) || 0;
-        const jobMax = parseInt(job.salaryMax) || Infinity;
-        
-        if (salaryMin && jobMax < salaryMin) return false;
-        if (salaryMax && jobMin > salaryMax) return false;
-        return true;
-      });
-    }
-
-    return jobs;
-  } catch (error) {
-    console.error('Error searching jobs:', error);
-    throw new Error('Failed to search jobs');
-  }
-};
-
-/**
- * Increment job view count
- * @param {string} jobId - Job ID
- * @returns {Promise<void>}
- */
-export const incrementJobViews = async (jobId) => {
-  try {
-    const jobRef = doc(db, COLLECTIONS.JOBS, jobId);
-    await updateDoc(jobRef, {
-      viewsCount: increment(1)
-    });
-  } catch (error) {
-    console.error('Error incrementing job views:', error);
-    // Non-critical error, don't throw
-  }
-};
-
-// ===== APPLICATION MANAGEMENT =====
-
-/**
- * Submit a job application
- * @param {Object} applicationData - Application data
- * @param {Array} files - Array of uploaded files
- * @returns {Promise<string>} - Application ID
- */
-export const submitApplication = async (applicationData, files = []) => {
-  try {
-    // Upload files to Firebase Storage
-    const uploadedFiles = await Promise.all(
-      files.map(async (file) => {
-        const fileName = `applications/${applicationData.jobId}/${Date.now()}_${file.name}`;
-        const storageRef = ref(storage, fileName);
-        const snapshot = await uploadBytes(storageRef, file.file);
-        const downloadURL = await getDownloadURL(snapshot.ref);
-        
-        return {
-          name: file.name,
-          size: file.size,
-          type: file.type,
-          url: downloadURL,
-          storagePath: fileName
-        };
-      })
-    );
-
-    // Create application document
-    const applicationDoc = {
-      ...applicationData,
-      files: uploadedFiles,
-      status: APPLICATION_STATUS.NEW,
-      appliedAt: serverTimestamp(),
-      updatedAt: serverTimestamp()
-    };
-
-    const docRef = await addDoc(collection(db, COLLECTIONS.APPLICATIONS), applicationDoc);
-
-    // Increment job applications count
-    const jobRef = doc(db, COLLECTIONS.JOBS, applicationData.jobId);
-    await updateDoc(jobRef, {
-      applicationsCount: increment(1)
-    });
-
-    console.log('Application submitted with ID:', docRef.id);
-    return docRef.id;
-  } catch (error) {
-    console.error('Error submitting application:', error);
-    throw new Error('Failed to submit application');
-  }
-};
-
-/**
- * Get applications for a specific job
- * @param {string} jobId - Job ID
- * @param {Object} options - Query options
- * @returns {Promise<Array>} - Array of application objects
- */
-export const getJobApplications = async (jobId, options = {}) => {
-  try {
-    const {
-      status = null,
-      limitCount = 100,
-      orderByField = 'appliedAt',
-      orderDirection = 'desc'
-    } = options;
-
-    let q = query(
-      collection(db, COLLECTIONS.APPLICATIONS),
-      where('jobId', '==', jobId),
-      orderBy(orderByField, orderDirection),
-      limit(limitCount)
-    );
-
-    if (status) {
-      q = query(q, where('status', '==', status));
-    }
-
-    const querySnapshot = await getDocs(q);
-    const applications = [];
-    
-    querySnapshot.forEach((doc) => {
-      applications.push({ id: doc.id, ...doc.data() });
-    });
-
-    return applications;
-  } catch (error) {
-    console.error('Error getting job applications:', error);
-    throw new Error('Failed to fetch job applications');
-  }
-};
-
-/**
- * Get applications for a company (all jobs)
- * @param {string} companyId - Company ID
- * @param {Object} options - Query options
- * @returns {Promise<Array>} - Array of application objects
- */
-export const getCompanyApplications = async (companyId, options = {}) => {
-  try {
-    // First get all jobs for the company
-    const companyJobs = await getCompanyJobs(companyId);
-    const jobIds = companyJobs.map(job => job.id);
-
-    if (jobIds.length === 0) return [];
-
-    // Get applications for all company jobs
-    // Note: Firestore has a limit of 10 items in 'in' queries, so we might need to batch this
-    const applications = [];
-    
-    for (let i = 0; i < jobIds.length; i += 10) {
-      const batchJobIds = jobIds.slice(i, i + 10);
-      
-      let q = query(
-        collection(db, COLLECTIONS.APPLICATIONS),
-        where('jobId', 'in', batchJobIds),
-        orderBy('appliedAt', 'desc')
-      );
-
-      if (options.status) {
-        q = query(q, where('status', '==', options.status));
-      }
-
-      const querySnapshot = await getDocs(q);
-      querySnapshot.forEach((doc) => {
-        applications.push({ id: doc.id, ...doc.data() });
-      });
-    }
-
-    // Sort by appliedAt descending
-    applications.sort((a, b) => b.appliedAt?.toDate() - a.appliedAt?.toDate());
-
-    return applications.slice(0, options.limitCount || 100);
-  } catch (error) {
-    console.error('Error getting company applications:', error);
-    throw new Error('Failed to fetch company applications');
-  }
-};
-
-/**
- * Update application status
- * @param {string} applicationId - Application ID
- * @param {string} status - New status
- * @param {Object} updates - Additional updates
- * @returns {Promise<void>}
- */
-export const updateApplicationStatus = async (applicationId, status, updates = {}) => {
-  try {
-    const applicationRef = doc(db, COLLECTIONS.APPLICATIONS, applicationId);
-    await updateDoc(applicationRef, {
-      status,
-      ...updates,
-      updatedAt: serverTimestamp()
-    });
-    
-    console.log('Application status updated successfully');
-  } catch (error) {
-    console.error('Error updating application status:', error);
-    throw new Error('Failed to update application status');
-  }
-};
-
-// ===== COMPANY MANAGEMENT =====
-
-/**
- * Create or update company profile
- * @param {string} companyId - Company ID (usually user ID)
- * @param {Object} companyData - Company profile data
- * @returns {Promise<void>}
- */
-export const saveCompanyProfile = async (companyId, companyData) => {
-  try {
-    const companyRef = doc(db, COLLECTIONS.COMPANIES, companyId);
-    await setDoc(companyRef, {
-      ...companyData,
-      updatedAt: serverTimestamp()
-    }, { merge: true });
-    
-    console.log('Company profile saved successfully');
-  } catch (error) {
-    console.error('Error saving company profile:', error);
-    throw new Error('Failed to save company profile');
-  }
-};
-
-/**
- * Get company profile
- * @param {string} companyId - Company ID
- * @returns {Promise<Object|null>} - Company data or null
- */
-export const getCompanyProfile = async (companyId) => {
-  try {
-    const companyRef = doc(db, COLLECTIONS.COMPANIES, companyId);
-    const companySnap = await getDoc(companyRef);
-    
-    if (companySnap.exists()) {
-      return { id: companySnap.id, ...companySnap.data() };
-    }
-    return null;
-  } catch (error) {
-    console.error('Error getting company profile:', error);
-    throw new Error('Failed to fetch company profile');
-  }
-};
-
-// ===== REAL-TIME SUBSCRIPTIONS =====
-
-/**
- * Subscribe to real-time updates for company jobs
- * @param {string} companyId - Company ID
- * @param {Function} callback - Callback function for updates
- * @returns {Function} - Unsubscribe function
- */
-export const subscribeToCompanyJobs = (companyId, callback) => {
-  const q = query(
-    collection(db, COLLECTIONS.JOBS),
-    where('companyId', '==', companyId),
-    orderBy('createdAt', 'desc')
-  );
-
-  return onSnapshot(q, (querySnapshot) => {
-    const jobs = [];
-    querySnapshot.forEach((doc) => {
-      jobs.push({ id: doc.id, ...doc.data() });
-    });
-    callback(jobs);
-  });
-};
-
-/**
- * Subscribe to real-time updates for company applications
- * @param {string} companyId - Company ID
- * @param {Function} callback - Callback function for updates
- * @returns {Function} - Unsubscribe function
- */
-export const subscribeToCompanyApplications = (companyId, callback) => {
-  // This is a complex subscription since we need to get applications for all company jobs
-  // For now, we'll use polling, but in a production app you might want to use Cloud Functions
-  // to maintain a denormalized collection of company applications
-  
-  let unsubscribe = null;
-  
-  const setupSubscription = async () => {
+  // Create a new job listing
+  async createJob(jobData, employerId) {
     try {
-      const companyJobs = await getCompanyJobs(companyId);
-      const jobIds = companyJobs.map(job => job.id);
-      
-      if (jobIds.length === 0) {
-        callback([]);
-        return () => {};
+      const job = {
+        ...jobData,
+        employerId,
+        status: JOB_STATUS.ACTIVE,
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
+        applicationsCount: 0,
+        viewsCount: 0,
+        featured: false,
+        expiresAt: this.calculateExpiryDate(jobData.duration || 30)
+      };
+
+      const docRef = await addDoc(collection(db, 'jobs'), job);
+
+      // Update employer's job count
+      await this.updateEmployerJobCount(employerId, 1);
+
+      return { id: docRef.id, ...job };
+    } catch (error) {
+      console.error('Error creating job:', error);
+      throw new Error('Failed to create job listing');
+    }
+  }
+
+  // Update job listing
+  async updateJob(jobId, updates) {
+    try {
+      const jobRef = doc(db, 'jobs', jobId);
+      await updateDoc(jobRef, {
+        ...updates,
+        updatedAt: serverTimestamp()
+      });
+
+      return true;
+    } catch (error) {
+      console.error('Error updating job:', error);
+      throw new Error('Failed to update job listing');
+    }
+  }
+
+  // Delete job listing
+  async deleteJob(jobId, employerId) {
+    try {
+      const batch = writeBatch(db);
+
+      // Delete the job
+      const jobRef = doc(db, 'jobs', jobId);
+      batch.delete(jobRef);
+
+      // Delete all applications for this job
+      const applicationsQuery = query(
+        collection(db, 'jobApplications'),
+        where('jobId', '==', jobId)
+      );
+      const applicationsSnapshot = await getDocs(applicationsQuery);
+
+      applicationsSnapshot.docs.forEach(doc => {
+        batch.delete(doc.ref);
+      });
+
+      await batch.commit();
+
+      // Update employer's job count
+      await this.updateEmployerJobCount(employerId, -1);
+
+      return true;
+    } catch (error) {
+      console.error('Error deleting job:', error);
+      throw new Error('Failed to delete job listing');
+    }
+  }
+
+  // Get job by ID
+  async getJob(jobId) {
+    try {
+      const jobRef = doc(db, 'jobs', jobId);
+      const jobDoc = await getDoc(jobRef);
+
+      if (!jobDoc.exists()) {
+        throw new Error('Job not found');
       }
 
-      // Subscribe to first batch of job IDs (Firestore limit is 10 for 'in' queries)
-      const firstBatch = jobIds.slice(0, 10);
-      
-      const q = query(
-        collection(db, COLLECTIONS.APPLICATIONS),
-        where('jobId', 'in', firstBatch),
-        orderBy('appliedAt', 'desc')
+      return { id: jobDoc.id, ...jobDoc.data() };
+    } catch (error) {
+      console.error('Error getting job:', error);
+      throw error;
+    }
+  }
+
+  // Search jobs with filters
+  async searchJobs(filters = {}, options = {}) {
+    try {
+      let q = collection(db, 'jobs');
+      const constraints = [];
+
+      // Add filters
+      if (filters.category) {
+        constraints.push(where('category', '==', filters.category));
+      }
+
+      if (filters.subcategory) {
+        constraints.push(where('subcategory', '==', filters.subcategory));
+      }
+
+      if (filters.location) {
+        constraints.push(where('region', '==', filters.location));
+      }
+
+      if (filters.type) {
+        constraints.push(where('type', '==', filters.type));
+      }
+
+      if (filters.experience) {
+        constraints.push(where('experience', '==', filters.experience));
+      }
+
+      if (filters.workRights) {
+        constraints.push(where('workRights', '==', filters.workRights));
+      }
+
+      // Only show active jobs
+      constraints.push(where('status', '==', JOB_STATUS.ACTIVE));
+
+      // Add ordering
+      constraints.push(orderBy('createdAt', 'desc'));
+
+      // Add limit
+      if (options.limit) {
+        constraints.push(limit(options.limit));
+      }
+
+      q = query(q, ...constraints);
+      const snapshot = await getDocs(q);
+
+      let jobs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+      // Apply keyword filter if provided
+      if (filters.keywords) {
+        const keywords = filters.keywords.toLowerCase().split(' ');
+        jobs = jobs.filter(job =>
+          keywords.some(keyword =>
+            job.title.toLowerCase().includes(keyword) ||
+            job.company.toLowerCase().includes(keyword) ||
+            job.description.toLowerCase().includes(keyword)
+          )
+        );
+      }
+
+      return jobs;
+    } catch (error) {
+      console.error('Error searching jobs:', error);
+      throw new Error('Failed to search jobs');
+    }
+  }
+
+  // Get jobs by employer
+  async getEmployerJobs(employerId, status = null) {
+    try {
+      let q = query(
+        collection(db, 'jobs'),
+        where('employerId', '==', employerId),
+        orderBy('createdAt', 'desc')
       );
 
-      unsubscribe = onSnapshot(q, (querySnapshot) => {
-        const applications = [];
-        querySnapshot.forEach((doc) => {
-          applications.push({ id: doc.id, ...doc.data() });
-        });
-        callback(applications);
+      if (status) {
+        q = query(q, where('status', '==', status));
+      }
+
+      const snapshot = await getDocs(q);
+      return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    } catch (error) {
+      console.error('Error getting employer jobs:', error);
+      throw new Error('Failed to get employer jobs');
+    }
+  }
+
+  // Get company jobs (alias for getEmployerJobs)
+  async getCompanyJobs(employerId, status = null) {
+    return this.getEmployerJobs(employerId, status);
+  }
+
+  // Get company applications
+  async getCompanyApplications(employerId, status = null) {
+    try {
+      // First get all jobs by this employer
+      const jobs = await this.getEmployerJobs(employerId);
+      const jobIds = jobs.map(job => job.id);
+
+      if (jobIds.length === 0) return [];
+
+      // Get applications for these jobs
+      const applicationsQuery = query(
+        collection(db, 'jobApplications'),
+        where('jobId', 'in', jobIds),
+        orderBy('createdAt', 'desc')
+      );
+
+      const snapshot = await getDocs(applicationsQuery);
+      let applications = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+      // Filter by status if provided
+      if (status) {
+        applications = applications.filter(app => app.status === status);
+      }
+
+      return applications;
+    } catch (error) {
+      console.error('Error getting company applications:', error);
+      throw new Error('Failed to get company applications');
+    }
+  }
+
+  // Get company dashboard stats
+  async getCompanyDashboardStats(employerId) {
+    try {
+      const [jobs, applications] = await Promise.all([
+        this.getEmployerJobs(employerId),
+        this.getCompanyApplications(employerId)
+      ]);
+
+      const stats = {
+        totalJobs: jobs.length,
+        activeJobs: jobs.filter(job => job.status === JOB_STATUS.ACTIVE).length,
+        totalApplications: applications.length,
+        pendingApplications: applications.filter(app => app.status === APPLICATION_STATUS.PENDING).length,
+        shortlistedApplications: applications.filter(app => app.status === APPLICATION_STATUS.SHORTLISTED).length,
+        totalViews: jobs.reduce((sum, job) => sum + (job.viewsCount || 0), 0)
+      };
+
+      return stats;
+    } catch (error) {
+      console.error('Error getting company dashboard stats:', error);
+      throw new Error('Failed to get company dashboard stats');
+    }
+  }
+
+  // Subscribe to company jobs
+  subscribeToCompanyJobs(employerId, callback) {
+    const q = query(
+      collection(db, 'jobs'),
+      where('employerId', '==', employerId),
+      orderBy('createdAt', 'desc')
+    );
+
+    return onSnapshot(q, (snapshot) => {
+      const jobs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      callback(jobs);
+    });
+  }
+
+  // Subscribe to company applications
+  subscribeToCompanyApplications(employerId, callback) {
+    // This is a simplified version - in production you'd need to handle the 'in' query limitation
+    return this.getCompanyApplications(employerId).then(applications => {
+      callback(applications);
+      return () => { }; // Return cleanup function
+    });
+  }
+
+  // Apply for a job
+  async applyForJob(jobId, applicationData, applicantId) {
+    try {
+      // Check if already applied
+      const existingApplication = await this.getApplication(jobId, applicantId);
+      if (existingApplication) {
+        throw new Error('You have already applied for this job');
+      }
+
+      const application = {
+        jobId,
+        applicantId,
+        status: APPLICATION_STATUS.PENDING,
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
+        ...applicationData
+      };
+
+      const docRef = await addDoc(collection(db, 'jobApplications'), application);
+
+      // Update job application count
+      await this.updateJobApplicationCount(jobId, 1);
+
+      return { id: docRef.id, ...application };
+    } catch (error) {
+      console.error('Error applying for job:', error);
+      throw error;
+    }
+  }
+
+  // Submit application (alias for applyForJob)
+  async submitApplication(jobId, applicationData, applicantId) {
+    return this.applyForJob(jobId, applicationData, applicantId);
+  }
+
+  // Get application by job and applicant
+  async getApplication(jobId, applicantId) {
+    try {
+      const q = query(
+        collection(db, 'jobApplications'),
+        where('jobId', '==', jobId),
+        where('applicantId', '==', applicantId)
+      );
+
+      const snapshot = await getDocs(q);
+      if (snapshot.empty) return null;
+
+      const doc = snapshot.docs[0];
+      return { id: doc.id, ...doc.data() };
+    } catch (error) {
+      console.error('Error getting application:', error);
+      return null;
+    }
+  }
+
+  // Get applications for a job
+  async getJobApplications(jobId, status = null) {
+    try {
+      let q = query(
+        collection(db, 'jobApplications'),
+        where('jobId', '==', jobId),
+        orderBy('createdAt', 'desc')
+      );
+
+      if (status) {
+        q = query(q, where('status', '==', status));
+      }
+
+      const snapshot = await getDocs(q);
+      return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    } catch (error) {
+      console.error('Error getting job applications:', error);
+      throw new Error('Failed to get job applications');
+    }
+  }
+
+  // Get applications by applicant
+  async getApplicantApplications(applicantId, status = null) {
+    try {
+      let q = query(
+        collection(db, 'jobApplications'),
+        where('applicantId', '==', applicantId),
+        orderBy('createdAt', 'desc')
+      );
+
+      if (status) {
+        q = query(q, where('status', '==', status));
+      }
+
+      const snapshot = await getDocs(q);
+      return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    } catch (error) {
+      console.error('Error getting applicant applications:', error);
+      throw new Error('Failed to get applicant applications');
+    }
+  }
+
+  // Update application status
+  async updateApplicationStatus(applicationId, status, notes = '') {
+    try {
+      const applicationRef = doc(db, 'jobApplications', applicationId);
+      await updateDoc(applicationRef, {
+        status,
+        notes,
+        updatedAt: serverTimestamp()
+      });
+
+      return true;
+    } catch (error) {
+      console.error('Error updating application status:', error);
+      throw new Error('Failed to update application status');
+    }
+  }
+
+  // Track job view
+  async trackJobView(jobId) {
+    try {
+      const jobRef = doc(db, 'jobs', jobId);
+      await updateDoc(jobRef, {
+        viewsCount: arrayUnion(1)
       });
     } catch (error) {
-      console.error('Error setting up applications subscription:', error);
-      callback([]);
+      console.error('Error tracking job view:', error);
     }
-  };
-
-  setupSubscription();
-  
-  return () => {
-    if (unsubscribe) unsubscribe();
-  };
-};
-
-// ===== FILE MANAGEMENT =====
-
-/**
- * Upload a file to Firebase Storage
- * @param {File} file - File to upload
- * @param {string} path - Storage path
- * @returns {Promise<string>} - Download URL
- */
-export const uploadFile = async (file, path) => {
-  try {
-    const storageRef = ref(storage, path);
-    const snapshot = await uploadBytes(storageRef, file);
-    const downloadURL = await getDownloadURL(snapshot.ref);
-    return downloadURL;
-  } catch (error) {
-    console.error('Error uploading file:', error);
-    throw new Error('Failed to upload file');
   }
-};
 
-/**
- * Delete a file from Firebase Storage
- * @param {string} path - Storage path
- * @returns {Promise<void>}
- */
-export const deleteFile = async (path) => {
-  try {
-    const storageRef = ref(storage, path);
-    await deleteObject(storageRef);
-    console.log('File deleted successfully');
-  } catch (error) {
-    console.error('Error deleting file:', error);
-    throw new Error('Failed to delete file');
+  // Helper methods
+  calculateExpiryDate(durationDays) {
+    const expiryDate = new Date();
+    expiryDate.setDate(expiryDate.getDate() + durationDays);
+    return expiryDate;
   }
-};
 
-// ===== STATISTICS & ANALYTICS =====
-
-/**
- * Get dashboard statistics for a company
- * @param {string} companyId - Company ID
- * @returns {Promise<Object>} - Dashboard stats
- */
-export const getCompanyDashboardStats = async (companyId) => {
-  try {
-    const [jobs, applications] = await Promise.all([
-      getCompanyJobs(companyId),
-      getCompanyApplications(companyId)
-    ]);
-
-    const activeJobs = jobs.filter(job => job.status === JOB_STATUS.ACTIVE);
-    const newApplications = applications.filter(app => app.status === APPLICATION_STATUS.NEW);
-
-    // Calculate average time to hire (mock for now)
-    const averageTimeToHire = '14 days';
-    const responseRate = '89%';
-
-    return {
-      totalJobs: jobs.length,
-      activeJobs: activeJobs.length,
-      totalApplications: applications.length,
-      newApplications: newApplications.length,
-      averageTimeToHire,
-      responseRate
-    };
-  } catch (error) {
-    console.error('Error getting dashboard stats:', error);
-    return {
-      totalJobs: 0,
-      activeJobs: 0,
-      totalApplications: 0,
-      newApplications: 0,
-      averageTimeToHire: '0 days',
-      responseRate: '0%'
-    };
+  async updateEmployerJobCount(employerId, increment) {
+    try {
+      const employerRef = doc(db, 'users', employerId);
+      await updateDoc(employerRef, {
+        jobCount: arrayUnion(increment)
+      });
+    } catch (error) {
+      console.error('Error updating employer job count:', error);
+    }
   }
-};
 
-export default {
-  // Job management
+  async updateJobApplicationCount(jobId, increment) {
+    try {
+      const jobRef = doc(db, 'jobs', jobId);
+      await updateDoc(jobRef, {
+        applicationsCount: arrayUnion(increment)
+      });
+    } catch (error) {
+      console.error('Error updating job application count:', error);
+    }
+  }
+
+  // Real-time listeners
+  subscribeToJobUpdates(jobId, callback) {
+    const jobRef = doc(db, 'jobs', jobId);
+    return onSnapshot(jobRef, (doc) => {
+      if (doc.exists()) {
+        callback({ id: doc.id, ...doc.data() });
+      }
+    });
+  }
+
+  subscribeToJobApplications(jobId, callback) {
+    const q = query(
+      collection(db, 'jobApplications'),
+      where('jobId', '==', jobId),
+      orderBy('createdAt', 'desc')
+    );
+
+    return onSnapshot(q, (snapshot) => {
+      const applications = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      callback(applications);
+    });
+  }
+
+  cleanup() {
+    this.isInitialized = false;
+  }
+}
+
+// Create singleton instance
+const jobService = new JobService();
+
+// Export individual methods for direct import
+export const {
   createJob,
   updateJob,
   deleteJob,
   getJob,
-  getCompanyJobs,
   searchJobs,
-  incrementJobViews,
-  
-  // Application management
-  submitApplication,
-  getJobApplications,
+  getEmployerJobs,
+  getCompanyJobs,
   getCompanyApplications,
-  updateApplicationStatus,
-  
-  // Company management
-  saveCompanyProfile,
-  getCompanyProfile,
-  
-  // Real-time subscriptions
+  getCompanyDashboardStats,
   subscribeToCompanyJobs,
   subscribeToCompanyApplications,
-  
-  // File management
-  uploadFile,
-  deleteFile,
-  
-  // Statistics
-  getCompanyDashboardStats,
-  
-  // Constants
-  COLLECTIONS,
-  JOB_STATUS,
-  APPLICATION_STATUS
-};
+  applyForJob,
+  submitApplication,
+  getApplication,
+  getJobApplications,
+  getApplicantApplications,
+  updateApplicationStatus,
+  trackJobView,
+  subscribeToJobUpdates,
+  subscribeToJobApplications
+} = jobService;
+
+export default jobService;

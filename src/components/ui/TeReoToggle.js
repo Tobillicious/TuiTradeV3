@@ -222,3 +222,6 @@ export const TeReoJobTitle = ({ title, className = '' }) => {
 
   return <span className={className}>{displayTitle}</span>;
 };
+
+// Default export
+export default TeReoToggle;

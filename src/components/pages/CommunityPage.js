@@ -3,25 +3,126 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
-import { 
-    Users, MapPin, Calendar, MessageSquare, Vote, 
+import {
+    Users, MapPin, Calendar, MessageSquare, Vote,
     Star, ChevronRight, Clock, Heart, Share2,
     Plus, Filter, Search, ExternalLink, Shield,
     Home, Briefcase, Award, Bell
 } from 'lucide-react';
-import { 
-    collection, query, where, orderBy, limit, getDocs, 
-    doc, getDoc, setDoc, updateDoc, increment 
+import {
+    collection, query, where, orderBy, limit, getDocs,
+    doc, getDoc, setDoc, updateDoc, increment, addDoc, serverTimestamp
 } from 'firebase/firestore';
 import { useAuth } from '../../context/AuthContext';
 import { useNotification } from '../../context/NotificationContext';
 import { db } from '../../lib/firebase';
 import { getBilingualText } from '../../lib/nzLocalizationEnhanced';
 
+// NewDiscussionForm Component
+const NewDiscussionForm = ({ communityId, onDiscussionCreated }) => {
+    const { currentUser } = useAuth();
+    const [title, setTitle] = useState('');
+    const [content, setContent] = useState('');
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [error, setError] = useState('');
+
+    const handleCreateDiscussion = async (e) => {
+        e.preventDefault();
+
+        if (!title.trim()) {
+            setError('Please enter a title for your discussion.');
+            return;
+        }
+        if (!content.trim()) {
+            setError('Please enter content for your discussion.');
+            return;
+        }
+        if (!currentUser) {
+            setError('You must be logged in to post a discussion.');
+            return;
+        }
+
+        setIsSubmitting(true);
+        setError('');
+
+        try {
+            const discussionData = {
+                title: title.trim(),
+                content: content.trim(),
+                authorId: currentUser.uid,
+                authorName: currentUser.displayName || currentUser.email.split('@')[0],
+                communityId: communityId,
+                createdAt: serverTimestamp(),
+                upvotes: 0,
+                downvotes: 0,
+                replyCount: 0,
+                upvotedBy: [],
+                downvotedBy: [],
+            };
+
+            const discussionsRef = collection(db, 'communities', communityId, 'discussions');
+            await addDoc(discussionsRef, discussionData);
+
+            setTitle('');
+            setContent('');
+            if (onDiscussionCreated) {
+                onDiscussionCreated();
+            }
+        } catch (err) {
+            console.error("Error creating discussion:", err);
+            setError('Failed to create discussion. Please try again.');
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
+    return (
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-8">
+            <h3 className="text-lg font-bold text-gray-900 mb-4">Start a New Discussion</h3>
+            <form onSubmit={handleCreateDiscussion} className="space-y-4">
+                <div>
+                    <label htmlFor="discussion-title" className="block text-sm font-medium text-gray-700 mb-1">Title</label>
+                    <input
+                        id="discussion-title"
+                        type="text"
+                        value={title}
+                        onChange={(e) => setTitle(e.target.value)}
+                        placeholder="What's on your mind?"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
+                        disabled={isSubmitting}
+                    />
+                </div>
+                <div>
+                    <label htmlFor="discussion-content" className="block text-sm font-medium text-gray-700 mb-1">Content</label>
+                    <textarea
+                        id="discussion-content"
+                        value={content}
+                        onChange={(e) => setContent(e.target.value)}
+                        rows={4}
+                        placeholder="Share more details here..."
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
+                        disabled={isSubmitting}
+                    />
+                </div>
+                {error && <p className="text-sm text-red-600">{error}</p>}
+                <div>
+                    <button
+                        type="submit"
+                        disabled={isSubmitting}
+                        className="bg-green-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-green-700 disabled:opacity-50 transition-colors"
+                    >
+                        {isSubmitting ? 'Posting...' : 'Post Discussion'}
+                    </button>
+                </div>
+            </form>
+        </div>
+    );
+};
+
 const CommunityPage = ({ communityId, onNavigate }) => {
     const { user } = useAuth();
     const { showNotification } = useNotification();
-    
+
     const [community, setCommunity] = useState(null);
     const [members, setMembers] = useState([]);
     const [discussions, setDiscussions] = useState([]);
@@ -36,7 +137,7 @@ const CommunityPage = ({ communityId, onNavigate }) => {
 
     const loadCommunityData = useCallback(async () => {
         if (!communityId) return;
-        
+
         setIsLoading(true);
         try {
             // Load community details
@@ -45,7 +146,7 @@ const CommunityPage = ({ communityId, onNavigate }) => {
                 showNotification('Community not found', 'error');
                 return;
             }
-            
+
             const communityData = { id: communityDoc.id, ...communityDoc.data() };
             setCommunity(communityData);
 
@@ -70,7 +171,7 @@ const CommunityPage = ({ communityId, onNavigate }) => {
             }
 
             // Load moderators
-            const moderatorsData = membersData.filter(member => 
+            const moderatorsData = membersData.filter(member =>
                 member.role === 'moderator' || member.role === 'admin'
             );
             setModerators(moderatorsData);
@@ -179,12 +280,99 @@ const CommunityPage = ({ communityId, onNavigate }) => {
         if (!date) return '';
         const now = new Date();
         const diffInHours = Math.floor((now - date) / (1000 * 60 * 60));
-        
+
         if (diffInHours < 1) return 'Just now';
         if (diffInHours < 24) return `${diffInHours}h ago`;
         const diffInDays = Math.floor(diffInHours / 24);
         if (diffInDays < 7) return `${diffInDays}d ago`;
         return date.toLocaleDateString();
+    };
+
+    const handleVote = async (discussionId, voteType) => {
+        if (!user) {
+            showNotification('Please sign in to vote', 'info');
+            return;
+        }
+
+        try {
+            const discussionRef = doc(db, 'communities', communityId, 'discussions', discussionId);
+            const discussionDoc = await getDoc(discussionRef);
+
+            if (!discussionDoc.exists()) {
+                showNotification('Discussion not found', 'error');
+                return;
+            }
+
+            const discussionData = discussionDoc.data();
+            const upvotedBy = discussionData.upvotedBy || [];
+            const downvotedBy = discussionData.downvotedBy || [];
+            const userId = user.uid;
+
+            let newUpvotes = discussionData.upvotes || 0;
+            let newDownvotes = discussionData.downvotes || 0;
+            let newUpvotedBy = [...upvotedBy];
+            let newDownvotedBy = [...downvotedBy];
+
+            if (voteType === 'up') {
+                // Remove from downvoted if previously downvoted
+                if (downvotedBy.includes(userId)) {
+                    newDownvotedBy = downvotedBy.filter(id => id !== userId);
+                    newDownvotes = Math.max(0, newDownvotes - 1);
+                }
+
+                // Toggle upvote
+                if (upvotedBy.includes(userId)) {
+                    newUpvotedBy = upvotedBy.filter(id => id !== userId);
+                    newUpvotes = Math.max(0, newUpvotes - 1);
+                } else {
+                    newUpvotedBy.push(userId);
+                    newUpvotes += 1;
+                }
+            } else if (voteType === 'down') {
+                // Remove from upvoted if previously upvoted
+                if (upvotedBy.includes(userId)) {
+                    newUpvotedBy = upvotedBy.filter(id => id !== userId);
+                    newUpvotes = Math.max(0, newUpvotes - 1);
+                }
+
+                // Toggle downvote
+                if (downvotedBy.includes(userId)) {
+                    newDownvotedBy = downvotedBy.filter(id => id !== userId);
+                    newDownvotes = Math.max(0, newDownvotes - 1);
+                } else {
+                    newDownvotedBy.push(userId);
+                    newDownvotes += 1;
+                }
+            }
+
+            await updateDoc(discussionRef, {
+                upvotes: newUpvotes,
+                downvotes: newDownvotes,
+                upvotedBy: newUpvotedBy,
+                downvotedBy: newDownvotedBy
+            });
+
+            // Refresh discussions data
+            loadCommunityData();
+
+            const voteAction = voteType === 'up' ? 'upvoted' : 'downvoted';
+            showNotification(`Successfully ${voteAction} discussion`, 'success');
+        } catch (error) {
+            console.error('Error voting on discussion:', error);
+            showNotification('Error voting on discussion', 'error');
+        }
+    };
+
+    const getUserVoteStatus = (discussion) => {
+        if (!user) return null;
+
+        const userId = user.uid;
+        const upvotedBy = discussion.upvotedBy || [];
+        const downvotedBy = discussion.downvotedBy || [];
+
+        if (upvotedBy.includes(userId)) return 'up';
+        if (downvotedBy.includes(userId)) return 'down';
+        return null;
     };
 
     if (isLoading) {
@@ -250,11 +438,11 @@ const CommunityPage = ({ communityId, onNavigate }) => {
                                     </p>
                                 </div>
                             </div>
-                            
+
                             <p className="text-lg text-green-100 mb-4 italic">
                                 Kia ora whānau! Welcome to your neighborhood community
                             </p>
-                            
+
                             <div className="flex flex-wrap items-center gap-6 text-sm">
                                 <div className="flex items-center">
                                     <Users className="w-4 h-4 mr-2" />
@@ -313,11 +501,10 @@ const CommunityPage = ({ communityId, onNavigate }) => {
                                 <button
                                     key={tab.id}
                                     onClick={() => setActiveTab(tab.id)}
-                                    className={`flex items-center px-4 py-2 text-sm font-medium rounded-lg transition-colors whitespace-nowrap ${
-                                        activeTab === tab.id
-                                            ? 'bg-green-100 text-green-700'
-                                            : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'
-                                    }`}
+                                    className={`flex items-center px-4 py-2 text-sm font-medium rounded-lg transition-colors whitespace-nowrap ${activeTab === tab.id
+                                        ? 'bg-green-100 text-green-700'
+                                        : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'
+                                        }`}
                                 >
                                     <Icon className="w-4 h-4 mr-2" />
                                     {tab.label}
@@ -504,7 +691,7 @@ const CommunityPage = ({ communityId, onNavigate }) => {
                                             </div>
                                         ))}
                                     </div>
-                                    
+
                                     <div className="mt-4 pt-4 border-t border-gray-100">
                                         <p className="text-xs text-gray-500 italic">
                                             Next election: March 2024
@@ -544,8 +731,93 @@ const CommunityPage = ({ communityId, onNavigate }) => {
                     </div>
                 )}
 
-                {/* Other tab content would go here */}
-                {activeTab !== 'overview' && (
+                {/* Discussions Tab */}
+                {activeTab === 'discussions' && (
+                    <div className="space-y-8">
+                        <NewDiscussionForm
+                            communityId={communityId}
+                            onDiscussionCreated={loadCommunityData}
+                        />
+
+                        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+                            <h2 className="text-xl font-bold text-gray-900 mb-6 flex items-center">
+                                <MessageSquare className="w-5 h-5 mr-2 text-green-600" />
+                                Community Discussions
+                            </h2>
+
+                            {discussions.length === 0 ? (
+                                <div className="text-center py-12">
+                                    <MessageSquare className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+                                    <h3 className="text-lg font-medium text-gray-900 mb-2">No discussions yet</h3>
+                                    <p className="text-gray-500">Be the first to start a community conversation!</p>
+                                </div>
+                            ) : (
+                                <div className="space-y-6">
+                                    {discussions.map((discussion) => (
+                                        <div key={discussion.id} className="border border-gray-100 rounded-lg p-6 hover:bg-gray-50 transition-colors">
+                                            <div className="flex items-start justify-between mb-4">
+                                                <div className="flex-1">
+                                                    <h3 className="text-lg font-semibold text-gray-900 mb-2">{discussion.title}</h3>
+                                                    <p className="text-gray-600 mb-3">{discussion.content}</p>
+                                                    <div className="flex items-center text-sm text-gray-500 space-x-4">
+                                                        <span>by {discussion.authorName}</span>
+                                                        <span>{formatTimeAgo(discussion.createdAt)}</span>
+                                                        <span className="flex items-center">
+                                                            <MessageSquare className="w-4 h-4 mr-1" />
+                                                            {discussion.replyCount || 0} replies
+                                                        </span>
+                                                        <span className="flex items-center">
+                                                            <Vote className="w-4 h-4 mr-1" />
+                                                            {discussion.upvotes - discussion.downvotes} votes
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                                {discussion.pinned && (
+                                                    <div className="ml-4">
+                                                        <div className="bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full text-sm font-medium">
+                                                            Pinned
+                                                        </div>
+                                                    </div>
+                                                )}
+                                            </div>
+
+                                            {/* Voting buttons */}
+                                            <div className="flex items-center space-x-4 pt-4 border-t border-gray-100">
+                                                <button
+                                                    onClick={() => handleVote(discussion.id, 'up')}
+                                                    className={`flex items-center transition-colors ${getUserVoteStatus(discussion) === 'up'
+                                                            ? 'text-green-600'
+                                                            : 'text-gray-500 hover:text-green-600'
+                                                        }`}
+                                                >
+                                                    <Vote className="w-4 h-4 mr-1" />
+                                                    Upvote
+                                                </button>
+                                                <button
+                                                    onClick={() => handleVote(discussion.id, 'down')}
+                                                    className={`flex items-center transition-colors ${getUserVoteStatus(discussion) === 'down'
+                                                            ? 'text-red-600'
+                                                            : 'text-gray-500 hover:text-red-600'
+                                                        }`}
+                                                >
+                                                    <Vote className="w-4 h-4 mr-1 rotate-180" />
+                                                    Downvote
+                                                </button>
+                                                <button className="flex items-center text-gray-500 hover:text-blue-600 transition-colors">
+                                                    <MessageSquare className="w-4 h-4 mr-1" />
+                                                    Reply
+                                                </button>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                )}
+
+                {/* Other tab content */}
+                {activeTab !== 'overview' && activeTab !== 'discussions' && (
                     <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 text-center">
                         <h2 className="text-2xl font-bold text-gray-900 mb-4 capitalize">{activeTab}</h2>
                         <p className="text-gray-600 mb-6">This section is coming soon! We're building amazing features for your community.</p>

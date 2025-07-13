@@ -1,32 +1,34 @@
 // Real-time Messaging Service - Comprehensive chat and communication system
 // Handles buyer-seller messaging, order discussions, and support channels
 
-import { 
-  collection, 
-  doc, 
-  addDoc, 
-  updateDoc, 
-  getDoc, 
-  getDocs, 
-  query, 
-  where, 
-  orderBy, 
+import {
+  collection,
+  doc,
+  addDoc,
+  updateDoc,
+  getDoc,
+  getDocs,
+  query,
+  where,
+  orderBy,
   limit,
   onSnapshot,
   serverTimestamp,
   arrayUnion,
   runTransaction
 } from 'firebase/firestore';
-import { 
-  ref, 
-  push, 
-  onValue, 
-  off, 
+import {
+  ref,
+  push,
+  onValue,
+  off,
   serverTimestamp as rtServerTimestamp,
   onDisconnect
 } from 'firebase/database';
 import { db, realtimeDb } from './firebase';
 import { createNotification } from './notificationService';
+import { storage } from './firebase'; // Added storage import
+import { ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage'; // Added storage imports
 
 // Message types
 export const MESSAGE_TYPES = {
@@ -78,7 +80,7 @@ class MessagingService {
 
   initialize(userId) {
     if (this.isInitialized) return;
-    
+
     this.currentUserId = userId;
     this.setupPresence(userId);
     this.isInitialized = true;
@@ -138,7 +140,7 @@ class MessagingService {
 
       const docRef = await addDoc(collection(db, 'conversations'), conversation);
       const createdConversation = { ...conversation, firestoreId: docRef.id };
-      
+
       this.conversations.set(docRef.id, createdConversation);
       return createdConversation;
     } catch (error) {
@@ -156,14 +158,14 @@ class MessagingService {
       );
 
       const snapshot = await getDocs(q);
-      
+
       for (const doc of snapshot.docs) {
         const conv = doc.data();
-        
+
         // Check if all participants match
         const allParticipantsMatch = participantIds.every(id => conv.participants.includes(id)) &&
-                                    conv.participants.length === participantIds.length;
-        
+          conv.participants.length === participantIds.length;
+
         // For item inquiries, also check item ID
         if (allParticipantsMatch && metadata.itemId) {
           if (conv.metadata?.itemId === metadata.itemId) {
@@ -173,7 +175,7 @@ class MessagingService {
           return { id: doc.id, ...conv, firestoreId: doc.id };
         }
       }
-      
+
       return null;
     } catch (error) {
       console.error('Error finding existing conversation:', error);
@@ -232,7 +234,7 @@ class MessagingService {
       // Use Realtime Database for instant updates
       if (realtimeDb) {
         const messagesRef = ref(realtimeDb, `conversations/${conversationId}/messages`);
-        const rtQuery = options.limit ? 
+        const rtQuery = options.limit ?
           query(messagesRef, orderBy('timestamp', 'desc'), limit(options.limit)) :
           query(messagesRef, orderBy('timestamp', 'desc'));
 
@@ -268,7 +270,7 @@ class MessagingService {
       return unsubscribe;
     } catch (error) {
       console.error('Error subscribing to messages:', error);
-      return () => {};
+      return () => { };
     }
   }
 
@@ -283,24 +285,24 @@ class MessagingService {
 
       const unsubscribe = onSnapshot(q, async (snapshot) => {
         const conversations = [];
-        
+
         for (const doc of snapshot.docs) {
           const conv = { id: doc.id, ...doc.data() };
-          
+
           // Get participant details
           const participantDetails = await this.getParticipantDetails(conv.participants);
           conv.participantDetails = participantDetails;
-          
+
           conversations.push(conv);
         }
-        
+
         callback(conversations);
       });
 
       return unsubscribe;
     } catch (error) {
       console.error('Error subscribing to conversations:', error);
-      return () => {};
+      return () => { };
     }
   }
 
@@ -308,7 +310,7 @@ class MessagingService {
   async markMessagesAsRead(conversationId, messageIds) {
     try {
       const batch = [];
-      
+
       // Update message statuses
       for (const messageId of messageIds) {
         batch.push(
@@ -359,13 +361,13 @@ class MessagingService {
   }
 
   subscribeToTyping(conversationId, callback) {
-    if (!realtimeDb) return () => {};
+    if (!realtimeDb) return () => { };
 
     const typingRef = ref(realtimeDb, `typing/${conversationId}`);
     const unsubscribe = onValue(typingRef, (snapshot) => {
       const typingUsers = [];
       const data = snapshot.val();
-      
+
       if (data) {
         Object.entries(data).forEach(([userId, typingData]) => {
           if (typingData.typing && userId !== this.currentUserId) {
@@ -377,7 +379,7 @@ class MessagingService {
           }
         });
       }
-      
+
       callback(typingUsers);
     });
 
@@ -394,14 +396,22 @@ class MessagingService {
         throw new Error(validation.error);
       }
 
-      // This would integrate with Firebase Storage
-      // For now, return mock data
+      // Real Firebase Storage integration
+      const fileRef = storageRef(storage, `conversations/${conversationId}/files/${Date.now()}_${file.name}`);
+
+      // Upload file to Firebase Storage
+      const uploadResult = await uploadBytes(fileRef, file);
+
+      // Get download URL
+      const downloadURL = await getDownloadURL(uploadResult.ref);
+
       const fileData = {
         name: file.name,
         size: file.size,
         type: file.type,
-        url: `https://mock-storage.tuitrade.co.nz/files/${Date.now()}_${file.name}`,
-        uploadedAt: new Date().toISOString()
+        url: downloadURL,
+        uploadedAt: new Date().toISOString(),
+        storagePath: uploadResult.ref.fullPath
       };
 
       return fileData;
@@ -416,14 +426,14 @@ class MessagingService {
     try {
       const messageRef = doc(db, 'messages', messageId);
       const messageDoc = await getDoc(messageRef);
-      
+
       if (!messageDoc.exists()) {
         throw new Error('Message not found');
       }
 
       const currentReactions = messageDoc.data().reactions || {};
       const userReactions = currentReactions[this.currentUserId] || [];
-      
+
       // Toggle reaction
       const updatedReactions = userReactions.includes(emoji)
         ? userReactions.filter(r => r !== emoji)
@@ -446,7 +456,7 @@ class MessagingService {
       // This would use full-text search in production
       // For now, simple query implementation
       let q = collection(db, 'messages');
-      
+
       if (conversationId) {
         q = query(q, where('conversationId', '==', conversationId));
       }
@@ -454,7 +464,7 @@ class MessagingService {
       const snapshot = await getDocs(q);
       const messages = snapshot.docs
         .map(doc => ({ id: doc.id, ...doc.data() }))
-        .filter(message => 
+        .filter(message =>
           message.content?.toLowerCase().includes(query.toLowerCase()) ||
           message.metadata?.fileName?.toLowerCase().includes(query.toLowerCase())
         );
@@ -515,7 +525,7 @@ class MessagingService {
       if (conversation.exists()) {
         const convData = conversation.data();
         const otherParticipants = convData.participants.filter(id => id !== this.currentUserId);
-        
+
         otherParticipants.forEach(participantId => {
           updates[`unreadCounts.${participantId}`] = (convData.unreadCounts?.[participantId] || 0) + 1;
         });
@@ -569,7 +579,7 @@ class MessagingService {
   async getParticipantDetails(participantIds) {
     try {
       const details = {};
-      
+
       for (const id of participantIds) {
         const userDoc = await getDoc(doc(db, 'users', id));
         if (userDoc.exists()) {
@@ -582,7 +592,7 @@ class MessagingService {
           };
         }
       }
-      
+
       return details;
     } catch (error) {
       console.error('Error getting participant details:', error);
@@ -609,7 +619,7 @@ class MessagingService {
   getNotificationText(message) {
     switch (message.type) {
       case MESSAGE_TYPES.TEXT:
-        return message.content.length > 50 
+        return message.content.length > 50
           ? message.content.substring(0, 50) + '...'
           : message.content;
       case MESSAGE_TYPES.IMAGE:
