@@ -70,18 +70,37 @@ export const useTeReo = () => {
 // Toggle button component
 export const TeReoToggle = ({ className = '' }) => {
   const { isTeReoMode, toggleTeReoMode } = useTeReo();
+  const [isHovered, setIsHovered] = useState(false);
+
+  const handleMouseEnter = () => setIsHovered(true);
+  const handleMouseLeave = () => setIsHovered(false);
 
   return (
-    <button
-      onClick={toggleTeReoMode}
-      className={`flex items-center space-x-2 px-3 py-2 rounded-lg transition-all hover:bg-gray-100 ${className}`}
-      title={isTeReoMode ? 'Switch to English' : 'Switch to Te Reo Māori'}
-    >
-      <Languages size={18} className={isTeReoMode ? 'text-green-600' : 'text-gray-600'} />
-      <span className={`text-sm font-medium ${isTeReoMode ? 'text-green-600' : 'text-gray-600'}`}>
-        {isTeReoMode ? 'Te Reo' : 'English'}
-      </span>
-    </button>
+    <div className="relative" onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
+      <button
+        onClick={toggleTeReoMode}
+        className={`relative flex items-center w-32 h-8 rounded-full transition-colors duration-300 focus:outline-none ${
+          isTeReoMode ? 'bg-blue-600' : 'bg-gray-300'
+        } ${className}`}
+        aria-label={isTeReoMode ? 'Switch to English' : 'Switch to Te Reo Māori'}
+      >
+        <span
+          className={`absolute left-1 top-1 bottom-1 w-6 h-6 bg-white rounded-full shadow-md transform transition-transform duration-300 ${
+            isTeReoMode ? 'translate-x-24' : ''
+          }`}
+        />
+        <div className="flex justify-around w-full text-xs font-bold">
+          <span className={isTeReoMode ? 'text-white' : 'text-gray-500'}>English</span>
+          <span className={isTeReoMode ? 'text-white' : 'text-gray-500'}>Te Reo</span>
+        </div>
+      </button>
+      {isHovered && (
+        <div className="absolute bottom-full mb-2 w-48 bg-gray-800 text-white text-sm rounded-lg py-2 px-3 shadow-lg text-center">
+          {isTeReoMode ? 'Huri ki te reo Pākehā' : 'Switch to Te Reo Māori'}
+          <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-x-8 border-x-transparent border-t-8 border-t-gray-800"></div>
+        </div>
+      )}
+    </div>
   );
 };
 

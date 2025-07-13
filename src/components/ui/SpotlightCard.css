@@ -1,201 +1,64 @@
 .card-spotlight {
-  position: relative;
-  overflow: hidden;
-  background: var(--card-bg, #1a1a1a);
-  border: var(--card-border, 1px solid rgba(255, 255, 255, 0.1));
-  border-radius: var(--card-radius, 1rem);
-  transition: all 0.3s ease;
-  cursor: pointer;
-  
-  /* CSS Variables for spotlight effect */
-  --mouse-x: 50%;
-  --mouse-y: 50%;
-  --spotlight-color: rgba(255, 255, 255, 0.25);
-  --spotlight-size: 300px;
-  --intensity: 0;
-}
-
-.card-spotlight::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: radial-gradient(
-    circle var(--spotlight-size) at var(--mouse-x) var(--mouse-y),
-    var(--spotlight-color),
-    transparent 70%
-  );
-  opacity: var(--intensity);
-  transition: opacity 0.3s ease;
-  pointer-events: none;
-  z-index: 1;
-}
-
-.card-spotlight::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: radial-gradient(
-    circle calc(var(--spotlight-size) * 0.5) at var(--mouse-x) var(--mouse-y),
-    rgba(255, 255, 255, 0.1),
-    transparent 70%
-  );
-  opacity: calc(var(--intensity) * 0.5);
-  transition: opacity 0.3s ease;
-  pointer-events: none;
-  z-index: 2;
-}
-
-.card-spotlight > * {
-  position: relative;
-  z-index: 3;
-}
-
-/* Hover effects */
-.card-spotlight:hover {
-  transform: translateY(-2px);
-  box-shadow: 
-    0 20px 25px -5px rgba(0, 0, 0, 0.1),
-    0 10px 10px -5px rgba(0, 0, 0, 0.04);
-}
-
-/* Theme variations */
-.card-spotlight.theme-green {
-  --spotlight-color: rgba(16, 185, 129, 0.25);
-  border-color: rgba(16, 185, 129, 0.2);
-}
-
-.card-spotlight.theme-blue {
-  --spotlight-color: rgba(59, 130, 246, 0.25);
-  border-color: rgba(59, 130, 246, 0.2);
-}
-
-.card-spotlight.theme-purple {
-  --spotlight-color: rgba(147, 51, 234, 0.25);
-  border-color: rgba(147, 51, 234, 0.2);
-}
-
-.card-spotlight.theme-red {
-  --spotlight-color: rgba(239, 68, 68, 0.25);
-  border-color: rgba(239, 68, 68, 0.2);
-}
-
-.card-spotlight.theme-orange {
-  --spotlight-color: rgba(249, 115, 22, 0.25);
-  border-color: rgba(249, 115, 22, 0.2);
-}
-
-.card-spotlight.theme-pink {
-  --spotlight-color: rgba(236, 72, 153, 0.25);
-  border-color: rgba(236, 72, 153, 0.2);
-}
-
-/* Size variations */
-.card-spotlight.size-small {
-  --spotlight-size: 200px;
-}
-
-.card-spotlight.size-large {
-  --spotlight-size: 400px;
-}
-
-.card-spotlight.size-extra-large {
-  --spotlight-size: 600px;
-}
-
-/* Intensity variations */
-.card-spotlight.intensity-subtle {
-  --intensity: 0.3;
-}
-
-.card-spotlight.intensity-normal {
-  --intensity: 0.6;
-}
-
-.card-spotlight.intensity-strong {
-  --intensity: 1;
-}
-
-.card-spotlight.intensity-dramatic {
-  --intensity: 1.5;
-}
-
-/* Animation effects */
-.card-spotlight.animate-pulse::before {
-  animation: spotlight-pulse 2s ease-in-out infinite;
-}
-
-@keyframes spotlight-pulse {
-  0%, 100% {
-    opacity: var(--intensity);
-  }
-  50% {
-    opacity: calc(var(--intensity) * 0.5);
-  }
-}
-
-.card-spotlight.animate-rotate::before {
-  animation: spotlight-rotate 4s linear infinite;
-}
-
-@keyframes spotlight-rotate {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-/* Glassmorphism effect */
-.card-spotlight.glassmorphism {
-  background: rgba(255, 255, 255, 0.05);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-/* Dark mode */
-.card-spotlight.dark {
-  background: rgba(0, 0, 0, 0.8);
-  border-color: rgba(255, 255, 255, 0.1);
-}
-
-/* Light mode */
-.card-spotlight.light {
-  background: rgba(255, 255, 255, 0.9);
-  border-color: rgba(0, 0, 0, 0.1);
-  --spotlight-color: rgba(0, 0, 0, 0.1);
-}
-
-/* Mobile responsiveness */
-@media (max-width: 640px) {
-  .card-spotlight {
-    --spotlight-size: 200px;
-  }
-}
-
-/* Reduce motion for accessibility */
-@media (prefers-reduced-motion: reduce) {
-  .card-spotlight {
-    transition: none;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    cursor: pointer;
   }
   
-  .card-spotlight::before,
-  .card-spotlight::after {
-    transition: none;
+  .spotlight-effect {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(
+      circle var(--spotlight-size) at var(--mouse-x) var(--mouse-y),
+      var(--spotlight-color),
+      transparent 70%
+    );
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+    z-index: 1;
+  }
+  
+  .card-spotlight:hover .spotlight-effect,
+  .card-spotlight:focus .spotlight-effect {
+    opacity: 1;
+  }
+  
+  .card-spotlight > * {
+    position: relative;
+    z-index: 2;
   }
   
   .card-spotlight:hover {
-    transform: none;
+    transform: translateY(-2px);
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1),
+      0 10px 10px -5px rgba(0, 0, 0, 0.04);
   }
   
-  .card-spotlight.animate-pulse::before,
-  .card-spotlight.animate-rotate::before {
-    animation: none;
+  /* Tui Theme */
+  .theme-tui {
+    --spotlight-color: rgba(0, 128, 128, 0.5); /* Teal */
+    border-color: rgba(0, 128, 128, 0.3);
+    background-color: rgba(0, 50, 50, 0.1);
   }
-}
+  
+  .theme-tui:hover {
+    border-color: rgba(0, 128, 128, 0.6);
+  }
+  
+  @media (prefers-reduced-motion: reduce) {
+    .card-spotlight {
+      transition: none;
+    }
+  
+    .spotlight-effect {
+      transition: none;
+    }
+  
+    .card-spotlight:hover {
+      transform: none;
+    }
+  }

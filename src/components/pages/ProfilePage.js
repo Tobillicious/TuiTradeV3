@@ -1,6 +1,6 @@
 // src/components/pages/ProfilePage.js
 import { Mail, Calendar, Edit } from 'lucide-react';
-import { useAuth } from '../../context/AuthContext';
+import { useAppContext } from '../../context/AppContext';
 import { useState, useEffect } from 'react';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { doc, updateDoc, getDoc, setDoc, collection, query, where, orderBy, getDocs } from 'firebase/firestore';
@@ -8,7 +8,7 @@ import { db, storage } from '../../lib/firebase';
 import { LoadingSpinner, ErrorMessage, SuccessMessage } from '../ui/Loaders';
 
 const ProfilePage = () => {
-    const { currentUser } = useAuth();
+    const { currentUser } = useAppContext();
     const [isEditOpen, setIsEditOpen] = useState(false);
     const [displayName, setDisplayName] = useState('');
     const [avatar, setAvatar] = useState(null);

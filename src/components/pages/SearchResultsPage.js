@@ -4,7 +4,7 @@ import { useState, useEffect, useMemo } from 'react';
 import ItemCard from '../ui/ItemCard';
 import JobCard from '../ui/JobCard';
 import EnhancedSearchFilters from '../ui/EnhancedSearchFilters';
-import { Search, Grid, List, Home, ChevronRight, Briefcase } from 'lucide-react';
+import { Search, Home, ChevronRight } from 'lucide-react';
 import { useTeReo, TeReoText } from '../ui/TeReoToggle';
 import jobService from '../../lib/jobsService';
 

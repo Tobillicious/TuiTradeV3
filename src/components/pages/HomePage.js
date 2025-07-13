@@ -2,8 +2,10 @@
 import { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { collection, query, orderBy, limit, getDocs } from 'firebase/firestore';
+import { useNavigate } from 'react-router-dom';
 import { db } from '../../lib/firebase';
 import { LISTINGS_LIMIT } from '../../lib/utils';
+import { useAppContext } from '../../context/AppContext';
 import ItemCard from '../ui/ItemCard';
 import { AuctionCard } from '../ui/AuctionSystem';
 import Carousel from '../ui/Carousel';
@@ -12,7 +14,9 @@ import SpotlightCard from '../ui/SpotlightCard';
 import { Tag, Shield, Star, MessageCircle, ChevronDown } from 'lucide-react';
 import { getBilingualText, TE_REO_TRANSLATIONS } from '../../lib/nzLocalizationEnhanced';
 
-const HomePage = ({ onWatchToggle, watchedItems, onNavigate, onItemClick, onAddToCart, cartItems }) => {
+const HomePage = () => {
+    const { onWatchToggle, watchedItems, onAddToCart, cartItems } = useAppContext();
+    const navigate = useNavigate();
     const [listings, setListings] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [hasMoreItems, setHasMoreItems] = useState(true);
@@ -97,6 +101,10 @@ const HomePage = ({ onWatchToggle, watchedItems, onNavigate, onItemClick, onAddT
             setIsLoadingMore(false);
         }
     };
+    
+    const onItemClick = (item) => {
+        navigate(`/item/${item.id}`);
+    }
 
 
 
@@ -185,7 +193,7 @@ const HomePage = ({ onWatchToggle, watchedItems, onNavigate, onItemClick, onAddT
                         </p>
                         <div className="flex flex-col sm:flex-row gap-4 justify-center animate-fade-in-up animation-delay-400">
                             <button
-                                onClick={() => onNavigate('create-listing')}
+                                onClick={() => navigate('/create-listing')}
                                 className="bg-white text-green-600 px-8 py-3 rounded-lg font-semibold hover:bg-green-50 transition-all transform hover:scale-105 shadow-lg"
                             >
                                 <Tag className="inline mr-2" size={20} />
@@ -232,7 +240,7 @@ const HomePage = ({ onWatchToggle, watchedItems, onNavigate, onItemClick, onAddT
                             autoplay={true}
                             autoplayDelay={5000}
                             pauseOnHover={true}
-                            onNavigate={onNavigate}
+                            onNavigate={(path) => navigate(path)}
                         />
                     </motion.div>
                 </div>
@@ -264,7 +272,7 @@ const HomePage = ({ onWatchToggle, watchedItems, onNavigate, onItemClick, onAddT
                                 <p className="text-gray-500 mb-6">Be the first to list an item on TuiTrade!</p>
                                 <p className="text-sm text-gray-400 italic">Tīmata mai - Start here</p>
                                 <button
-                                    onClick={() => onNavigate('create-listing')}
+                                    onClick={() => navigate('/create-listing')}
                                     className="bg-green-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-green-700 transition-colors"
                                 >
                                     Create First Listing
@@ -282,7 +290,7 @@ const HomePage = ({ onWatchToggle, watchedItems, onNavigate, onItemClick, onAddT
                                             onItemClick={onItemClick}
                                             onWatchToggle={onWatchToggle}
                                             watchedItems={watchedItems}
-                                            onNavigate={onNavigate}
+                                            onNavigate={(path) => navigate(path)}
                                         />
                                     ) : (
                                         <ItemCard
@@ -293,7 +301,7 @@ const HomePage = ({ onWatchToggle, watchedItems, onNavigate, onItemClick, onAddT
                                             onItemClick={onItemClick}
                                             onAddToCart={onAddToCart}
                                             isInCart={cartItems.some(cartItem => cartItem.id === item.id)}
-                                            onNavigate={onNavigate}
+                                            onNavigate={(path) => navigate(path)}
                                         />
                                     )
                                 ))}
@@ -377,15 +385,10 @@ const HomePage = ({ onWatchToggle, watchedItems, onNavigate, onItemClick, onAddT
                             transition={{ duration: 0.6, delay: 0.1, ease: "easeOut" }}
                             viewport={{ once: true, margin: "-50px" }}
                         >
-                            <SpotlightCard 
-                                className="theme-green"
-                                spotlightColor="rgba(16, 185, 129, 0.25)"
-                                backgroundColor="rgba(255, 255, 255, 0.95)"
-                                borderRadius="1rem"
-                            >
+                            <SpotlightCard className="theme-tui">
                                 <div className="text-center p-6">
                                     <motion.div 
-                                        className="w-16 h-16 bg-green-600 rounded-full flex items-center justify-center mx-auto mb-4"
+                                        className="w-16 h-16 bg-teal-500 rounded-full flex items-center justify-center mx-auto mb-4"
                                         whileHover={{ scale: 1.1, rotate: 5 }}
                                         transition={{ duration: 0.2 }}
                                     >
@@ -406,10 +409,8 @@ const HomePage = ({ onWatchToggle, watchedItems, onNavigate, onItemClick, onAddT
                             viewport={{ once: true, margin: "-50px" }}
                         >
                             <SpotlightCard 
-                                className="theme-orange"
                                 spotlightColor="rgba(249, 115, 22, 0.25)"
                                 backgroundColor="rgba(255, 255, 255, 0.95)"
-                                borderRadius="1rem"
                             >
                                 <div className="text-center p-6">
                                     <motion.div 
@@ -434,10 +435,8 @@ const HomePage = ({ onWatchToggle, watchedItems, onNavigate, onItemClick, onAddT
                             viewport={{ once: true, margin: "-50px" }}
                         >
                             <SpotlightCard 
-                                className="theme-blue"
                                 spotlightColor="rgba(59, 130, 246, 0.25)"
                                 backgroundColor="rgba(255, 255, 255, 0.95)"
-                                borderRadius="1rem"
                             >
                                 <div className="text-center p-6">
                                     <motion.div 

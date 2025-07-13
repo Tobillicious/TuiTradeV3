@@ -1,60 +1,81 @@
 // src/components/pages/ItemDetailPage.js
 import { useState, useEffect } from 'react';
-import { doc, updateDoc, increment, getDoc } from 'firebase/firestore';
+import { useParams, useNavigate } from 'react-router-dom';
+import { doc, getDoc, updateDoc, increment } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
+import { useAppContext } from '../../context/AppContext';
 import { formatPrice, timeAgo, CATEGORIES } from '../../lib/utils';
 import { FullPageLoader } from '../ui/Loaders';
-import { Heart, ShoppingCart, MessageCircle, MapPin, Calendar, Eye, Shield, Home, ChevronRight, Download, Zap, CheckCircle } from 'lucide-react';
+import { Heart, ShoppingCart, MessageCircle, MapPin, Calendar, Eye, Shield, Home, ChevronRight, Download, Zap } from 'lucide-react';
 import { StarRating, ReviewList } from '../ui/ReviewSystem';
 import { AuctionInterface } from '../ui/AuctionSystem';
 import { trackItemView } from '../../lib/apiService';
 
-const ItemDetailPage = ({ item, onNavigate, onWatchToggle, watchedItems, onContactSeller, onAddToCart, isInCart }) => {
+const ItemDetailPage = () => {
+    const { itemId } = useParams();
+    const navigate = useNavigate();
+    const { onWatchToggle, watchedItems, onContactSeller, onAddToCart, cartItems } = useAppContext();
+    
+    const [item, setItem] = useState(null);
+    const [isLoading, setIsLoading] = useState(true);
     const [activeImageIndex, setActiveImageIndex] = useState(0);
     const [sellerRating, setSellerRating] = useState({ average: 0, count: 0 });
 
     useEffect(() => {
-        if (!item) return;
+        if (!itemId) return;
 
-        const updateViews = async () => {
+        const fetchItem = async () => {
+            setIsLoading(true);
             try {
-                await updateDoc(doc(db, 'listings', item.id), {
-                    views: increment(1)
-                });
+                const itemDoc = await getDoc(doc(db, 'listings', itemId));
+                if (itemDoc.exists()) {
+                    const itemData = { id: itemDoc.id, ...itemDoc.data() };
+                    setItem(itemData);
 
-                // Track item view for personalization
-                trackItemView(item.id, item.categoryId, {
-                    itemTitle: item.title,
-                    itemPrice: item.price,
-                    itemLocation: item.location,
-                    itemCondition: item.condition,
-                    isDigital: item.isDigital,
-                    listingType: item.listingType
-                });
-            } catch (error) {
-                console.error('Error updating views:', error);
-            }
-        };
+                    // We only track the view and fetch seller rating if the item is successfully loaded
+                    trackItemView(itemData.id, itemData.categoryId, {
+                        itemTitle: itemData.title,
+                        itemPrice: itemData.price,
+                        itemLocation: itemData.location,
+                        itemCondition: itemData.condition,
+                        isDigital: itemData.isDigital,
+                        listingType: itemData.listingType
+                    });
+                    
+                    await updateDoc(doc(db, 'listings', itemId), {
+                        views: increment(1)
+                    });
 
-        const fetchSellerRating = async () => {
-            try {
-                const sellerDoc = await getDoc(doc(db, 'users', item.userId));
-                if (sellerDoc.exists()) {
-                    const data = sellerDoc.data();
-                    setSellerRating(data.rating || { average: 0, count: 0 });
+                    const sellerDoc = await getDoc(doc(db, 'users', itemData.userId));
+                    if (sellerDoc.exists()) {
+                        const data = sellerDoc.data();
+                        setSellerRating(data.rating || { average: 0, count: 0 });
+                    }
+                } else {
+                    console.error("No such item!");
+                    // Optionally navigate to a 404 page
                 }
             } catch (error) {
-                console.error('Error fetching seller rating:', error);
+                console.error('Error fetching item:', error);
+            } finally {
+                setIsLoading(false);
             }
         };
 
-        updateViews();
-        fetchSellerRating();
-    }, [item]);
+        fetchItem();
+    }, [itemId]);
 
-    if (!item) return <FullPageLoader message="Loading item..." />;
+    if (isLoading) return <FullPageLoader message="Loading item..." />;
+    if (!item) return (
+        <div className="text-center py-10">
+            <h2 className="text-2xl font-bold">Item not found</h2>
+            <p>This listing may have been removed.</p>
+            <button onClick={() => navigate('/')} className="mt-4 bg-green-600 text-white px-6 py-2 rounded-lg">Go Home</button>
+        </div>
+    );
 
     const isWatched = watchedItems.includes(item.id);
+    const isInCart = cartItems.some(cartItem => cartItem.id === item.id);
     const images = item.images || [item.imageUrl];
     const createdDate = item.createdAt?.toDate ? item.createdAt.toDate() : new Date();
     const CategoryIcon = CATEGORIES[item.category]?.icon;
@@ -64,13 +85,13 @@ const ItemDetailPage = ({ item, onNavigate, onWatchToggle, watchedItems, onConta
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                 {/* Breadcrumb */}
                 <div className="mb-6 flex items-center text-sm text-gray-500">
-                    <button onClick={() => onNavigate('home')} className="hover:text-green-600 flex items-center">
+                    <button onClick={() => navigate('/')} className="hover:text-green-600 flex items-center">
                         <Home size={16} className="mr-2" />
                         Home
                     </button>
                     <ChevronRight size={16} className="mx-2" />
                     <button
-                        onClick={() => onNavigate('category', { categoryKey: item.category })}
+                        onClick={() => navigate(`/category/${item.category}`)}
                         className="hover:text-green-600"
                     >
                         {CATEGORIES[item.category]?.name}

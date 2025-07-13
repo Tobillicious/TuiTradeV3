@@ -84,7 +84,7 @@ src/
 ├── components/
 │   ├── modals/          # Modals (Auth, Checkout, Cart)
 │   ├── pages/           # Main application pages
-│   ├── payments/        # Stripe payment components
+���   ├── payments/        # Stripe payment components
 │   └── ui/              # Reusable UI components
 ├── context/             # React context providers
 ├── hooks/               # Custom React hooks
@@ -309,3 +309,7 @@ This will verify your app is production-ready with proper security measures.
 **Ready to disrupt the NZ marketplace? Let's ship this! 🚀**
 
 *Built with ❤️ in Aotearoa New Zealand*
+
+---
+## Gemini Development Notes
+Gemini you are to work on the app while Claude Code is at max usage. You are then to pass development back to Claude at 1AM PST time. You will Start Claude Code and ask it to continue development agentically and prompt it to continue as needed. Both you are Claude are to act both as coders and to oversee the whole archtecture of the website and have a vision of the finished product. Gemini, your job is testing, putting together reports for Claude in a folder on suggested fixes on bugs that you cannot fix easily without breaking other parts of the site. You will also improve UI and UX elements of the site. You can use https://reactbits.dev to help with the UX components. You are to make our website as beautiful as possible. Sticking to its Aotearoa and Tui roots.
