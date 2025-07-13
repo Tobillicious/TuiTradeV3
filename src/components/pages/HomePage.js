@@ -1,5 +1,6 @@
 // src/components/pages/HomePage.js
 import { useState, useEffect, useCallback } from 'react';
+import { motion } from 'framer-motion';
 import { collection, query, orderBy, limit, getDocs } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
 import { LISTINGS_LIMIT } from '../../lib/utils';
@@ -204,7 +205,12 @@ const HomePage = ({ onWatchToggle, watchedItems, onNavigate, onItemClick, onAddT
             {/* Enhanced Categories Section with Carousel */}
             <div className="bg-gradient-to-br from-gray-50 to-white py-20">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="text-center mb-16">
+                    <motion.div 
+                        className="text-center mb-16"
+                        initial={{ y: 30, opacity: 0 }}
+                        animate={{ y: 0, opacity: 1 }}
+                        transition={{ duration: 0.8, ease: "easeOut" }}
+                    >
                         <h2 className="text-4xl md:text-5xl font-bold mb-4 text-gray-900">
                             {getBilingualText('Explore Our Categories', 'browse_categories')}
                         </h2>
@@ -214,20 +220,21 @@ const HomePage = ({ onWatchToggle, watchedItems, onNavigate, onItemClick, onAddT
                         <p className="text-lg text-gray-500">
                             Discover amazing items across {TE_REO_TRANSLATIONS.phrases.new_zealand}'s most comprehensive {TE_REO_TRANSLATIONS.interface.marketplace}
                         </p>
-                    </div>
+                    </motion.div>
 
-                    {/* Carousel Container */}
-                    <div className="flex justify-center">
+                    {/* Hero Carousel */}
+                    <motion.div
+                        initial={{ y: 50, opacity: 0 }}
+                        animate={{ y: 0, opacity: 1 }}
+                        transition={{ duration: 1, delay: 0.3, ease: "easeOut" }}
+                    >
                         <Carousel 
-                            baseWidth={350}
                             autoplay={true}
-                            autoplayDelay={4000}
+                            autoplayDelay={5000}
                             pauseOnHover={true}
-                            loop={true}
-                            round={true}
                             onNavigate={onNavigate}
                         />
-                    </div>
+                    </motion.div>
                 </div>
             </div>
 
@@ -348,66 +355,105 @@ const HomePage = ({ onWatchToggle, watchedItems, onNavigate, onItemClick, onAddT
             {/* Trust & Safety */}
             <div className="bg-green-50 py-16">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="text-center mb-12">
+                    <motion.div 
+                        className="text-center mb-12"
+                        initial={{ y: 30, opacity: 0 }}
+                        whileInView={{ y: 0, opacity: 1 }}
+                        transition={{ duration: 0.6, ease: "easeOut" }}
+                        viewport={{ once: true, margin: "-100px" }}
+                    >
                         <h2 className="text-3xl font-bold text-gray-900 mb-4">
                             Trade with Confidence
                         </h2>
                         <p className="text-gray-600 text-lg">
                             Your safety and satisfaction are our top priorities
                         </p>
-                    </div>
+                    </motion.div>
 
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                        <SpotlightCard 
-                            className="theme-green"
-                            spotlightColor="rgba(16, 185, 129, 0.25)"
-                            backgroundColor="rgba(255, 255, 255, 0.95)"
-                            borderRadius="1rem"
+                        <motion.div
+                            initial={{ y: 50, opacity: 0 }}
+                            whileInView={{ y: 0, opacity: 1 }}
+                            transition={{ duration: 0.6, delay: 0.1, ease: "easeOut" }}
+                            viewport={{ once: true, margin: "-50px" }}
                         >
-                            <div className="text-center p-6">
-                                <div className="w-16 h-16 bg-green-600 rounded-full flex items-center justify-center mx-auto mb-4">
-                                    <Shield className="w-8 h-8 text-white" />
+                            <SpotlightCard 
+                                className="theme-green"
+                                spotlightColor="rgba(16, 185, 129, 0.25)"
+                                backgroundColor="rgba(255, 255, 255, 0.95)"
+                                borderRadius="1rem"
+                            >
+                                <div className="text-center p-6">
+                                    <motion.div 
+                                        className="w-16 h-16 bg-green-600 rounded-full flex items-center justify-center mx-auto mb-4"
+                                        whileHover={{ scale: 1.1, rotate: 5 }}
+                                        transition={{ duration: 0.2 }}
+                                    >
+                                        <Shield className="w-8 h-8 text-white" />
+                                    </motion.div>
+                                    <h3 className="text-xl font-semibold mb-2">Secure Trading</h3>
+                                    <p className="text-gray-600">
+                                        All transactions are protected with our secure payment system and buyer protection.
+                                    </p>
                                 </div>
-                                <h3 className="text-xl font-semibold mb-2">Secure Trading</h3>
-                                <p className="text-gray-600">
-                                    All transactions are protected with our secure payment system and buyer protection.
-                                </p>
-                            </div>
-                        </SpotlightCard>
+                            </SpotlightCard>
+                        </motion.div>
 
-                        <SpotlightCard 
-                            className="theme-orange"
-                            spotlightColor="rgba(249, 115, 22, 0.25)"
-                            backgroundColor="rgba(255, 255, 255, 0.95)"
-                            borderRadius="1rem"
+                        <motion.div
+                            initial={{ y: 50, opacity: 0 }}
+                            whileInView={{ y: 0, opacity: 1 }}
+                            transition={{ duration: 0.6, delay: 0.2, ease: "easeOut" }}
+                            viewport={{ once: true, margin: "-50px" }}
                         >
-                            <div className="text-center p-6">
-                                <div className="w-16 h-16 bg-yellow-500 rounded-full flex items-center justify-center mx-auto mb-4">
-                                    <Star className="w-8 h-8 text-white" />
+                            <SpotlightCard 
+                                className="theme-orange"
+                                spotlightColor="rgba(249, 115, 22, 0.25)"
+                                backgroundColor="rgba(255, 255, 255, 0.95)"
+                                borderRadius="1rem"
+                            >
+                                <div className="text-center p-6">
+                                    <motion.div 
+                                        className="w-16 h-16 bg-yellow-500 rounded-full flex items-center justify-center mx-auto mb-4"
+                                        whileHover={{ scale: 1.1, rotate: 5 }}
+                                        transition={{ duration: 0.2 }}
+                                    >
+                                        <Star className="w-8 h-8 text-white" />
+                                    </motion.div>
+                                    <h3 className="text-xl font-semibold mb-2">Quality Guaranteed</h3>
+                                    <p className="text-gray-600">
+                                        We verify all listings and provide detailed seller ratings to ensure quality.
+                                    </p>
                                 </div>
-                                <h3 className="text-xl font-semibold mb-2">Quality Guaranteed</h3>
-                                <p className="text-gray-600">
-                                    We verify all listings and provide detailed seller ratings to ensure quality.
-                                </p>
-                            </div>
-                        </SpotlightCard>
+                            </SpotlightCard>
+                        </motion.div>
 
-                        <SpotlightCard 
-                            className="theme-blue"
-                            spotlightColor="rgba(59, 130, 246, 0.25)"
-                            backgroundColor="rgba(255, 255, 255, 0.95)"
-                            borderRadius="1rem"
+                        <motion.div
+                            initial={{ y: 50, opacity: 0 }}
+                            whileInView={{ y: 0, opacity: 1 }}
+                            transition={{ duration: 0.6, delay: 0.3, ease: "easeOut" }}
+                            viewport={{ once: true, margin: "-50px" }}
                         >
-                            <div className="text-center p-6">
-                                <div className="w-16 h-16 bg-blue-500 rounded-full flex items-center justify-center mx-auto mb-4">
-                                    <MessageCircle className="w-8 h-8 text-white" />
+                            <SpotlightCard 
+                                className="theme-blue"
+                                spotlightColor="rgba(59, 130, 246, 0.25)"
+                                backgroundColor="rgba(255, 255, 255, 0.95)"
+                                borderRadius="1rem"
+                            >
+                                <div className="text-center p-6">
+                                    <motion.div 
+                                        className="w-16 h-16 bg-blue-500 rounded-full flex items-center justify-center mx-auto mb-4"
+                                        whileHover={{ scale: 1.1, rotate: 5 }}
+                                        transition={{ duration: 0.2 }}
+                                    >
+                                        <MessageCircle className="w-8 h-8 text-white" />
+                                    </motion.div>
+                                    <h3 className="text-xl font-semibold mb-2">24/7 Support</h3>
+                                    <p className="text-gray-600">
+                                        Our dedicated support team is here to help you with any questions or concerns.
+                                    </p>
                                 </div>
-                                <h3 className="text-xl font-semibold mb-2">24/7 Support</h3>
-                                <p className="text-gray-600">
-                                    Our dedicated support team is here to help you with any questions or concerns.
-                                </p>
-                            </div>
-                        </SpotlightCard>
+                            </SpotlightCard>
+                        </motion.div>
                     </div>
                 </div>
             </div>
@@ -415,7 +461,13 @@ const HomePage = ({ onWatchToggle, watchedItems, onNavigate, onItemClick, onAddT
             {/* Page Views Counter */}
             <div className="bg-gray-900 py-8">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="text-center">
+                    <motion.div 
+                        className="text-center"
+                        initial={{ y: 30, opacity: 0 }}
+                        whileInView={{ y: 0, opacity: 1 }}
+                        transition={{ duration: 0.6, ease: "easeOut" }}
+                        viewport={{ once: true }}
+                    >
                         <p className="text-gray-400 text-sm mb-2">Total Page Views</p>
                         <Counter 
                             value={pageViews}
@@ -430,7 +482,7 @@ const HomePage = ({ onWatchToggle, watchedItems, onNavigate, onItemClick, onAddT
                             shadow={true}
                         />
                         <p className="text-gray-500 text-xs mt-2 italic">He taonga tuku iho - Community treasures viewed</p>
-                    </div>
+                    </motion.div>
                 </div>
             </div>
         </div>

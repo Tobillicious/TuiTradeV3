@@ -1,162 +1,108 @@
 import { useEffect, useState, useRef } from "react";
-import { motion, useMotionValue, useTransform } from "framer-motion";
-import { FiCircle, FiCode, FiFileText, FiLayers, FiLayout } from "react-icons/fi";
-import { ShoppingCart, Car, Home, Briefcase, Wrench, Gift } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { ShoppingCart, Car, Home, Briefcase, Wrench, Gift, ChevronLeft, ChevronRight } from "lucide-react";
 import "./Carousel.css";
 
 const DEFAULT_ITEMS = [
   {
     title: "Marketplace",
     description: "Everything you need, all in one place",
+    subtitle: "11 categories • Auctions & Classified",
     id: 1,
-    icon: <ShoppingCart className="carousel-icon" />,
+    icon: <ShoppingCart className="w-8 h-8" />,
     color: "from-blue-500 to-blue-600",
-    route: "marketplace-landing"
+    route: "marketplace-landing",
+    image: "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=800&h=600&fit=crop"
   },
   {
     title: "Motors",
     description: "Find your perfect ride",
+    subtitle: "6 categories • Auctions & Classified",
     id: 2,
-    icon: <Car className="carousel-icon" />,
+    icon: <Car className="w-8 h-8" />,
     color: "from-red-500 to-red-600",
-    route: "motors-landing"
+    route: "motors-landing",
+    image: "https://images.unsplash.com/photo-1494976688754-90f929ac2c0e?w=800&h=600&fit=crop"
   },
   {
     title: "Property",
     description: "Your dream home awaits",
+    subtitle: "3 categories • Classified",
     id: 3,
-    icon: <Home className="carousel-icon" />,
+    icon: <Home className="w-8 h-8" />,
     color: "from-green-500 to-green-600",
-    route: "real-estate-landing"
+    route: "real-estate-landing",
+    image: "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=800&h=600&fit=crop"
   },
   {
     title: "Jobs",
     description: "Your next career move",
+    subtitle: "5 categories • Classified",
     id: 4,
-    icon: <Briefcase className="carousel-icon" />,
+    icon: <Briefcase className="w-8 h-8" />,
     color: "from-purple-500 to-purple-600",
-    route: "jobs-landing"
+    route: "jobs-landing",
+    image: "https://images.unsplash.com/photo-1521737604893-d14cc237f11d?w=800&h=600&fit=crop"
   },
   {
     title: "Services",
     description: "Professional services",
+    subtitle: "4 categories • Classified",
     id: 5,
-    icon: <Wrench className="carousel-icon" />,
+    icon: <Wrench className="w-8 h-8" />,
     color: "from-orange-500 to-orange-600",
-    route: "digital-goods-landing"
+    route: "digital-goods-landing",
+    image: "https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=800&h=600&fit=crop"
   },
   {
     title: "Community",
     description: "Connect with Kiwis",
+    subtitle: "3 categories • Classified",
     id: 6,
-    icon: <Gift className="carousel-icon" />,
+    icon: <Gift className="w-8 h-8" />,
     color: "from-pink-500 to-pink-600",
-    route: "community-landing"
+    route: "community-landing",
+    image: "https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=800&h=600&fit=crop"
   },
 ];
 
-const DRAG_BUFFER = 0;
-const VELOCITY_THRESHOLD = 500;
-const GAP = 16;
-const SPRING_OPTIONS = { type: "spring", stiffness: 300, damping: 30 };
-
 export default function Carousel({
   items = DEFAULT_ITEMS,
-  baseWidth = 300,
   autoplay = true,
-  autoplayDelay = 4000,
+  autoplayDelay = 5000,
   pauseOnHover = true,
-  loop = true,
-  round = true,
   onNavigate
 }) {
-  const containerPadding = 16;
-  const itemWidth = baseWidth - containerPadding * 2;
-  const trackItemOffset = itemWidth + GAP;
-
-  const carouselItems = loop ? [...items, items[0]] : items;
   const [currentIndex, setCurrentIndex] = useState(0);
-  const x = useMotionValue(0);
   const [isHovered, setIsHovered] = useState(false);
-  const [isResetting, setIsResetting] = useState(false);
+  const timeoutRef = useRef(null);
 
-  const containerRef = useRef(null);
-  useEffect(() => {
-    if (pauseOnHover && containerRef.current) {
-      const container = containerRef.current;
-      const handleMouseEnter = () => setIsHovered(true);
-      const handleMouseLeave = () => setIsHovered(false);
-      container.addEventListener("mouseenter", handleMouseEnter);
-      container.addEventListener("mouseleave", handleMouseLeave);
-      return () => {
-        container.removeEventListener("mouseenter", handleMouseEnter);
-        container.removeEventListener("mouseleave", handleMouseLeave);
-      };
-    }
-  }, [pauseOnHover]);
-
+  // Auto-advance slides
   useEffect(() => {
     if (autoplay && (!pauseOnHover || !isHovered)) {
-      const timer = setInterval(() => {
-        setCurrentIndex((prev) => {
-          if (prev === items.length - 1 && loop) {
-            return prev + 1;
-          }
-          if (prev === carouselItems.length - 1) {
-            return loop ? 0 : prev;
-          }
-          return prev + 1;
-        });
+      timeoutRef.current = setTimeout(() => {
+        setCurrentIndex((prev) => (prev + 1) % items.length);
       }, autoplayDelay);
-      return () => clearInterval(timer);
     }
-  }, [
-    autoplay,
-    autoplayDelay,
-    isHovered,
-    loop,
-    items.length,
-    carouselItems.length,
-    pauseOnHover,
-  ]);
-
-  const effectiveTransition = isResetting ? { duration: 0 } : SPRING_OPTIONS;
-
-  const handleAnimationComplete = () => {
-    if (loop && currentIndex === carouselItems.length - 1) {
-      setIsResetting(true);
-      x.set(0);
-      setCurrentIndex(0);
-      setTimeout(() => setIsResetting(false), 50);
-    }
-  };
-
-  const handleDragEnd = (_, info) => {
-    const offset = info.offset.x;
-    const velocity = info.velocity.x;
-    if (offset < -DRAG_BUFFER || velocity < -VELOCITY_THRESHOLD) {
-      if (loop && currentIndex === items.length - 1) {
-        setCurrentIndex(currentIndex + 1);
-      } else {
-        setCurrentIndex((prev) => Math.min(prev + 1, carouselItems.length - 1));
+    
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
       }
-    } else if (offset > DRAG_BUFFER || velocity > VELOCITY_THRESHOLD) {
-      if (loop && currentIndex === 0) {
-        setCurrentIndex(items.length - 1);
-      } else {
-        setCurrentIndex((prev) => Math.max(prev - 1, 0));
-      }
-    }
-  };
-
-  const dragProps = loop
-    ? {}
-    : {
-      dragConstraints: {
-        left: -trackItemOffset * (carouselItems.length - 1),
-        right: 0,
-      },
     };
+  }, [currentIndex, autoplay, autoplayDelay, isHovered, pauseOnHover, items.length]);
+
+  const goToNext = () => {
+    setCurrentIndex((prev) => (prev + 1) % items.length);
+  };
+
+  const goToPrevious = () => {
+    setCurrentIndex((prev) => (prev - 1 + items.length) % items.length);
+  };
+
+  const goToSlide = (index) => {
+    setCurrentIndex(index);
+  };
 
   const handleItemClick = (item) => {
     if (onNavigate && item.route) {
@@ -164,82 +110,120 @@ export default function Carousel({
     }
   };
 
+  const currentItem = items[currentIndex];
+
   return (
-    <div
-      ref={containerRef}
-      className={`carousel-container ${round ? "round" : ""}`}
-      style={{
-        width: `${baseWidth}px`,
-        ...(round && { height: `${baseWidth}px`, borderRadius: "50%" }),
-      }}
+    <div 
+      className="hero-carousel"
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
     >
-      <motion.div
-        className="carousel-track"
-        drag="x"
-        {...dragProps}
-        style={{
-          width: itemWidth,
-          gap: `${GAP}px`,
-          perspective: 1000,
-          perspectiveOrigin: `${currentIndex * trackItemOffset + itemWidth / 2}px 50%`,
-          x,
-        }}
-        onDragEnd={handleDragEnd}
-        animate={{ x: -(currentIndex * trackItemOffset) }}
-        transition={effectiveTransition}
-        onAnimationComplete={handleAnimationComplete}
-      >
-        {carouselItems.map((item, index) => {
-          const range = [
-            -(index + 1) * trackItemOffset,
-            -index * trackItemOffset,
-            -(index - 1) * trackItemOffset,
-          ];
-          const outputRange = [90, 0, -90];
-          // eslint-disable-next-line react-hooks/rules-of-hooks
-          const rotateY = useTransform(x, range, outputRange, { clamp: false });
-          return (
-            <motion.div
-              key={index}
-              className={`carousel-item ${round ? "round" : ""}`}
-              style={{
-                width: itemWidth,
-                height: round ? itemWidth : "100%",
-                rotateY: rotateY,
-                ...(round && { borderRadius: "50%" }),
-              }}
-              transition={effectiveTransition}
-              onClick={() => handleItemClick(item)}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-            >
-              <div className={`carousel-item-content bg-gradient-to-br ${item.color} text-white`}>
-                <div className={`carousel-item-header ${round ? "round" : ""}`}>
-                  <span className="carousel-icon-container">
-                    {item.icon}
-                  </span>
-                </div>
-                <div className="carousel-item-text">
-                  <div className="carousel-item-title">{item.title}</div>
-                  <p className="carousel-item-description">{item.description}</p>
-                </div>
+      <div className="hero-carousel-container">
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={currentIndex}
+            className={`hero-slide bg-gradient-to-br ${currentItem.color}`}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.6, ease: "easeInOut" }}
+            onClick={() => handleItemClick(currentItem)}
+          >
+            {/* Background Image */}
+            <div className="hero-slide-bg">
+              <img 
+                src={currentItem.image} 
+                alt={currentItem.title}
+                className="hero-slide-image"
+              />
+              <div className="hero-slide-overlay"></div>
+            </div>
+
+            {/* Content */}
+            <div className="hero-slide-content">
+              <div className="hero-slide-text">
+                <motion.div
+                  initial={{ y: 50, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
+                  className="hero-slide-icon-container"
+                >
+                  <div className="hero-slide-icon">
+                    {currentItem.icon}
+                  </div>
+                </motion.div>
+
+                <motion.h2
+                  initial={{ y: 50, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  transition={{ duration: 0.8, delay: 0.3, ease: "easeOut" }}
+                  className="hero-slide-title"
+                >
+                  {currentItem.title}
+                </motion.h2>
+
+                <motion.p
+                  initial={{ y: 50, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  transition={{ duration: 0.8, delay: 0.4, ease: "easeOut" }}
+                  className="hero-slide-description"
+                >
+                  {currentItem.description}
+                </motion.p>
+
+                <motion.p
+                  initial={{ y: 50, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  transition={{ duration: 0.8, delay: 0.5, ease: "easeOut" }}
+                  className="hero-slide-subtitle"
+                >
+                  {currentItem.subtitle}
+                </motion.p>
+
+                <motion.button
+                  initial={{ y: 50, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  transition={{ duration: 0.8, delay: 0.6, ease: "easeOut" }}
+                  className="hero-slide-cta"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleItemClick(currentItem);
+                  }}
+                  whileHover={{ scale: 1.05, y: -2 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  Explore {currentItem.title}
+                </motion.button>
               </div>
-            </motion.div>
-          );
-        })}
-      </motion.div>
-      <div className={`carousel-indicators-container ${round ? "round" : ""}`}>
-        <div className="carousel-indicators">
+            </div>
+          </motion.div>
+        </AnimatePresence>
+
+        {/* Navigation Arrows */}
+        <button
+          className="hero-nav-button hero-nav-prev"
+          onClick={goToPrevious}
+          aria-label="Previous slide"
+        >
+          <ChevronLeft className="w-6 h-6" />
+        </button>
+
+        <button
+          className="hero-nav-button hero-nav-next"
+          onClick={goToNext}
+          aria-label="Next slide"
+        >
+          <ChevronRight className="w-6 h-6" />
+        </button>
+
+        {/* Indicators */}
+        <div className="hero-indicators">
           {items.map((_, index) => (
-            <motion.div
+            <button
               key={index}
-              className={`carousel-indicator ${currentIndex % items.length === index ? "active" : "inactive"
-                }`}
-              animate={{
-                scale: currentIndex % items.length === index ? 1.2 : 1,
-              }}
-              onClick={() => setCurrentIndex(index)}
-              transition={{ duration: 0.15 }}
+              className={`hero-indicator ${index === currentIndex ? 'active' : ''}`}
+              onClick={() => goToSlide(index)}
+              aria-label={`Go to slide ${index + 1}`}
             />
           ))}
         </div>
