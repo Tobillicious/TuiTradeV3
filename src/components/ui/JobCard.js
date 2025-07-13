@@ -15,8 +15,47 @@ const JobCard = ({
     onApplyJob, 
     isWatched = false, 
     showCompanyLogo = true,
-    compact = false 
+    compact = false,
+    autoSize = true // New prop for automatic sizing
 }) => {
+    
+    // Calculate dynamic card size based on content and importance
+    const calculateCardSize = () => {
+        if (!autoSize) return compact ? 'small' : 'medium';
+        
+        let score = 0;
+        
+        // Content richness scoring
+        if (job.description?.length > 200) score += 2;
+        else if (job.description?.length > 100) score += 1;
+        
+        if (job.requirements?.length > 5) score += 2;
+        else if (job.requirements?.length > 2) score += 1;
+        
+        if (job.benefits?.length > 3) score += 1;
+        
+        // Priority scoring
+        if (job.featured) score += 3;
+        if (job.salary === 'high' || job.salary === 'very-high') score += 2;
+        if (job.urgent) score += 2;
+        
+        // Recency scoring (newer jobs get larger cards)
+        const daysOld = Math.floor((new Date() - new Date(job.postedDate)) / (1000 * 60 * 60 * 24));
+        if (daysOld <= 1) score += 2;
+        else if (daysOld <= 7) score += 1;
+        
+        // Company tier scoring
+        const bigCompanies = ['microsoft', 'google', 'apple', 'amazon', 'meta'];
+        if (bigCompanies.some(company => job.company.toLowerCase().includes(company))) score += 2;
+        
+        // Determine size based on score
+        if (score >= 8) return 'hero';
+        if (score >= 5) return 'large';
+        if (score >= 3) return 'medium';
+        return 'small';
+    };
+    
+    const cardSize = calculateCardSize();
     const getTimeAgo = (dateString) => {
         const date = new Date(dateString);
         const now = new Date();
@@ -81,12 +120,29 @@ const JobCard = ({
         }
     };
 
+    // Dynamic styling based on card size
+    const getSizeClasses = () => {
+        const baseClasses = "bg-white rounded-lg shadow-md hover:shadow-lg transition-all duration-300 cursor-pointer border border-gray-200 hover:border-gray-300";
+        const featuredRing = job.featured ? 'ring-2 ring-blue-500 ring-opacity-20' : '';
+        
+        switch (cardSize) {
+            case 'hero':
+                return `${baseClasses} ${featuredRing} p-8 transform hover:scale-[1.02] shadow-lg hover:shadow-2xl bg-gradient-to-br from-blue-50 to-white border-blue-200`;
+            case 'large':
+                return `${baseClasses} ${featuredRing} p-6 transform hover:scale-[1.01] shadow-md hover:shadow-xl`;
+            case 'medium':
+                return `${baseClasses} ${featuredRing} p-5 hover:shadow-lg`;
+            case 'small':
+                return `${baseClasses} ${featuredRing} p-4 text-sm`;
+            default:
+                return `${baseClasses} ${featuredRing} p-5`;
+        }
+    };
+
     return (
         <div 
             onClick={handleCardClick}
-            className={`bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow cursor-pointer border border-gray-200 hover:border-gray-300 ${
-                job.featured ? 'ring-2 ring-blue-500 ring-opacity-20' : ''
-            } ${compact ? 'p-4' : 'p-6'}`}
+            className={getSizeClasses()}
         >
             {/* Featured Badge */}
             {job.featured && (
@@ -166,74 +222,119 @@ const JobCard = ({
                             </div>
                         </div>
 
-                        {/* Job Description Preview */}
-                        {!compact && (
+                        {/* Job Description Preview - Size-aware */}
+                        {cardSize !== 'small' && (
                             <div className="mt-3">
-                                <p className="text-gray-700 text-sm line-clamp-2">
+                                <p className={`text-gray-700 ${
+                                    cardSize === 'hero' ? 'text-base line-clamp-4' : 
+                                    cardSize === 'large' ? 'text-sm line-clamp-3' : 
+                                    'text-sm line-clamp-2'
+                                }`}>
                                     {job.description}
                                 </p>
                             </div>
                         )}
 
-                        {/* Job Tags/Skills */}
-                        {job.requirements && job.requirements.length > 0 && (
+                        {/* Job Tags/Skills - Size-aware */}
+                        {job.requirements && job.requirements.length > 0 && cardSize !== 'small' && (
                             <div className="mt-3 flex flex-wrap gap-2">
-                                {job.requirements.slice(0, 3).map((requirement, index) => (
-                                    <span
-                                        key={index}
-                                        className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-gray-100 text-gray-700"
-                                    >
-                                        {requirement}
-                                    </span>
-                                ))}
-                                {job.requirements.length > 3 && (
+                                {(() => {
+                                    const maxTags = cardSize === 'hero' ? 6 : cardSize === 'large' ? 4 : 3;
+                                    return job.requirements.slice(0, maxTags).map((requirement, index) => (
+                                        <span
+                                            key={index}
+                                            className={`inline-flex items-center px-2 py-1 rounded-full ${
+                                                cardSize === 'hero' ? 'text-sm bg-blue-100 text-blue-800' : 'text-xs bg-gray-100 text-gray-700'
+                                            }`}
+                                        >
+                                            {requirement}
+                                        </span>
+                                    ));
+                                })()}
+                                {job.requirements.length > (cardSize === 'hero' ? 6 : cardSize === 'large' ? 4 : 3) && (
                                     <span className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-gray-100 text-gray-700">
-                                        +{job.requirements.length - 3} more
+                                        +{job.requirements.length - (cardSize === 'hero' ? 6 : cardSize === 'large' ? 4 : 3)} more
                                     </span>
                                 )}
                             </div>
                         )}
 
-                        {/* Benefits Preview */}
-                        {job.benefits && job.benefits.length > 0 && (
+                        {/* Benefits Preview - Size-aware */}
+                        {job.benefits && job.benefits.length > 0 && cardSize !== 'small' && (
                             <div className="mt-2 flex flex-wrap gap-2">
-                                {job.benefits.slice(0, 2).map((benefit, index) => (
-                                    <span
-                                        key={index}
-                                        className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-green-100 text-green-700"
-                                    >
-                                        {benefit}
-                                    </span>
-                                ))}
-                                {job.benefits.length > 2 && (
+                                {(() => {
+                                    const maxBenefits = cardSize === 'hero' ? 4 : cardSize === 'large' ? 3 : 2;
+                                    return job.benefits.slice(0, maxBenefits).map((benefit, index) => (
+                                        <span
+                                            key={index}
+                                            className={`inline-flex items-center px-2 py-1 rounded-full ${
+                                                cardSize === 'hero' ? 'text-sm bg-green-100 text-green-800' : 'text-xs bg-green-100 text-green-700'
+                                            }`}
+                                        >
+                                            {benefit}
+                                        </span>
+                                    ));
+                                })()}
+                                {job.benefits.length > (cardSize === 'hero' ? 4 : cardSize === 'large' ? 3 : 2) && (
                                     <span className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-green-100 text-green-700">
-                                        +{job.benefits.length - 2} benefits
+                                        +{job.benefits.length - (cardSize === 'hero' ? 4 : cardSize === 'large' ? 3 : 2)} benefits
                                     </span>
                                 )}
                             </div>
                         )}
 
-                        {/* Action Buttons */}
+                        {/* Hero Card Special Features */}
+                        {cardSize === 'hero' && (
+                            <div className="mt-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                                <div className="flex items-center justify-between">
+                                    <div>
+                                        <h4 className="text-sm font-semibold text-blue-800 mb-1">🌟 Premium Opportunity</h4>
+                                        <p className="text-xs text-blue-600">High-priority position with immediate hiring</p>
+                                    </div>
+                                    <div className="text-right">
+                                        <div className="text-xs text-blue-600 font-medium">Quick Apply</div>
+                                        <div className="text-xs text-blue-500">⚡ Fast response</div>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Action Buttons - Size-aware */}
                         <div className="mt-4 flex items-center justify-between">
-                            <div className="flex items-center space-x-3">
+                            <div className={`flex items-center ${cardSize === 'hero' ? 'space-x-4' : 'space-x-3'}`}>
                                 <button
                                     onClick={handleApplyJob}
-                                    className="job-action-button bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors font-medium"
+                                    className={`job-action-button bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium ${
+                                        cardSize === 'hero' ? 'px-6 py-3 text-base' : 
+                                        cardSize === 'large' ? 'px-5 py-2.5 text-sm' : 
+                                        'px-4 py-2 text-sm'
+                                    }`}
                                 >
-                                    Apply Now
+                                    {cardSize === 'hero' ? '🚀 Apply Now' : 'Apply Now'}
                                 </button>
                                 
-                                <button
-                                    onClick={handleCardClick}
-                                    className="job-action-button text-blue-600 hover:text-blue-800 transition-colors font-medium flex items-center"
-                                >
-                                    View Details
-                                    <ChevronRight size={16} className="ml-1" />
-                                </button>
+                                {cardSize !== 'small' && (
+                                    <button
+                                        onClick={handleCardClick}
+                                        className={`job-action-button text-blue-600 hover:text-blue-800 transition-colors font-medium flex items-center ${
+                                            cardSize === 'hero' ? 'text-base' : 'text-sm'
+                                        }`}
+                                    >
+                                        View Details
+                                        <ChevronRight size={cardSize === 'hero' ? 18 : 16} className="ml-1" />
+                                    </button>
+                                )}
                             </div>
 
-                            <div className="text-xs text-gray-500">
-                                {getCategoryDisplay(job.category)}
+                            <div className="flex flex-col items-end">
+                                <div className={`${cardSize === 'hero' ? 'text-sm' : 'text-xs'} text-gray-500`}>
+                                    {getCategoryDisplay(job.category)}
+                                </div>
+                                
+                                {/* Size indicator (for demo - remove in production) */}
+                                <div className="text-xs text-gray-400 font-mono mt-1">
+                                    {cardSize.toUpperCase()}
+                                </div>
                             </div>
                         </div>
                     </div>
