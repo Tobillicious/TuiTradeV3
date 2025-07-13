@@ -199,7 +199,7 @@ export default function Carousel({
           </motion.div>
         </AnimatePresence>
 
-        {/* Navigation Arrows */}
+        {/* Navigation Arrows - Always Visible */}
         <button
           className="hero-nav-button hero-nav-prev"
           onClick={goToPrevious}
@@ -216,16 +216,51 @@ export default function Carousel({
           <ChevronRight className="w-6 h-6" />
         </button>
 
-        {/* Indicators */}
-        <div className="hero-indicators">
-          {items.map((_, index) => (
-            <button
-              key={index}
-              className={`hero-indicator ${index === currentIndex ? 'active' : ''}`}
-              onClick={() => goToSlide(index)}
-              aria-label={`Go to slide ${index + 1}`}
-            />
-          ))}
+        {/* Progress Bar and Category Names */}
+        <div className="hero-navigation-bar">
+          <div className="hero-progress-container">
+            <div className="hero-progress-bar">
+              <div 
+                className="hero-progress-fill"
+                style={{ width: `${((currentIndex + 1) / items.length) * 100}%` }}
+              />
+            </div>
+            <span className="hero-progress-text">
+              {currentIndex + 1} / {items.length}
+            </span>
+          </div>
+          
+          <div className="hero-category-nav">
+            {items.map((item, index) => (
+              <button
+                key={index}
+                className={`hero-category-button ${index === currentIndex ? 'active' : ''}`}
+                onClick={() => goToSlide(index)}
+                aria-label={`Go to ${item.title}`}
+              >
+                {item.icon}
+                <span className="hero-category-name">{item.title}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Call-to-Action Overlay */}
+        <div className="hero-cta-overlay">
+          <div className="hero-cta-content">
+            <p className="hero-cta-hint">
+              Click to explore • Swipe to browse • Auto-advance every 5s
+            </p>
+            <div className="hero-pause-button">
+              <button
+                onClick={() => setCurrentIndex(currentIndex)} // Reset timer
+                className="hero-pause-btn"
+                aria-label="Pause autoplay"
+              >
+                ⏸ Pause
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </div>

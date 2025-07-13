@@ -18,13 +18,11 @@ const Counter = ({
   className = ""
 }) => {
   const [digits, setDigits] = useState([]);
-  const [previousDigits, setPreviousDigits] = useState([]);
 
   useEffect(() => {
     const newDigits = places.map(place => Math.floor((value / place) % 10));
-    setPreviousDigits(digits);
     setDigits(newDigits);
-  }, [value, places]);
+  }, [value, places, digits]);
 
   const digitVariants = {
     initial: { y: -20, opacity: 0 },
