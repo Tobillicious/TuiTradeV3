@@ -15,6 +15,7 @@ import { PreloadCriticalResources } from './components/ui/PerformanceOptimizer';
 // UI Components & Pages - Lazy loaded for better performance
 import { FullPageLoader } from './components/ui/Loaders';
 import ErrorBoundary from './components/ui/ErrorBoundary';
+import MobileBottomNav from './components/ui/MobileBottomNav';
 import AuthModal from './components/modals/AuthModal';
 import ContactSellerModal from './components/modals/ContactSellerModal';
 import ShoppingCartModal from './components/modals/ShoppingCartModal';
@@ -720,9 +721,19 @@ function AppContent() {
                 )}
 
                 {/* --- Main Content --- */}
-                <main className="flex-grow flex flex-col">
+                <main className="flex-grow flex flex-col pb-20 lg:pb-0">
                     {renderPage()}
                 </main>
+
+                {/* Mobile Bottom Navigation */}
+                <MobileBottomNav
+                    currentPage={currentPage}
+                    onNavigate={handleNavigate}
+                    watchedItemsCount={watchedItems.length}
+                    cartItemsCount={cartItems.length}
+                    currentUser={currentUser}
+                    onAuthClick={() => setIsAuthModalOpen(true)}
+                />
 
                 {/* --- Footer --- */}
                 <footer className={`text-white ${isDarkMode ? 'bg-gray-900' : 'bg-gray-800'}`}>
