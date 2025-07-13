@@ -1,5 +1,6 @@
-// Real-time Messaging Service - Comprehensive chat and communication system
-// Handles buyer-seller messaging, order discussions, and support channels
+// Advanced Messaging Service for TuiTrade
+// Context-aware messaging with relationship-based permissions and features
+// Supports: Marketplace, Professional, Community, Personal, and Inner Circle conversations
 
 import {
   collection,
@@ -38,7 +39,12 @@ export const MESSAGE_TYPES = {
   SYSTEM: 'system',
   ORDER_UPDATE: 'order_update',
   OFFER: 'offer',
-  LOCATION: 'location'
+  LOCATION: 'location',
+  LISTING_SHARE: 'listing_share',
+  PAYMENT_REQUEST: 'payment_request',
+  EVENT_INVITE: 'event_invite',
+  CV_SHARE: 'cv_share',
+  VOICE: 'voice'
 };
 
 // Conversation types
@@ -47,6 +53,55 @@ export const CONVERSATION_TYPES = {
   ORDER_DISCUSSION: 'order_discussion',
   SUPPORT: 'support',
   GENERAL: 'general'
+};
+
+// Message contexts for relationship-based messaging
+export const MESSAGE_CONTEXTS = {
+  MARKETPLACE: {
+    id: 'marketplace',
+    name: 'Marketplace',
+    description: 'Buying and selling conversations',
+    features: ['listing-preview', 'price-negotiation', 'payment-integration', 'delivery-tracking'],
+    permissions: ['public', 'acquaintance', 'business-contact'],
+    autoArchiveAfter: 30, // days
+    encryption: false
+  },
+  PROFESSIONAL: {
+    id: 'professional',
+    name: 'Professional',
+    description: 'Job and business communications',
+    features: ['cv-sharing', 'interview-scheduling', 'reference-requests', 'portfolio-sharing'],
+    permissions: ['public', 'business-contact', 'friend'],
+    autoArchiveAfter: 90,
+    encryption: false
+  },
+  COMMUNITY: {
+    id: 'community',
+    name: 'Community',
+    description: 'Neighbourhood and local discussions',
+    features: ['event-coordination', 'local-recommendations', 'safety-alerts', 'group-messaging'],
+    permissions: ['public', 'neighbour', 'friend'],
+    autoArchiveAfter: 60,
+    encryption: false
+  },
+  PERSONAL: {
+    id: 'personal',
+    name: 'Personal',
+    description: 'Friends and social conversations',
+    features: ['photo-sharing', 'reactions', 'voice-messages', 'location-sharing'],
+    permissions: ['friend', 'inner-circle'],
+    autoArchiveAfter: 365,
+    encryption: false
+  },
+  INNER_CIRCLE: {
+    id: 'inner-circle',
+    name: 'Inner Circle',
+    description: 'Close friends and family',
+    features: ['end-to-end-encryption', 'disappearing-messages', 'priority-notifications', 'unlimited-media'],
+    permissions: ['inner-circle'],
+    autoArchiveAfter: null, // Never
+    encryption: true
+  }
 };
 
 // Message status

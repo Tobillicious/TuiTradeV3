@@ -16,6 +16,7 @@ import { PreloadCriticalResources } from './components/ui/PerformanceOptimizer';
 import { FullPageLoader } from './components/ui/Loaders';
 import ErrorBoundary from './components/ui/ErrorBoundary';
 import MobileBottomNav from './components/ui/MobileBottomNav';
+import NotificationBell from './components/ui/NotificationBell';
 import AuthModal from './components/modals/AuthModal';
 import ContactSellerModal from './components/modals/ContactSellerModal';
 import ShoppingCartModal from './components/modals/ShoppingCartModal';
@@ -516,6 +517,8 @@ function AppContent() {
                                 >
                                     {isDarkMode ? <Sun className="w-6 h-6" /> : <Moon className="w-6 h-6" />}
                                 </button>
+
+                                <NotificationBell onNavigate={handleNavigate} />
 
                                 <button
                                     onClick={() => currentUser ? handleNavigate('watchlist') : setIsAuthModalOpen(true)}

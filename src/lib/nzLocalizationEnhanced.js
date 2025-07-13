@@ -64,6 +64,18 @@ export const TE_REO_TRANSLATIONS = {
     'cart': 'kāta', // cart
     'watchlist': 'mātakitaki', // watchlist
     'categories': 'kāwai', // categories
+    // Notification system
+    'notifications': 'pānui', // notifications
+    'markAllRead': 'tohua katoa kua pānuitia', // mark all read
+    'loadingNotifications': 'e uta ana ngā pānui...', // loading notifications
+    'noNotifications': 'kāore anō he pānui', // no notifications yet
+    'notificationHint': 'ka pānui mātou ki a koe ina tupu tētahi mea', // we'll notify you when something happens
+    'viewAllNotifications': 'tirohia ngā pānui katoa', // view all notifications
+    'selectConversation': 'tīpakohia he kōrerorero hei tīmata i te karere', // select conversation to start messaging
+    'noMessages': 'kāore anō he karere', // no messages yet
+    'startConversation': 'tīmatahia te kōrerorero!', // start the conversation
+    'typeMessage': 'tuhia tō karere...', // type your message
+    'typing': 'e tuhi ana...', // typing
   },
 
   // Job-related terms
