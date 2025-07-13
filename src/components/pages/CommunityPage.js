@@ -7,7 +7,7 @@ import {
     Users, MapPin, Calendar, MessageSquare, Vote,
     Star, ChevronRight, Clock, Heart, Share2,
     Plus, Filter, Search, ExternalLink, Shield,
-    Home, Briefcase, Award, Bell
+    Home, Briefcase, Award, Bell, ThumbsUp, ThumbsDown
 } from 'lucide-react';
 import {
     collection, query, where, orderBy, limit, getDocs,
@@ -17,104 +17,146 @@ import { useAuth } from '../../context/AuthContext';
 import { useNotification } from '../../context/NotificationContext';
 import { db } from '../../lib/firebase';
 import { getBilingualText } from '../../lib/nzLocalizationEnhanced';
+import { useTeReo, TeReoText } from '../ui/TeReoToggle';
 
 // NewDiscussionForm Component
 const NewDiscussionForm = ({ communityId, onDiscussionCreated }) => {
-    const { currentUser } = useAuth();
     const [title, setTitle] = useState('');
     const [content, setContent] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const [error, setError] = useState('');
+    const { currentUser } = useAuth();
+    const { showNotification } = useNotification();
+    const { getText } = useTeReo();
 
-    const handleCreateDiscussion = async (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-
-        if (!title.trim()) {
-            setError('Please enter a title for your discussion.');
-            return;
-        }
-        if (!content.trim()) {
-            setError('Please enter content for your discussion.');
-            return;
-        }
         if (!currentUser) {
-            setError('You must be logged in to post a discussion.');
+            showNotification('Please sign in to create a discussion', 'info');
+            return;
+        }
+
+        if (!title.trim() || !content.trim()) {
+            showNotification('Please fill in all fields', 'error');
             return;
         }
 
         setIsSubmitting(true);
-        setError('');
-
         try {
             const discussionData = {
                 title: title.trim(),
                 content: content.trim(),
                 authorId: currentUser.uid,
-                authorName: currentUser.displayName || currentUser.email.split('@')[0],
-                communityId: communityId,
+                authorName: currentUser.displayName || currentUser.email,
                 createdAt: serverTimestamp(),
                 upvotes: 0,
                 downvotes: 0,
-                replyCount: 0,
-                upvotedBy: [],
-                downvotedBy: [],
+                replyCount: 0
             };
 
-            const discussionsRef = collection(db, 'communities', communityId, 'discussions');
-            await addDoc(discussionsRef, discussionData);
+            await addDoc(collection(db, 'communities', communityId, 'discussions'), discussionData);
 
             setTitle('');
             setContent('');
-            if (onDiscussionCreated) {
-                onDiscussionCreated();
-            }
-        } catch (err) {
-            console.error("Error creating discussion:", err);
-            setError('Failed to create discussion. Please try again.');
+            showNotification('Discussion created successfully!', 'success');
+            onDiscussionCreated();
+        } catch (error) {
+            console.error('Error creating discussion:', error);
+            showNotification('Failed to create discussion', 'error');
         } finally {
             setIsSubmitting(false);
         }
     };
 
     return (
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-8">
-            <h3 className="text-lg font-bold text-gray-900 mb-4">Start a New Discussion</h3>
-            <form onSubmit={handleCreateDiscussion} className="space-y-4">
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                <Plus className="w-5 h-5 mr-2 text-green-600" />
+                {getText('Start a Discussion', 'Tīmata he Kōrerorero')}
+            </h3>
+            <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
-                    <label htmlFor="discussion-title" className="block text-sm font-medium text-gray-700 mb-1">Title</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                        {getText('Title', 'Taitara')}
+                    </label>
                     <input
-                        id="discussion-title"
                         type="text"
                         value={title}
                         onChange={(e) => setTitle(e.target.value)}
-                        placeholder="What's on your mind?"
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
-                        disabled={isSubmitting}
+                        placeholder={getText('Enter discussion title...', 'Tuhia te taitara o te kōrerorero...')}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                        maxLength={100}
                     />
                 </div>
                 <div>
-                    <label htmlFor="discussion-content" className="block text-sm font-medium text-gray-700 mb-1">Content</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                        {getText('Content', 'Ihirangi')}
+                    </label>
                     <textarea
-                        id="discussion-content"
                         value={content}
                         onChange={(e) => setContent(e.target.value)}
+                        placeholder={getText('Share your thoughts...', 'Tohaina ō whakaaro...')}
                         rows={4}
-                        placeholder="Share more details here..."
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
-                        disabled={isSubmitting}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent resize-none"
+                        maxLength={1000}
                     />
                 </div>
-                {error && <p className="text-sm text-red-600">{error}</p>}
-                <div>
+                <div className="flex justify-end">
                     <button
                         type="submit"
-                        disabled={isSubmitting}
-                        className="bg-green-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-green-700 disabled:opacity-50 transition-colors"
+                        disabled={isSubmitting || !title.trim() || !content.trim()}
+                        className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                     >
-                        {isSubmitting ? 'Posting...' : 'Post Discussion'}
+                        {isSubmitting ? (
+                            <div className="flex items-center">
+                                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
+                                {getText('Posting...', 'Tukuna ana...')}
+                            </div>
+                        ) : (
+                            getText('Post Discussion', 'Tukuna te Kōrerorero')
+                        )}
                     </button>
                 </div>
             </form>
+        </div>
+    );
+};
+
+// DiscussionCard component for displaying a single discussion
+const DiscussionCard = ({ discussion }) => {
+    const { getText } = useTeReo();
+
+    const handleVote = (voteType) => {
+        // We will implement this in the next step
+        console.log(`Voted ${voteType} on discussion ${discussion.id}`);
+    };
+
+    return (
+        <div className="bg-white rounded-lg border border-gray-200 p-4 flex space-x-4 hover:shadow-md transition-shadow duration-300">
+            <div className="flex flex-col items-center space-y-1">
+                <button onClick={() => handleVote('up')} className="p-1 text-gray-400 hover:text-green-500 transition-colors">
+                    <ThumbsUp size={18} />
+                </button>
+                <span className="font-bold text-gray-800 text-lg">{discussion.upvotes - discussion.downvotes}</span>
+                <button onClick={() => handleVote('down')} className="p-1 text-gray-400 hover:text-red-500 transition-colors">
+                    <ThumbsDown size={18} />
+                </button>
+            </div>
+            <div className="flex-1">
+                <h4 className="font-semibold text-gray-900 text-lg mb-1">{discussion.title}</h4>
+                <p className="text-gray-700 text-sm mb-2 line-clamp-2">{discussion.content}</p>
+                <div className="flex items-center justify-between text-xs text-gray-500">
+                    <span>
+                        Posted by <span className="font-medium text-gray-700">{discussion.authorName}</span>
+                    </span>
+                    <div className="flex items-center space-x-4">
+                        <span>{formatTimeAgo(discussion.createdAt)}</span>
+                        <span className="flex items-center">
+                            <MessageSquare size={12} className="mr-1" />
+                            {discussion.replyCount || 0} comments
+                        </span>
+                    </div>
+                </div>
+            </div>
         </div>
     );
 };
@@ -754,61 +796,7 @@ const CommunityPage = ({ communityId, onNavigate }) => {
                             ) : (
                                 <div className="space-y-6">
                                     {discussions.map((discussion) => (
-                                        <div key={discussion.id} className="border border-gray-100 rounded-lg p-6 hover:bg-gray-50 transition-colors">
-                                            <div className="flex items-start justify-between mb-4">
-                                                <div className="flex-1">
-                                                    <h3 className="text-lg font-semibold text-gray-900 mb-2">{discussion.title}</h3>
-                                                    <p className="text-gray-600 mb-3">{discussion.content}</p>
-                                                    <div className="flex items-center text-sm text-gray-500 space-x-4">
-                                                        <span>by {discussion.authorName}</span>
-                                                        <span>{formatTimeAgo(discussion.createdAt)}</span>
-                                                        <span className="flex items-center">
-                                                            <MessageSquare className="w-4 h-4 mr-1" />
-                                                            {discussion.replyCount || 0} replies
-                                                        </span>
-                                                        <span className="flex items-center">
-                                                            <Vote className="w-4 h-4 mr-1" />
-                                                            {discussion.upvotes - discussion.downvotes} votes
-                                                        </span>
-                                                    </div>
-                                                </div>
-                                                {discussion.pinned && (
-                                                    <div className="ml-4">
-                                                        <div className="bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full text-sm font-medium">
-                                                            Pinned
-                                                        </div>
-                                                    </div>
-                                                )}
-                                            </div>
-
-                                            {/* Voting buttons */}
-                                            <div className="flex items-center space-x-4 pt-4 border-t border-gray-100">
-                                                <button
-                                                    onClick={() => handleVote(discussion.id, 'up')}
-                                                    className={`flex items-center transition-colors ${getUserVoteStatus(discussion) === 'up'
-                                                            ? 'text-green-600'
-                                                            : 'text-gray-500 hover:text-green-600'
-                                                        }`}
-                                                >
-                                                    <Vote className="w-4 h-4 mr-1" />
-                                                    Upvote
-                                                </button>
-                                                <button
-                                                    onClick={() => handleVote(discussion.id, 'down')}
-                                                    className={`flex items-center transition-colors ${getUserVoteStatus(discussion) === 'down'
-                                                            ? 'text-red-600'
-                                                            : 'text-gray-500 hover:text-red-600'
-                                                        }`}
-                                                >
-                                                    <Vote className="w-4 h-4 mr-1 rotate-180" />
-                                                    Downvote
-                                                </button>
-                                                <button className="flex items-center text-gray-500 hover:text-blue-600 transition-colors">
-                                                    <MessageSquare className="w-4 h-4 mr-1" />
-                                                    Reply
-                                                </button>
-                                            </div>
-                                        </div>
+                                        <DiscussionCard key={discussion.id} discussion={discussion} />
                                     ))}
                                 </div>
                             )}
