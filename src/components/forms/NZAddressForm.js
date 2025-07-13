@@ -2,8 +2,8 @@
 // Handles NZ-specific address formats, regions, and validation
 
 import React, { useState, useEffect, useMemo } from 'react';
-import { MapPin, Navigation, Truck, Calculator, Info } from 'lucide-react';
-import { NZ_REGIONS, SHIPPING_ZONES, validateNZAddress, formatNZAddress, calculateShippingCost } from '../../lib/nzLocalization';
+import { MapPin, Calculator, Info } from 'lucide-react';
+import { NZ_REGIONS, validateNZAddress, formatNZAddress, calculateShippingCost } from '../../lib/nzLocalization';
 
 const NZAddressForm = ({ 
     address = {}, 

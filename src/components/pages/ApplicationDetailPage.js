@@ -2,26 +2,28 @@
 // Advanced candidate evaluation with scoring, notes, and interview scheduling
 
 import React, { useState, useEffect } from 'react';
-import { 
+import {
   ArrowLeft, User, Mail, Phone, MapPin, Calendar, FileText, Download,
   Star, Edit, Save, X, CheckCircle, XCircle, Clock, MessageCircle,
   Briefcase, Award, GraduationCap, Globe, Heart, ThumbsUp, ThumbsDown,
   Eye, Flag, Share, Bookmark, AlertTriangle, Coffee, Video, Users
 } from 'lucide-react';
 import { useTeReo, TeReoText } from '../ui/TeReoToggle';
-import { 
-  getDoc, 
-  doc, 
-  updateDoc, 
-  serverTimestamp 
+import {
+  getDoc,
+  doc,
+  updateDoc,
+  serverTimestamp
 } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
 import { updateApplicationStatus, getJob } from '../../lib/jobsService';
 import { createApplicationStatusNotification } from '../../lib/notificationService';
+import { fetchUserReputation } from '../../lib/reputationService';
+import { USER_BADGES } from '../../lib/communityFeatures';
 
 const ApplicationDetailPage = ({ applicationId, onNavigate, currentUser }) => {
   const { getText } = useTeReo();
-  
+
   const [application, setApplication] = useState(null);
   const [job, setJob] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -29,7 +31,8 @@ const ApplicationDetailPage = ({ applicationId, onNavigate, currentUser }) => {
   const [employerNotes, setEmployerNotes] = useState('');
   const [candidateScore, setCandidateScore] = useState(0);
   const [statusUpdating, setStatusUpdating] = useState(false);
-  
+  const [reputation, setReputation] = useState(null);
+
   // Interview scheduling state
   const [showInterviewScheduler, setShowInterviewScheduler] = useState(false);
   const [interviewData, setInterviewData] = useState({
@@ -51,21 +54,27 @@ const ApplicationDetailPage = ({ applicationId, onNavigate, currentUser }) => {
   const loadApplicationDetails = async () => {
     try {
       setLoading(true);
-      
+
       // Load application data
       const applicationRef = doc(db, 'jobApplications', applicationId);
       const applicationSnap = await getDoc(applicationRef);
-      
+
       if (applicationSnap.exists()) {
         const appData = { id: applicationSnap.id, ...applicationSnap.data() };
         setApplication(appData);
         setEmployerNotes(appData.employerNotes || '');
         setCandidateScore(appData.candidateScore || 0);
-        
+
         // Load related job data
         if (appData.jobId) {
           const jobData = await getJob(appData.jobId);
           setJob(jobData);
+        }
+
+        // Load reputation data
+        if (appData.applicantId) {
+          const repData = await fetchUserReputation(appData.applicantId);
+          setReputation(repData);
         }
       } else {
         console.error('Application not found');
@@ -79,7 +88,7 @@ const ApplicationDetailPage = ({ applicationId, onNavigate, currentUser }) => {
 
   const handleStatusUpdate = async (newStatus) => {
     if (!application) return;
-    
+
     setStatusUpdating(true);
     try {
       // Update application status
@@ -99,7 +108,7 @@ const ApplicationDetailPage = ({ applicationId, onNavigate, currentUser }) => {
 
       // Update local state
       setApplication(prev => ({ ...prev, status: newStatus }));
-      
+
       console.log(`Application status updated to: ${newStatus}`);
     } catch (error) {
       console.error('Error updating application status:', error);
@@ -118,7 +127,7 @@ const ApplicationDetailPage = ({ applicationId, onNavigate, currentUser }) => {
         notesUpdatedAt: serverTimestamp(),
         notesUpdatedBy: currentUser?.uid
       });
-      
+
       setIsEditingNotes(false);
       console.log('Notes saved successfully');
     } catch (error) {
@@ -149,13 +158,13 @@ const ApplicationDetailPage = ({ applicationId, onNavigate, currentUser }) => {
         status: 'interviewed'
       });
 
-      setApplication(prev => ({ 
-        ...prev, 
+      setApplication(prev => ({
+        ...prev,
         status: 'interviewed',
         interviewScheduled: true,
         interviewDetails: interviewData
       }));
-      
+
       setShowInterviewScheduler(false);
       console.log('Interview scheduled successfully');
     } catch (error) {
@@ -173,10 +182,10 @@ const ApplicationDetailPage = ({ applicationId, onNavigate, currentUser }) => {
       'hired': { color: 'bg-green-200 text-green-900', text: 'Hired', icon: CheckCircle },
       'rejected': { color: 'bg-red-100 text-red-800', text: 'Not Selected', icon: XCircle }
     };
-    
+
     const config = statusConfig[status] || statusConfig['new'];
     const Icon = config.icon;
-    
+
     return (
       <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${config.color}`}>
         <Icon size={14} className="mr-1" />
@@ -213,6 +222,45 @@ const ApplicationDetailPage = ({ applicationId, onNavigate, currentUser }) => {
         <span className="ml-2 text-sm text-gray-600">
           {candidateScore > 0 ? `${candidateScore}/5 stars` : 'Not rated'}
         </span>
+      </div>
+    );
+  };
+
+  const TuiTradeProfile = ({ reputation }) => {
+    if (!reputation) return null;
+
+    return (
+      <div className="bg-white rounded-lg shadow-sm border p-6">
+        <h3 className="text-lg font-semibold text-gray-900 mb-4">TuiTrade Profile</h3>
+        <div className="space-y-4">
+          <div className="flex items-center">
+            <Star className="w-5 h-5 text-yellow-400 mr-3" />
+            <div>
+              <p className="font-medium text-gray-900">{reputation.averageSellerRating.toFixed(1)} / 5.0</p>
+              <p className="text-sm text-gray-600">Average Seller Rating</p>
+            </div>
+          </div>
+          <div className="flex items-center">
+            <Briefcase className="w-5 h-5 text-gray-400 mr-3" />
+            <div>
+              <p className="font-medium text-gray-900">{reputation.totalTrades}</p>
+              <p className="text-sm text-gray-600">Completed Trades</p>
+            </div>
+          </div>
+          {reputation.badges && reputation.badges.length > 0 && (
+            <div>
+              <h4 className="text-md font-semibold text-gray-800 mb-2">Community Badges</h4>
+              <div className="flex flex-wrap gap-2">
+                {reputation.badges.map(badge => (
+                  <div key={badge.id} className="flex items-center bg-gray-100 text-gray-700 px-2 py-1 rounded-full text-xs font-medium" title={badge.description}>
+                    <Award className="w-4 h-4 mr-1.5" style={{ color: badge.color }} />
+                    {badge.name}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
       </div>
     );
   };
@@ -288,7 +336,7 @@ const ApplicationDetailPage = ({ applicationId, onNavigate, currentUser }) => {
             {/* Candidate Information */}
             <div className="bg-white rounded-lg shadow-sm border p-6">
               <h2 className="text-xl font-semibold text-gray-900 mb-4">Candidate Information</h2>
-              
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-4">
                   <div className="flex items-center">
@@ -298,7 +346,7 @@ const ApplicationDetailPage = ({ applicationId, onNavigate, currentUser }) => {
                       <p className="text-sm text-gray-600">Full Name</p>
                     </div>
                   </div>
-                  
+
                   <div className="flex items-center">
                     <Mail className="w-5 h-5 text-gray-400 mr-3" />
                     <div>
@@ -366,7 +414,7 @@ const ApplicationDetailPage = ({ applicationId, onNavigate, currentUser }) => {
                         <div>
                           <p className="font-medium text-gray-900">{file.name}</p>
                           <p className="text-sm text-gray-600">
-                            {(file.size / (1024 * 1024)).toFixed(2)} MB • 
+                            {(file.size / (1024 * 1024)).toFixed(2)} MB •
                             Uploaded {formatDate(file.uploadedAt)}
                           </p>
                         </div>
@@ -429,7 +477,7 @@ const ApplicationDetailPage = ({ applicationId, onNavigate, currentUser }) => {
                   <Eye size={16} className="mr-2" />
                   Mark as Reviewing
                 </button>
-                
+
                 <button
                   onClick={() => handleStatusUpdate('offered')}
                   disabled={statusUpdating || application.status === 'hired'}
@@ -438,7 +486,7 @@ const ApplicationDetailPage = ({ applicationId, onNavigate, currentUser }) => {
                   <CheckCircle size={16} className="mr-2" />
                   Make Offer
                 </button>
-                
+
                 <button
                   onClick={() => handleStatusUpdate('rejected')}
                   disabled={statusUpdating || application.status === 'hired'}
@@ -449,6 +497,9 @@ const ApplicationDetailPage = ({ applicationId, onNavigate, currentUser }) => {
                 </button>
               </div>
             </div>
+
+            {/* TuiTrade Profile */}
+            <TuiTradeProfile reputation={reputation} />
 
             {/* Candidate Rating */}
             <div className="bg-white rounded-lg shadow-sm border p-6">
@@ -468,7 +519,7 @@ const ApplicationDetailPage = ({ applicationId, onNavigate, currentUser }) => {
                   {isEditingNotes ? 'Save' : 'Edit'}
                 </button>
               </div>
-              
+
               {isEditingNotes ? (
                 <div className="space-y-3">
                   <textarea
@@ -513,7 +564,7 @@ const ApplicationDetailPage = ({ applicationId, onNavigate, currentUser }) => {
                     <p className="text-sm text-gray-600">{formatDate(application.appliedAt)}</p>
                   </div>
                 </div>
-                
+
                 {application.status !== 'new' && (
                   <div className="flex items-start">
                     <div className="bg-yellow-100 rounded-full p-2 mr-3">
@@ -525,7 +576,7 @@ const ApplicationDetailPage = ({ applicationId, onNavigate, currentUser }) => {
                     </div>
                   </div>
                 )}
-                
+
                 {application.interviewScheduled && (
                   <div className="flex items-start">
                     <div className="bg-purple-100 rounded-full p-2 mr-3">

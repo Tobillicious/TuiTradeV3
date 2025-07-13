@@ -2,7 +2,7 @@
 // Provides bilingual text switching throughout the application
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { Globe, Languages } from 'lucide-react';
+import { Languages } from 'lucide-react';
 import { TE_REO_TRANSLATIONS, getBilingualText } from '../../lib/nzLocalizationEnhanced';
 
 // Context for Te Reo Māori state
@@ -58,7 +58,7 @@ export const useTeReo = () => {
     // Return default functions instead of throwing error
     return {
       isTeReoMode: false,
-      toggleTeReoMode: () => {},
+      toggleTeReoMode: () => { },
       getText: (englishText) => englishText,
       getBilingualDisplay: (englishText) => englishText,
       translations: {}
@@ -86,12 +86,12 @@ export const TeReoToggle = ({ className = '' }) => {
 };
 
 // Text component that automatically switches based on mode
-export const TeReoText = ({ 
-  english, 
-  teReoKey, 
-  className = '', 
+export const TeReoText = ({
+  english,
+  teReoKey,
+  className = '',
   showBilingual = false,
-  fallback = null 
+  fallback = null
 }) => {
   const { isTeReoMode, getText, getBilingualDisplay } = useTeReo();
 
@@ -104,7 +104,7 @@ export const TeReoText = ({
   }
 
   const text = getText(english, teReoKey);
-  
+
   return (
     <span className={className}>
       {text || fallback || english}
@@ -115,7 +115,7 @@ export const TeReoText = ({
 // Category name component with industry-specific translations
 export const TeReoCategoryText = ({ categoryKey, englishName, className = '' }) => {
   const { isTeReoMode } = useTeReo();
-  
+
   // Check for industry-specific translation
   const industryTranslation = {
     'technology': 'hangarau',
@@ -134,8 +134,8 @@ export const TeReoCategoryText = ({ categoryKey, englishName, className = '' }) 
     'retail': 'hokohoko'
   }[categoryKey];
 
-  const displayText = isTeReoMode && industryTranslation 
-    ? `${englishName} | ${industryTranslation}` 
+  const displayText = isTeReoMode && industryTranslation
+    ? `${englishName} | ${industryTranslation}`
     : englishName;
 
   return <span className={className}>{displayText}</span>;
@@ -144,7 +144,7 @@ export const TeReoCategoryText = ({ categoryKey, englishName, className = '' }) 
 // Location component with Māori place names
 export const TeReoLocationText = ({ location, className = '' }) => {
   const { isTeReoMode } = useTeReo();
-  
+
   const locationMappings = {
     'Auckland': 'Tāmaki Makaurau',
     'Wellington': 'Te Whanganui-a-Tara',
@@ -164,8 +164,8 @@ export const TeReoLocationText = ({ location, className = '' }) => {
   };
 
   const maoriName = locationMappings[location];
-  const displayText = isTeReoMode && maoriName 
-    ? `${location} | ${maoriName}` 
+  const displayText = isTeReoMode && maoriName
+    ? `${location} | ${maoriName}`
     : location;
 
   return <span className={className}>{displayText}</span>;
@@ -174,14 +174,14 @@ export const TeReoLocationText = ({ location, className = '' }) => {
 // Greeting component for time-sensitive greetings
 export const TeReoGreeting = ({ className = '' }) => {
   const { isTeReoMode } = useTeReo();
-  
+
   const getTimeBasedGreeting = () => {
     const hour = new Date().getHours();
-    
+
     if (hour < 12) {
       return isTeReoMode ? 'Ata mārie' : 'Good morning';
     } else if (hour < 17) {
-      return isTeReoMode ? 'Kia ora' : 'Good afternoon';  
+      return isTeReoMode ? 'Kia ora' : 'Good afternoon';
     } else {
       return isTeReoMode ? 'Ahiahi pai' : 'Good evening';
     }
@@ -193,7 +193,7 @@ export const TeReoGreeting = ({ className = '' }) => {
 // Job title component with Te Reo translations
 export const TeReoJobTitle = ({ title, className = '' }) => {
   const { isTeReoMode } = useTeReo();
-  
+
   const jobTitleMappings = {
     'Manager': 'kaiwhakahaere',
     'Developer': 'kaiwhakawhanake',
@@ -211,7 +211,7 @@ export const TeReoJobTitle = ({ title, className = '' }) => {
 
   // Check if title contains any of the mapped words
   let displayTitle = title;
-  
+
   if (isTeReoMode) {
     Object.entries(jobTitleMappings).forEach(([english, maori]) => {
       if (title.toLowerCase().includes(english.toLowerCase())) {
@@ -221,15 +221,4 @@ export const TeReoJobTitle = ({ title, className = '' }) => {
   }
 
   return <span className={className}>{displayTitle}</span>;
-};
-
-export default {
-  TeReoProvider,
-  useTeReo,
-  TeReoToggle,
-  TeReoText,
-  TeReoCategoryText,
-  TeReoLocationText,
-  TeReoGreeting,
-  TeReoJobTitle
 };

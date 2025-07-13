@@ -286,6 +286,43 @@ export const ENHANCED_CATEGORIES = {
             }
         }
     },
+    services: {
+        name: 'Services',
+        icon: Wrench,
+        color: 'orange',
+        listingTypes: ['classified'],
+        defaultDuration: 30,
+        fees: { listingFee: 10, successFeeRate: 0.05, maxSuccessFee: 150 },
+        subcategories: {
+            'trades': {
+                name: 'Trades & Home Services',
+                subcategories: {
+                    'building': { name: 'Building & Construction' },
+                    'plumbing': { name: 'Plumbing & Gas Fitting' },
+                    'electrical': { name: 'Electrical' },
+                    'painting': { name: 'Painting & Decorating' },
+                    'gardening': { name: 'Gardening & Landscaping' },
+                }
+            },
+            'professional': {
+                name: 'Professional Services',
+                subcategories: {
+                    'accounting': { name: 'Accounting & Bookkeeping' },
+                    'legal': { name: 'Legal Services' },
+                    'marketing': { name: 'Marketing & Design' },
+                    'it': { name: 'IT & Web Development' },
+                }
+            },
+            'creative': {
+                name: 'Creative Services',
+                subcategories: {
+                    'photography': { name: 'Photography & Video' },
+                    'writing': { name: 'Writing & Translation' },
+                    'music': { name: 'Music & Audio' },
+                }
+            }
+        }
+    },
     motors: {
         name: 'Motors',
         icon: Car,

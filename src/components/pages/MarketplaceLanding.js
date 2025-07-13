@@ -1,186 +1,138 @@
-// Marketplace Landing Page
-// General marketplace with everything from electronics to home goods
-
-import React, { useState, useEffect } from 'react';
-import { Shield, Zap, Users } from 'lucide-react';
-import { collection, getDocs, query } from 'firebase/firestore';
+import React, { useState, useEffect, useCallback } from 'react';
+import { motion } from 'framer-motion';
+import { collection, query, orderBy, limit, getDocs } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
-import CategoryLandingPage from './CategoryLandingPage';
+import { LISTINGS_LIMIT } from '../../lib/utils';
+import ItemCard from '../ui/ItemCard';
+import { AuctionCard } from '../ui/AuctionSystem';
+import { Monitor, Wrench, Package, Star, ChevronDown } from 'lucide-react';
 
-const MarketplaceLanding = ({ onNavigate }) => {
-    const [realStats, setRealStats] = useState({
-        totalListings: '0',
-        totalSellers: '0',
-        dailyViews: '0',
-        successRate: '95%'
-    });
+const MarketplaceLanding = ({ onNavigate, onWatchToggle, watchedItems, onItemClick, onAddToCart, cartItems }) => {
+  const [listings, setListings] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [hasMoreItems, setHasMoreItems] = useState(true);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
 
-    // Calculate real statistics from database
-    useEffect(() => {
-        const calculateRealStats = async () => {
-            try {
-                // Get total listings
-                const listingsSnapshot = await getDocs(query(collection(db, 'listings')));
-                const auctionsSnapshot = await getDocs(query(collection(db, 'auctions')));
-                const totalListings = listingsSnapshot.size + auctionsSnapshot.size;
+  const fetchListings = useCallback(async (loadMore = false) => {
+    if (!loadMore) setIsLoading(true);
+    try {
+      const listingsQuery = query(collection(db, 'listings'), orderBy('createdAt', 'desc'), limit(LISTINGS_LIMIT));
+      const auctionsQuery = query(collection(db, 'auctions'), orderBy('createdAt', 'desc'), limit(LISTINGS_LIMIT));
+      
+      const [listingsSnapshot, auctionsSnapshot] = await Promise.all([getDocs(listingsQuery), getDocs(auctionsQuery)]);
 
-                // Get unique sellers (simplified - in real app you'd query users collection)
-                const sellerEmails = new Set();
-                listingsSnapshot.docs.forEach(doc => {
-                    const data = doc.data();
-                    if (data.userEmail) sellerEmails.add(data.userEmail);
-                });
-                auctionsSnapshot.docs.forEach(doc => {
-                    const data = doc.data();
-                    if (data.userEmail) sellerEmails.add(data.userEmail);
-                });
+      let allItems = [
+        ...listingsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data(), createdAt: doc.data().createdAt?.toDate(), listingType: doc.data().listingType || 'fixed-price' })),
+        ...auctionsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data(), createdAt: doc.data().createdAt?.toDate(), endTime: doc.data().endTime?.toDate(), listingType: 'auction' }))
+      ].sort((a, b) => b.createdAt - a.createdAt);
 
-                // Calculate daily views (sum of all listing views)
-                let totalViews = 0;
-                [...listingsSnapshot.docs, ...auctionsSnapshot.docs].forEach(doc => {
-                    const data = doc.data();
-                    totalViews += data.views || 0;
-                });
+      if (loadMore) {
+        setListings(prev => [...prev, ...allItems]);
+      } else {
+        setListings(allItems);
+      }
+      setHasMoreItems(allItems.length === LISTINGS_LIMIT * 2);
+    } catch (error) {
+      console.error('Error fetching marketplace listings:', error);
+    } finally {
+      if (!loadMore) setIsLoading(false);
+    }
+  }, []);
 
-                setRealStats({
-                    totalListings: totalListings > 1000 ? `${Math.floor(totalListings/1000)}K+` : `${totalListings}+`,
-                    totalSellers: sellerEmails.size > 1000 ? `${Math.floor(sellerEmails.size/1000)}K+` : `${sellerEmails.size}+`,
-                    dailyViews: totalViews > 1000 ? `${Math.floor(totalViews/1000)}K+` : `${totalViews}+`,
-                    successRate: '95%' // This would be calculated from actual transaction data
-                });
-            } catch (error) {
-                console.warn('Error calculating stats:', error);
-                // Fallback to estimated stats based on community growth
-                setRealStats({
-                    totalListings: '2.5K+',
-                    totalSellers: '850+',
-                    dailyViews: '12K+',
-                    successRate: '95%'
-                });
-            }
-        };
+  useEffect(() => {
+    fetchListings();
+  }, [fetchListings]);
 
-        calculateRealStats();
-    }, []);
+  const handleLoadMore = async () => {
+    if (hasMoreItems && !isLoadingMore) {
+      setIsLoadingMore(true);
+      await fetchListings(true);
+      setIsLoadingMore(false);
+    }
+  };
 
-    const marketplaceData = {
-        category: 'marketplace',
-        title: 'Marketplace',
-        description: 'Aotearoa\'s premier online marketplace. Buy, sell, and discover unique items from trusted sellers across the country.',
-        subtitle: 'Kōrero mai, kōrero atu - Let\'s trade together!',
-        heroImage: 'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=1200&h=600&fit=crop',
-        heroGradient: 'from-blue-500 to-blue-600',
-
-        stats: realStats,
-
-        features: [
-            {
-                icon: Shield,
-                title: 'Buyer Protection',
-                description: 'Advanced verification system with dispute resolution and secure payment processing for peace of mind.'
-            },
-            {
-                icon: Zap,
-                title: 'Lightning Fast',
-                description: 'List items in under 2 minutes with our smart category detection and auto-pricing suggestions.'
-            },
-            {
-                icon: Users,
-                title: 'Trusted Community',
-                description: 'Join 50,000+ verified Kiwis trading everything from vintage finds to the latest tech.'
-            }
-        ],
-
-        popularSubcategories: [
-            {
-                id: 'electronics',
-                name: 'Electronics',
-                icon: '📱',
-                description: 'Phones, laptops, gaming, and smart home devices',
-                count: '5.2K'
-            },
-            {
-                id: 'fashion',
-                name: 'Fashion',
-                icon: '👗',
-                description: 'Clothing, shoes, accessories, and vintage finds',
-                count: '3.8K'
-            },
-            {
-                id: 'home-garden',
-                name: 'Home & Garden',
-                icon: '🏠',
-                description: 'Furniture, décor, appliances, and garden tools',
-                count: '4.1K'
-            },
-            {
-                id: 'sports',
-                name: 'Sports & Outdoors',
-                icon: '⚽',
-                description: 'Equipment, gear, and outdoor adventure items',
-                count: '2.3K'
-            },
-            {
-                id: 'books-media',
-                name: 'Books & Media',
-                icon: '📚',
-                description: 'Books, movies, music, and collectibles',
-                count: '1.9K'
-            },
-            {
-                id: 'baby-kids',
-                name: 'Baby & Kids',
-                icon: '🧸',
-                description: 'Toys, clothes, equipment, and educational items',
-                count: '1.6K'
-            },
-            {
-                id: 'health-beauty',
-                name: 'Health & Beauty',
-                icon: '💄',
-                description: 'Skincare, cosmetics, wellness, and fitness',
-                count: '1.1K'
-            },
-            {
-                id: 'business',
-                name: 'Business & Industrial',
-                icon: '🏢',
-                description: 'Equipment, supplies, and professional tools',
-                count: '890'
-            }
-        ],
-
-        trendingSearches: [
-            'iPhone 15 Pro Max',
-            'Gaming Chair',
-            'Vintage Clothing',
-            'Home Décor',
-            'Exercise Equipment',
-            'Kitchen Appliances',
-            'Designer Handbags',
-            'Outdoor Furniture'
-        ],
-
-        successStories: [
-            {
-                user: 'Emma from Tāmaki Makaurau (Auckland)',
-                story: 'Sold my entire wardrobe within a week! The platform made it so easy to reach genuine buyers.',
-                rating: 5
-            },
-            {
-                user: 'James from Ōtautahi (Christchurch)',
-                story: 'Found rare vintage camera gear that I\'ve been searching for years. Great community here!',
-                rating: 5
-            },
-            {
-                user: 'Sophie from Te Whanganui-a-Tara (Wellington)',
-                story: 'Made over $2,000 decluttering my home. The smart pricing suggestions were incredibly helpful.',
-                rating: 5
-            }
-        ]
-    };
-
-    return <CategoryLandingPage {...marketplaceData} onNavigate={onNavigate} />;
+  return (
+    <div className="min-h-screen bg-gray-50">
+      {/* Hero Section */}
+      <div className="bg-gradient-to-r from-gray-800 to-gray-700 text-white py-12">
+        <div className="max-w-7xl mx-auto px-4 text-center">
+          <h1 className="text-3xl md:text-4xl font-bold mb-2">Marketplace</h1>
+          <p className="text-lg text-gray-300 mb-6">Your one-stop shop for goods and services.</p>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-2xl mx-auto">
+            <button onClick={() => onNavigate('digital-goods-landing')} className="flex flex-col items-center justify-center p-4 bg-gray-700/50 rounded-lg hover:bg-gray-600/50 transition-colors">
+              <Monitor className="w-8 h-8 mb-2 text-indigo-400" />
+              <span className="font-semibold">Digital Goods</span>
+            </button>
+            <button onClick={() => onNavigate('services-landing')} className="flex flex-col items-center justify-center p-4 bg-gray-700/50 rounded-lg hover:bg-gray-600/50 transition-colors">
+              <Wrench className="w-8 h-8 mb-2 text-orange-400" />
+              <span className="font-semibold">Services</span>
+            </button>
+            <button onClick={() => onNavigate('used-goods-landing')} className="flex flex-col items-center justify-center p-4 bg-gray-700/50 rounded-lg hover:bg-gray-600/50 transition-colors">
+              <Package className="w-8 h-8 mb-2 text-amber-400" />
+              <span className="font-semibold">Used Goods</span>
+            </button>
+            <button onClick={() => onNavigate('new-goods-landing')} className="flex flex-col items-center justify-center p-4 bg-gray-700/50 rounded-lg hover:bg-gray-600/50 transition-colors">
+              <Star className="w-8 h-8 mb-2 text-teal-400" />
+              <span className="font-semibold">New Goods</span>
+            </button>
+          </div>
+        </div>
+      </div>
+      <div className="max-w-7xl mx-auto px-4 py-8">
+        <h2 className="text-2xl font-bold mb-4 text-center">Browse All Listings</h2>
+        {isLoading ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {[...Array(8)].map((_, i) => (
+              <div key={i} className="bg-white rounded-xl overflow-hidden shadow-sm border border-gray-100">
+                <div className="relative aspect-[4/5]">
+                  <div className="w-full h-full bg-gray-200 animate-pulse"></div>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {listings.map(item => (
+                item.listingType === 'auction' ? (
+                  <AuctionCard
+                    key={item.id}
+                    auction={item}
+                    onItemClick={onItemClick}
+                    onWatchToggle={onWatchToggle}
+                    watchedItems={watchedItems}
+                    onNavigate={onNavigate}
+                  />
+                ) : (
+                  <ItemCard
+                    key={item.id}
+                    item={item}
+                    isWatched={watchedItems.includes(item.id)}
+                    onWatchToggle={onWatchToggle}
+                    onItemClick={onItemClick}
+                    onAddToCart={onAddToCart}
+                    isInCart={cartItems.some(cartItem => cartItem.id === item.id)}
+                    onNavigate={onNavigate}
+                  />
+                )
+              ))}
+            </div>
+            {hasMoreItems && (
+              <div className="text-center mt-8">
+                <button
+                  onClick={handleLoadMore}
+                  disabled={isLoadingMore}
+                  className="bg-green-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors flex items-center mx-auto"
+                >
+                  {isLoadingMore ? 'Loading...' : 'Load More'}
+                </button>
+              </div>
+            )}
+          </>
+        )}
+      </div>
+    </div>
+  );
 };
 
 export default MarketplaceLanding;

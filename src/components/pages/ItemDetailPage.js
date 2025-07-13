@@ -7,6 +7,7 @@ import { FullPageLoader } from '../ui/Loaders';
 import { Heart, ShoppingCart, MessageCircle, MapPin, Calendar, Eye, Shield, Home, ChevronRight, Download, Zap, CheckCircle } from 'lucide-react';
 import { StarRating, ReviewList } from '../ui/ReviewSystem';
 import { AuctionInterface } from '../ui/AuctionSystem';
+import { trackItemView } from '../../lib/apiService';
 
 const ItemDetailPage = ({ item, onNavigate, onWatchToggle, watchedItems, onContactSeller, onAddToCart, isInCart }) => {
     const [activeImageIndex, setActiveImageIndex] = useState(0);
@@ -19,6 +20,16 @@ const ItemDetailPage = ({ item, onNavigate, onWatchToggle, watchedItems, onConta
             try {
                 await updateDoc(doc(db, 'listings', item.id), {
                     views: increment(1)
+                });
+
+                // Track item view for personalization
+                trackItemView(item.id, item.categoryId, {
+                    itemTitle: item.title,
+                    itemPrice: item.price,
+                    itemLocation: item.location,
+                    itemCondition: item.condition,
+                    isDigital: item.isDigital,
+                    listingType: item.listingType
                 });
             } catch (error) {
                 console.error('Error updating views:', error);

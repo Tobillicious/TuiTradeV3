@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, Suspense, lazy } from 'react';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
 import { collection, onSnapshot, doc, deleteDoc, setDoc } from 'firebase/firestore';
-import { Search, Heart, ShoppingCart, User, List, Eye, Lock, Tag, MessageCircle, Shield, Star, BarChart3, Package, Sun, Moon, Menu, X, ChevronDown, Car, Home as HomeIcon, Briefcase, Wrench, Gift } from 'lucide-react';
+import { Search, Heart, ShoppingCart, User, List, Eye, Lock, Tag, MessageCircle, Shield, Star, BarChart3, Package, Sun, Moon, Menu, X, ChevronDown, Car, Home as HomeIcon, Briefcase, Wrench, Gift, Monitor } from 'lucide-react';
 
 // Core setup
 import { auth, db } from './lib/firebase';
@@ -64,16 +64,11 @@ const ApplicationFormBuilder = lazy(() => import('./components/pages/Application
 const AdvancedJobSearch = lazy(() => import('./components/pages/AdvancedJobSearch'));
 const AnalyticsDashboard = lazy(() => import('./components/pages/AnalyticsDashboard'));
 const DigitalGoodsLanding = lazy(() => import('./components/pages/DigitalGoodsLanding'));
+const ServicesLanding = lazy(() => import('./components/pages/ServicesLanding'));
+const UsedGoodsLanding = lazy(() => import('./components/pages/UsedGoodsLanding'));
+const NewGoodsLanding = lazy(() => import('./components/pages/NewGoodsLanding'));
 const CommunityLanding = lazy(() => import('./components/pages/CommunityLanding'));
 const AdminDashboard = lazy(() => import('./components/pages/AdminDashboard'));
-// This is the inner component that can access notifications
-// Placeholder legal/support/info pages
-const PlaceholderPage = ({ title }) => (
-    <div className="max-w-2xl mx-auto py-16 px-4 text-center">
-        <h1 className="text-3xl font-bold mb-4">{title}</h1>
-        <p className="text-gray-600">This page is coming soon. For urgent help, contact support.</p>
-    </div>
-);
 function AppContent() {
     const [currentUser, setCurrentUser] = useState(null);
     const [isAuthReady, setIsAuthReady] = useState(false);
@@ -314,8 +309,11 @@ function AppContent() {
                         case 'advanced-job-search': return <AdvancedJobSearch {...pageProps} currentUser={currentUser} />;
                         case 'analytics-dashboard': return <AnalyticsDashboard {...pageProps} currentUser={currentUser} />;
                         case 'digital-goods-landing': return <DigitalGoodsLanding {...pageProps} />;
+                        case 'services-landing': return <ServicesLanding {...pageProps} />;
+                        case 'used-goods-landing': return <UsedGoodsLanding {...pageProps} />;
+                        case 'new-goods-landing': return <NewGoodsLanding {...pageProps} />;
                         case 'community-landing': return <CommunityLanding {...pageProps} />;
-                        
+
                         // Admin Dashboard (admin access only)
                         case 'admin': return <AdminDashboard {...pageProps} />;
 
@@ -443,16 +441,6 @@ function AppContent() {
                                                 <div>
                                                     <div className="font-medium">Jobs</div>
                                                     <div className="text-xs text-gray-500">(Mahi)</div>
-                                                </div>
-                                            </button>
-                                            <button
-                                                onClick={() => { handleNavigate('digital-goods-landing'); setIsCategoriesMenuOpen(false); }}
-                                                className={`w-full text-left px-4 py-3 rounded-lg transition-colors flex items-center ${isDarkMode ? 'text-gray-300 hover:bg-gray-700' : 'text-gray-700 hover:bg-gray-50'}`}
-                                            >
-                                                <Wrench size={16} className="mr-3 text-orange-500" />
-                                                <div>
-                                                    <div className="font-medium">Services</div>
-                                                    <div className="text-xs text-gray-500">(Ratonga)</div>
                                                 </div>
                                             </button>
                                             <button
@@ -664,13 +652,6 @@ function AppContent() {
                             >
                                 Jobs
                                 <span className="ml-2 text-xs text-gray-400">(Mahi)</span>
-                            </button>
-                            <button
-                                onClick={() => handleNavigate('digital-goods-landing')}
-                                className={`w-full text-left px-3 py-2 rounded-lg transition-colors ${isDarkMode ? 'text-gray-300 hover:bg-gray-700' : 'text-gray-700 hover:bg-gray-50'}`}
-                            >
-                                Digital Goods
-                                <span className="ml-2 text-xs text-gray-400">(Taonga Matihiko)</span>
                             </button>
                             <button
                                 onClick={() => handleNavigate('community-landing')}

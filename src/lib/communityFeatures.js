@@ -13,7 +13,7 @@ export const USER_PROFILE_SCHEMA = {
         avatar: { required: false, type: 'image' },
         coverPhoto: { required: false, type: 'image' }
     },
-    
+
     verification: {
         emailVerified: { default: false },
         phoneVerified: { default: false },
@@ -21,7 +21,7 @@ export const USER_PROFILE_SCHEMA = {
         idVerified: { default: false },
         bankAccountVerified: { default: false }
     },
-    
+
     reputation: {
         trustScore: { default: 0, range: [0, 100] },
         totalRatings: { default: 0 },
@@ -31,7 +31,7 @@ export const USER_PROFILE_SCHEMA = {
         sellerLevel: { default: 'new', enum: ['new', 'bronze', 'silver', 'gold', 'platinum'] },
         badges: { default: [], type: 'array' }
     },
-    
+
     activity: {
         itemsSold: { default: 0 },
         itemsPurchased: { default: 0 },
@@ -40,7 +40,7 @@ export const USER_PROFILE_SCHEMA = {
         lastActive: { auto: true },
         memberSince: { auto: true }
     },
-    
+
     social: {
         followers: { default: [], type: 'array' },
         following: { default: [], type: 'array' },
@@ -51,7 +51,7 @@ export const USER_PROFILE_SCHEMA = {
             website: { required: false }
         }
     },
-    
+
     preferences: {
         notificationSettings: {
             emailNotifications: { default: true },
@@ -148,14 +148,14 @@ export const ACHIEVEMENT_BADGES = {
         'quick-seller': { name: 'Quick Seller', description: 'Sold item within 24 hours', icon: '⚡', points: 25 },
         'repeat-customer': { name: 'Repeat Customer', description: 'Bought from same seller 3+ times', icon: '🔄', points: 30 }
     },
-    
+
     community: {
         'helpful-reviewer': { name: 'Helpful Reviewer', description: 'Left 50+ helpful reviews', icon: '⭐', points: 50 },
         'social-butterfly': { name: 'Social Butterfly', description: 'Following 50+ users', icon: '🦋', points: 25 },
         'trendsetter': { name: 'Trendsetter', description: 'Listed in trending category first', icon: '📈', points: 40 },
         'community-helper': { name: 'Community Helper', description: 'Helped 20+ users', icon: '🤝', points: 60 }
     },
-    
+
     quality: {
         'five-star-seller': { name: 'Five Star Seller', description: 'Maintained 5-star rating for 6 months', icon: '🌟', points: 75 },
         'honest-describer': { name: 'Honest Describer', description: 'Zero "item not as described" reports', icon: '✅', points: 50 },
@@ -171,18 +171,18 @@ export const ACTIVITY_TYPES = {
     user_verified: { icon: '✅', template: '{user} completed account verification' },
     level_upgraded: { icon: '⬆️', template: '{user} reached {level} seller status' },
     badge_earned: { icon: '🏆', template: '{user} earned the {badge} badge' },
-    
+
     // Trading activities  
     item_listed: { icon: '📦', template: '{user} listed {item}' },
     item_sold: { icon: '💰', template: '{user} sold {item}' },
     item_featured: { icon: '⭐', template: '{user} featured {item}' },
     milestone_reached: { icon: '🎯', template: '{user} reached {milestone} sales' },
-    
+
     // Social activities
     user_followed: { icon: '👥', template: '{user} started following {target}' },
     review_left: { icon: '⭐', template: '{user} left a {rating}-star review' },
     wishlist_shared: { icon: '❤️', template: '{user} shared their wishlist' },
-    
+
     // Community activities
     forum_post: { icon: '💬', template: '{user} posted in {category} forum' },
     question_answered: { icon: '❓', template: '{user} answered a community question' },
@@ -213,7 +213,7 @@ export const REVIEW_CATEGORIES = {
             weight: 0.15
         }
     },
-    
+
     buyer: {
         payment: {
             name: 'Payment Speed',
@@ -243,7 +243,7 @@ export const FORUM_CATEGORIES = {
         allowImages: true,
         allowPolls: true
     },
-    
+
     'selling-tips': {
         name: 'Selling Tips & Tricks',
         description: 'Share your selling expertise',
@@ -252,7 +252,7 @@ export const FORUM_CATEGORIES = {
         allowImages: true,
         tags: ['photography', 'pricing', 'descriptions', 'shipping']
     },
-    
+
     'buying-advice': {
         name: 'Buying Advice',
         description: 'Get help with purchases',
@@ -260,19 +260,19 @@ export const FORUM_CATEGORIES = {
         allowImages: true,
         tags: ['negotiation', 'authenticity', 'safety', 'payment']
     },
-    
+
     'category-specific': {
         name: 'Category Discussions',
         description: 'Category-specific discussions',
         icon: '📂',
         subcategories: {
             'electronics': 'Electronics & Tech',
-            'motors': 'Motors & Vehicles', 
+            'motors': 'Motors & Vehicles',
             'fashion': 'Fashion & Style',
             'home': 'Home & Garden'
         }
     },
-    
+
     'feedback-suggestions': {
         name: 'Feedback & Suggestions',
         description: 'Help us improve TuiTrade',
@@ -295,22 +295,22 @@ export class CommunityManager {
         try {
             // Add to following list
             await this.updateUserField('following', targetUserId, 'add');
-            
+
             // Add to target's followers
             await this.updateUserField('followers', this.userId, 'add', targetUserId);
-            
+
             // Create activity
             await this.createActivity('user_followed', {
                 target: targetUserId
             });
-            
+
             // Send notification to target user
             await this.sendNotification(targetUserId, 'new_follower', {
                 follower: this.userId
             });
-            
+
             trackEvent('user_follow', { targetUserId });
-            
+
             return { success: true };
         } catch (error) {
             console.error('Error following user:', error);
@@ -322,9 +322,9 @@ export class CommunityManager {
         try {
             await this.updateUserField('following', targetUserId, 'remove');
             await this.updateUserField('followers', this.userId, 'remove', targetUserId);
-            
+
             trackEvent('user_unfollow', { targetUserId });
-            
+
             return { success: true };
         } catch (error) {
             console.error('Error unfollowing user:', error);
@@ -344,10 +344,10 @@ export class CommunityManager {
         };
 
         this.activities.unshift(activity);
-        
+
         // In real app, save to database
         // await saveActivity(activity);
-        
+
         return activity;
     }
 
@@ -364,7 +364,7 @@ export class CommunityManager {
         // Filter by following if requested
         if (followingOnly) {
             const following = await this.getFollowing();
-            feed = feed.filter(activity => 
+            feed = feed.filter(activity =>
                 following.includes(activity.userId) || activity.userId === this.userId
             );
         }
@@ -384,16 +384,16 @@ export class CommunityManager {
     // User recommendations
     async getUserRecommendations() {
         const recommendations = [];
-        
+
         // Users selling in favourite categories
         const favouriteCategories = await this.getFavouriteCategories();
-        
+
         // Popular sellers in user's region
         const userLocation = await this.getUserLocation();
-        
+
         // Users with similar interests
         const similarUsers = await this.findSimilarUsers();
-        
+
         return {
             categoryBased: recommendations.slice(0, 5),
             locationBased: recommendations.slice(0, 3),
@@ -472,7 +472,7 @@ export const calculateTrustScore = (userStats) => {
     const verificationScore = verificationLevel;
 
     const totalScore = ratingScore + volumeScore + ageScore + verificationScore;
-    
+
     return Math.min(Math.round(totalScore), 100);
 };
 
@@ -482,12 +482,12 @@ export const MODERATION_RULES = {
         'weapons', 'drugs', 'stolen goods', 'counterfeit items',
         'adult content', 'illegal items', 'hazardous materials'
     ],
-    
+
     restricted: [
         'alcohol', 'prescription medication', 'financial services',
         'real estate', 'vehicles without WOF', 'animals'
     ],
-    
+
     flagReasons: [
         'Inappropriate content',
         'Spam or duplicate listing',
@@ -499,6 +499,45 @@ export const MODERATION_RULES = {
     ]
 };
 
+// User badges for reputation system
+export const USER_BADGES = {
+    powerSeller: {
+        id: 'power-seller',
+        name: 'Power Seller',
+        description: 'Sold 100+ items with excellent ratings',
+        color: '#FFD700',
+        icon: '💪'
+    },
+    topRated: {
+        id: 'top-rated',
+        name: 'Top Rated',
+        description: 'Maintained 4.5+ star rating for 6+ months',
+        color: '#FF6B6B',
+        icon: '⭐'
+    },
+    fastShipper: {
+        id: 'fast-shipper',
+        name: 'Fast Shipper',
+        description: 'Consistently ships within 24 hours',
+        color: '#4ECDC4',
+        icon: '📦'
+    },
+    verifiedSeller: {
+        id: 'verified-seller',
+        name: 'Verified Seller',
+        description: 'Completed identity verification',
+        color: '#45B7D1',
+        icon: '✅'
+    },
+    communityHelper: {
+        id: 'community-helper',
+        name: 'Community Helper',
+        description: 'Helped 20+ other users',
+        color: '#96CEB4',
+        icon: '🤝'
+    }
+};
+
 export default {
     USER_PROFILE_SCHEMA,
     SELLER_LEVELS,
@@ -508,5 +547,6 @@ export default {
     FORUM_CATEGORIES,
     CommunityManager,
     calculateTrustScore,
-    MODERATION_RULES
+    MODERATION_RULES,
+    USER_BADGES
 };

@@ -1,16 +1,16 @@
 // Comprehensive Review and Rating Service - Trust and reputation system
 // Handles user reviews, ratings, seller verification, and trust metrics
 
-import { 
-  collection, 
-  doc, 
-  addDoc, 
-  updateDoc, 
-  getDoc, 
-  getDocs, 
-  query, 
-  where, 
-  orderBy, 
+import {
+  collection,
+  doc,
+  addDoc,
+  updateDoc,
+  getDoc,
+  getDocs,
+  query,
+  where,
+  orderBy,
   limit,
   serverTimestamp,
   runTransaction,
@@ -76,7 +76,7 @@ class ReviewService {
         orderId: reviewData.orderId,
         itemId: reviewData.itemId,
         type: reviewData.type || REVIEW_TYPES.SELLER,
-        
+
         // Ratings
         ratings: {
           [RATING_CATEGORIES.OVERALL]: reviewData.rating,
@@ -85,35 +85,35 @@ class ReviewService {
           [RATING_CATEGORIES.SHIPPING]: reviewData.shippingRating || reviewData.rating,
           [RATING_CATEGORIES.VALUE]: reviewData.valueRating || reviewData.rating
         },
-        
+
         // Review content
         title: reviewData.title || '',
         comment: reviewData.comment || '',
         pros: reviewData.pros || [],
         cons: reviewData.cons || [],
-        
+
         // Media
         images: reviewData.images || [],
         videos: reviewData.videos || [],
-        
+
         // Metadata
         transactionValue: reviewData.transactionValue,
         itemCategory: reviewData.itemCategory,
         location: reviewData.location,
-        
+
         // Status
         status: REVIEW_STATUS.PENDING,
         isVerifiedPurchase: reviewData.isVerifiedPurchase || false,
-        
+
         // Moderation
         flags: [],
         moderationNotes: '',
-        
+
         // Engagement
         helpfulVotes: 0,
         unhelpfulVotes: 0,
         replies: [],
-        
+
         // Timestamps
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp()
@@ -121,11 +121,11 @@ class ReviewService {
 
       // Check if review already exists for this transaction
       const existingReview = await this.findExistingReview(
-        reviewData.reviewerId, 
-        reviewData.revieweeId, 
+        reviewData.reviewerId,
+        reviewData.revieweeId,
         reviewData.orderId
       );
-      
+
       if (existingReview) {
         throw new Error('Review already exists for this transaction');
       }
@@ -202,7 +202,7 @@ class ReviewService {
       } = options;
 
       const field = type === 'received' ? 'revieweeId' : 'reviewerId';
-      
+
       let q = query(
         collection(db, 'reviews'),
         where(field, '==', userId),
@@ -321,7 +321,7 @@ class ReviewService {
         // Update user document
         const userRef = doc(db, 'users', userId);
         const userDoc = await transaction.get(userRef);
-        
+
         if (userDoc.exists()) {
           transaction.update(userRef, {
             'ratings.totalReviews': totalReviews,
@@ -346,13 +346,13 @@ class ReviewService {
   // Calculate trust level
   calculateTrustLevel(totalReviews, averageRating) {
     const levels = Object.values(TRUST_LEVELS).reverse(); // Start from highest
-    
+
     for (const level of levels) {
       if (totalReviews >= level.minReviews && averageRating >= level.minRating) {
         return level;
       }
     }
-    
+
     return TRUST_LEVELS.NEW;
   }
 
@@ -362,7 +362,7 @@ class ReviewService {
       const result = await runTransaction(db, async (transaction) => {
         const reviewRef = doc(db, 'reviews', reviewId);
         const reviewDoc = await transaction.get(reviewRef);
-        
+
         if (!reviewDoc.exists()) {
           throw new Error('Review not found');
         }
@@ -463,7 +463,7 @@ class ReviewService {
     try {
       // Get user document
       const userDoc = await getDoc(doc(db, 'users', userId));
-      
+
       if (!userDoc.exists()) {
         return {
           totalReviews: 0,
@@ -478,19 +478,19 @@ class ReviewService {
       const ratings = userData.ratings || {};
 
       // Get recent reviews
-      const recentReviews = await this.getUserReviews(userId, { 
-        type: 'received', 
+      const recentReviews = await this.getUserReviews(userId, {
+        type: 'received',
         limit: 5,
         orderByField: 'createdAt',
         orderDirection: 'desc'
       });
 
       // Calculate distribution
-      const reviewsForDistribution = await this.getUserReviews(userId, { 
-        type: 'received', 
-        limit: 100 
+      const reviewsForDistribution = await this.getUserReviews(userId, {
+        type: 'received',
+        limit: 100
       });
-      
+
       const distribution = [1, 2, 3, 4, 5].map(rating => {
         const count = reviewsForDistribution.filter(r => Math.round(r.ratings.overall) === rating).length;
         return { rating, count, percentage: Math.round((count / reviewsForDistribution.length) * 100) || 0 };
@@ -517,7 +517,7 @@ class ReviewService {
     if (review.comment.length < 10) return false;
     if (review.ratings.overall < 1 || review.ratings.overall > 5) return false;
     if (this.containsInappropriateContent(review.comment)) return false;
-    
+
     return true;
   }
 
@@ -527,7 +527,7 @@ class ReviewService {
       'spam', 'fake', 'scam', 'fraud'
       // Would extend with comprehensive list
     ];
-    
+
     const lowerText = text.toLowerCase();
     return inappropriateWords.some(word => lowerText.includes(word));
   }
@@ -538,20 +538,20 @@ class ReviewService {
       const startDate = new Date();
       startDate.setDate(startDate.getDate() - (timeframe === '30d' ? 30 : 7));
 
-      const reviews = await this.getUserReviews(userId, { 
-        type: 'received', 
-        limit: 1000 
+      const reviews = await this.getUserReviews(userId, {
+        type: 'received',
+        limit: 1000
       });
 
-      const recentReviews = reviews.filter(review => 
+      const recentReviews = reviews.filter(review =>
         review.createdAt?.toDate?.() >= startDate
       );
 
       const analytics = {
         totalReviews: reviews.length,
         recentReviews: recentReviews.length,
-        averageRating: reviews.length > 0 
-          ? reviews.reduce((sum, r) => sum + r.ratings.overall, 0) / reviews.length 
+        averageRating: reviews.length > 0
+          ? reviews.reduce((sum, r) => sum + r.ratings.overall, 0) / reviews.length
           : 0,
         ratingTrend: this.calculateRatingTrend(reviews),
         categoryBreakdown: this.calculateCategoryBreakdown(reviews),
@@ -568,32 +568,32 @@ class ReviewService {
   calculateRatingTrend(reviews) {
     const last30 = reviews.slice(0, 30);
     const previous30 = reviews.slice(30, 60);
-    
+
     if (last30.length === 0) return 0;
-    
+
     const recent = last30.reduce((sum, r) => sum + r.ratings.overall, 0) / last30.length;
-    const previous = previous30.length > 0 
-      ? previous30.reduce((sum, r) => sum + r.ratings.overall, 0) / previous30.length 
+    const previous = previous30.length > 0
+      ? previous30.reduce((sum, r) => sum + r.ratings.overall, 0) / previous30.length
       : recent;
-    
+
     return ((recent - previous) / previous) * 100;
   }
 
   calculateCategoryBreakdown(reviews) {
     if (reviews.length === 0) return {};
-    
+
     const breakdown = {};
     Object.values(RATING_CATEGORIES).forEach(category => {
       const sum = reviews.reduce((total, review) => total + (review.ratings[category] || 0), 0);
       breakdown[category] = Math.round((sum / reviews.length) * 10) / 10;
     });
-    
+
     return breakdown;
   }
 
   calculateMonthlyStats(reviews) {
     const stats = {};
-    
+
     reviews.forEach(review => {
       const date = review.createdAt?.toDate?.();
       if (date) {
@@ -605,12 +605,12 @@ class ReviewService {
         stats[monthKey].totalRating += review.ratings.overall;
       }
     });
-    
+
     // Calculate averages
     Object.keys(stats).forEach(month => {
       stats[month].averageRating = Math.round((stats[month].totalRating / stats[month].count) * 10) / 10;
     });
-    
+
     return stats;
   }
 
@@ -622,11 +622,28 @@ class ReviewService {
 // Create singleton instance
 const reviewService = new ReviewService();
 
-export {
-  REVIEW_TYPES,
-  RATING_CATEGORIES,
-  REVIEW_STATUS,
-  TRUST_LEVELS
-};
+// Mock data for development and testing
+export const MOCK_REVIEWS = [
+  {
+    id: 'mock_review_1',
+    reviewerId: 'user_123',
+    revieweeId: 'user_456',
+    rating: 5,
+    title: 'Excellent seller!',
+    comment: 'Great communication and fast shipping. Highly recommended!',
+    createdAt: new Date('2024-01-15'),
+    status: 'published'
+  },
+  {
+    id: 'mock_review_2',
+    reviewerId: 'user_789',
+    revieweeId: 'user_456',
+    rating: 4,
+    title: 'Good experience',
+    comment: 'Item as described, good seller.',
+    createdAt: new Date('2024-01-10'),
+    status: 'published'
+  }
+];
 
 export default reviewService;

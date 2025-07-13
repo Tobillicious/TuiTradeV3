@@ -9,6 +9,7 @@ import { AuctionCard } from '../ui/AuctionSystem';
 import Carousel from '../ui/Carousel';
 import Counter from '../ui/Counter';
 import SpotlightCard from '../ui/SpotlightCard';
+import PersonalizedFeed from '../ui/PersonalizedFeed';
 import { Tag, Shield, Star, MessageCircle, ChevronDown } from 'lucide-react';
 import { getBilingualText, TE_REO_TRANSLATIONS } from '../../lib/nzLocalizationEnhanced';
 
@@ -176,7 +177,7 @@ const HomePage = ({ onWatchToggle, watchedItems, onNavigate, onItemClick, onAddT
             {/* Enhanced Categories Section with Carousel - Now First */}
             <div className="bg-gradient-to-br from-gray-50 to-white py-20">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <motion.div 
+                    <motion.div
                         className="text-center mb-16"
                         initial={{ y: 30, opacity: 0 }}
                         animate={{ y: 0, opacity: 1 }}
@@ -202,7 +203,7 @@ const HomePage = ({ onWatchToggle, watchedItems, onNavigate, onItemClick, onAddT
                         animate={{ y: 0, opacity: 1 }}
                         transition={{ duration: 1, delay: 0.3, ease: "easeOut" }}
                     >
-                        <Carousel 
+                        <Carousel
                             autoplay={true}
                             autoplayDelay={5000}
                             pauseOnHover={true}
@@ -254,7 +255,7 @@ const HomePage = ({ onWatchToggle, watchedItems, onNavigate, onItemClick, onAddT
                 return coolListings.length > 0 ? (
                     <div className="bg-gradient-to-br from-purple-50 via-pink-50 to-orange-50 py-16">
                         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                            <motion.div 
+                            <motion.div
                                 className="text-center mb-12"
                                 initial={{ y: 30, opacity: 0 }}
                                 whileInView={{ y: 0, opacity: 1 }}
@@ -272,7 +273,7 @@ const HomePage = ({ onWatchToggle, watchedItems, onNavigate, onItemClick, onAddT
                                 </p>
                             </motion.div>
 
-                            <motion.div 
+                            <motion.div
                                 className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8"
                                 initial={{ y: 50, opacity: 0 }}
                                 whileInView={{ y: 0, opacity: 1 }}
@@ -337,7 +338,7 @@ const HomePage = ({ onWatchToggle, watchedItems, onNavigate, onItemClick, onAddT
                                 ))}
                             </motion.div>
 
-                            <motion.div 
+                            <motion.div
                                 className="text-center mt-12"
                                 initial={{ y: 30, opacity: 0 }}
                                 whileInView={{ y: 0, opacity: 1 }}
@@ -352,6 +353,42 @@ const HomePage = ({ onWatchToggle, watchedItems, onNavigate, onItemClick, onAddT
                     </div>
                 ) : null;
             })()}
+
+            {/* Personalized Feed - AI-Powered Discovery */}
+            <div className="bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 py-16">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <motion.div
+                        className="text-center mb-12"
+                        initial={{ y: 30, opacity: 0 }}
+                        whileInView={{ y: 0, opacity: 1 }}
+                        transition={{ duration: 0.8, ease: "easeOut" }}
+                        viewport={{ once: true }}
+                    >
+                        <h2 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 bg-clip-text text-transparent">
+                            ✨ Personalized Discovery
+                        </h2>
+                        <p className="text-xl text-gray-600 mb-2 italic">
+                            He taonga mōu - Treasures just for you
+                        </p>
+                        <p className="text-lg text-gray-500">
+                            AI-powered recommendations based on your interests and behavior
+                        </p>
+                    </motion.div>
+
+                    <motion.div
+                        initial={{ y: 50, opacity: 0 }}
+                        whileInView={{ y: 0, opacity: 1 }}
+                        transition={{ duration: 1, delay: 0.2, ease: "easeOut" }}
+                        viewport={{ once: true }}
+                    >
+                        <PersonalizedFeed
+                            onItemClick={onItemClick}
+                            onWatchToggle={onWatchToggle}
+                            watchedItems={watchedItems}
+                        />
+                    </motion.div>
+                </div>
+            </div>
 
             {/* Infinite Feed - TikTok/Instagram Style */}
             <div className="bg-gray-50 min-h-screen py-8">
@@ -470,7 +507,7 @@ const HomePage = ({ onWatchToggle, watchedItems, onNavigate, onItemClick, onAddT
             {/* Trust & Safety */}
             <div className="bg-green-50 py-16">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <motion.div 
+                    <motion.div
                         className="text-center mb-12"
                         initial={{ y: 30, opacity: 0 }}
                         whileInView={{ y: 0, opacity: 1 }}
@@ -492,14 +529,14 @@ const HomePage = ({ onWatchToggle, watchedItems, onNavigate, onItemClick, onAddT
                             transition={{ duration: 0.6, delay: 0.1, ease: "easeOut" }}
                             viewport={{ once: true, margin: "-50px" }}
                         >
-                            <SpotlightCard 
+                            <SpotlightCard
                                 className="theme-green"
                                 spotlightColor="rgba(16, 185, 129, 0.25)"
                                 backgroundColor="rgba(255, 255, 255, 0.95)"
                                 borderRadius="1rem"
                             >
                                 <div className="text-center p-6">
-                                    <motion.div 
+                                    <motion.div
                                         className="w-16 h-16 bg-green-600 rounded-full flex items-center justify-center mx-auto mb-4"
                                         whileHover={{ scale: 1.1, rotate: 5 }}
                                         transition={{ duration: 0.2 }}
@@ -520,14 +557,14 @@ const HomePage = ({ onWatchToggle, watchedItems, onNavigate, onItemClick, onAddT
                             transition={{ duration: 0.6, delay: 0.2, ease: "easeOut" }}
                             viewport={{ once: true, margin: "-50px" }}
                         >
-                            <SpotlightCard 
+                            <SpotlightCard
                                 className="theme-orange"
                                 spotlightColor="rgba(249, 115, 22, 0.25)"
                                 backgroundColor="rgba(255, 255, 255, 0.95)"
                                 borderRadius="1rem"
                             >
                                 <div className="text-center p-6">
-                                    <motion.div 
+                                    <motion.div
                                         className="w-16 h-16 bg-yellow-500 rounded-full flex items-center justify-center mx-auto mb-4"
                                         whileHover={{ scale: 1.1, rotate: 5 }}
                                         transition={{ duration: 0.2 }}
@@ -548,14 +585,14 @@ const HomePage = ({ onWatchToggle, watchedItems, onNavigate, onItemClick, onAddT
                             transition={{ duration: 0.6, delay: 0.3, ease: "easeOut" }}
                             viewport={{ once: true, margin: "-50px" }}
                         >
-                            <SpotlightCard 
+                            <SpotlightCard
                                 className="theme-blue"
                                 spotlightColor="rgba(59, 130, 246, 0.25)"
                                 backgroundColor="rgba(255, 255, 255, 0.95)"
                                 borderRadius="1rem"
                             >
                                 <div className="text-center p-6">
-                                    <motion.div 
+                                    <motion.div
                                         className="w-16 h-16 bg-blue-500 rounded-full flex items-center justify-center mx-auto mb-4"
                                         whileHover={{ scale: 1.1, rotate: 5 }}
                                         transition={{ duration: 0.2 }}
@@ -576,7 +613,7 @@ const HomePage = ({ onWatchToggle, watchedItems, onNavigate, onItemClick, onAddT
             {/* Page Views Counter */}
             <div className="bg-gray-900 py-8">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <motion.div 
+                    <motion.div
                         className="text-center"
                         initial={{ y: 30, opacity: 0 }}
                         whileInView={{ y: 0, opacity: 1 }}
@@ -584,7 +621,7 @@ const HomePage = ({ onWatchToggle, watchedItems, onNavigate, onItemClick, onAddT
                         viewport={{ once: true }}
                     >
                         <p className="text-gray-400 text-sm mb-2">Total Page Views</p>
-                        <Counter 
+                        <Counter
                             value={pageViews}
                             places={[100000, 10000, 1000, 100, 10, 1]}
                             fontSize={42}

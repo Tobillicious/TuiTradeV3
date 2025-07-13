@@ -2,34 +2,36 @@
 // Comprehensive profile builder with skills, experience, and job preferences
 
 import React, { useState, useEffect } from 'react';
-import { 
+import {
   User, Mail, Phone, MapPin, Calendar, Briefcase, Award,
   Plus, Edit, Trash2, Save, Upload, FileText, Bell, Settings,
   Search, Filter, Eye, Download, CheckCircle, AlertCircle, X
 } from 'lucide-react';
 import { useTeReo, TeReoText } from '../ui/TeReoToggle';
-import { 
-  getDoc, 
-  setDoc, 
-  doc, 
-  collection, 
-  query, 
-  where, 
-  orderBy, 
-  getDocs 
+import {
+  getDoc,
+  setDoc,
+  doc,
+  collection,
+  query,
+  where,
+  orderBy,
+  getDocs
 } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { db, storage } from '../../lib/firebase';
+import { fetchUserReputation } from '../../lib/reputationService';
 
 const JobSeekerProfile = ({ onNavigate, currentUser }) => {
   const { getText } = useTeReo();
-  
+
   const [activeTab, setActiveTab] = useState('profile');
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setSaving] = useState(false);
   const [myApplications, setMyApplications] = useState([]);
   const [savedJobs, setSavedJobs] = useState([]);
-  
+  const [reputation, setReputation] = useState(null);
+
   // Profile data state
   const [profileData, setProfileData] = useState({
     // Personal Information
@@ -40,25 +42,25 @@ const JobSeekerProfile = ({ onNavigate, currentUser }) => {
     address: '',
     city: '',
     country: 'New Zealand',
-    
+
     // Professional Information
     currentTitle: '',
     summary: '',
     yearsExperience: '',
     industry: '',
-    
+
     // Skills & Qualifications
     skills: [],
     qualifications: [],
     certifications: [],
     languages: [{ language: 'English', proficiency: 'Native' }],
-    
+
     // Work Experience
     workExperience: [],
-    
+
     // Education
     education: [],
-    
+
     // Job Preferences
     jobPreferences: {
       desiredRoles: [],
@@ -68,17 +70,17 @@ const JobSeekerProfile = ({ onNavigate, currentUser }) => {
       availability: '', // immediate, 2weeks, 1month, etc
       workRights: ''
     },
-    
+
     // Profile Settings
     profileVisibility: 'public', // public, private, employers-only
     jobAlerts: true,
     profileComplete: false,
-    
+
     // Documents
     resumeUrl: '',
     portfolioUrl: '',
     linkedInUrl: '',
-    
+
     // Timestamps
     createdAt: null,
     updatedAt: null
@@ -96,7 +98,7 @@ const JobSeekerProfile = ({ onNavigate, currentUser }) => {
     try {
       const userRef = doc(db, 'users', currentUser.uid);
       const userSnap = await getDoc(userRef);
-      
+
       if (userSnap.exists()) {
         const userData = userSnap.data();
         setProfileData(prev => ({
@@ -113,6 +115,10 @@ const JobSeekerProfile = ({ onNavigate, currentUser }) => {
           email: currentUser.email
         }));
       }
+
+      // Load reputation data
+      const repData = await fetchUserReputation(currentUser.uid);
+      setReputation(repData);
     } catch (error) {
       console.error('Error loading user profile:', error);
     }
@@ -126,13 +132,13 @@ const JobSeekerProfile = ({ onNavigate, currentUser }) => {
         where('applicantId', '==', currentUser.uid),
         orderBy('appliedAt', 'desc')
       );
-      
+
       const querySnapshot = await getDocs(q);
       const applications = [];
       querySnapshot.forEach((doc) => {
         applications.push({ id: doc.id, ...doc.data() });
       });
-      
+
       setMyApplications(applications);
     } catch (error) {
       console.error('Error loading applications:', error);
@@ -146,7 +152,7 @@ const JobSeekerProfile = ({ onNavigate, currentUser }) => {
     try {
       const userRef = doc(db, 'users', currentUser.uid);
       const userSnap = await getDoc(userRef);
-      
+
       if (userSnap.exists()) {
         const userData = userSnap.data();
         setSavedJobs(userData.savedJobs || []);
@@ -166,11 +172,11 @@ const JobSeekerProfile = ({ onNavigate, currentUser }) => {
         updatedAt: new Date(),
         profileComplete: calculateProfileCompleteness(profileData) > 70
       };
-      
+
       if (!profileData.createdAt) {
         updateData.createdAt = new Date();
       }
-      
+
       await setDoc(userRef, updateData, { merge: true });
       setIsEditing(false);
       console.log('Profile saved successfully');
@@ -189,7 +195,7 @@ const JobSeekerProfile = ({ onNavigate, currentUser }) => {
       profile.skills.length > 0, profile.workExperience.length > 0,
       profile.education.length > 0, profile.resumeUrl
     ];
-    
+
     const completedFields = fields.filter(Boolean).length;
     return Math.round((completedFields / fields.length) * 100);
   };
@@ -276,7 +282,7 @@ const JobSeekerProfile = ({ onNavigate, currentUser }) => {
       'hired': { color: 'bg-green-200 text-green-900', text: 'Hired' },
       'rejected': { color: 'bg-red-100 text-red-800', text: 'Not Selected' }
     };
-    
+
     const config = statusConfig[status] || statusConfig['new'];
     return (
       <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${config.color}`}>
@@ -296,8 +302,8 @@ const JobSeekerProfile = ({ onNavigate, currentUser }) => {
           </div>
         </div>
         <div className="w-full bg-gray-200 rounded-full h-2">
-          <div 
-            className="bg-green-600 h-2 rounded-full transition-all duration-300" 
+          <div
+            className="bg-green-600 h-2 rounded-full transition-all duration-300"
             style={{ width: `${calculateProfileCompleteness(profileData)}%` }}
           ></div>
         </div>
@@ -305,6 +311,57 @@ const JobSeekerProfile = ({ onNavigate, currentUser }) => {
           Complete your profile to increase your visibility to employers
         </p>
       </div>
+
+      {/* TuiTrade Reputation */}
+      {reputation && (
+        <div className="bg-white rounded-lg shadow-sm border p-6">
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">Your TuiTrade Reputation</h3>
+          <p className="text-sm text-gray-600 mb-4">This is how employers see your profile. A strong reputation can help you stand out!</p>
+          <div className="space-y-4">
+            <div className="flex items-center">
+              <Award className="w-5 h-5 text-yellow-400 mr-3" />
+              <div>
+                <p className="font-medium text-gray-900">{reputation.averageSellerRating.toFixed(1)} / 5.0</p>
+                <p className="text-sm text-gray-600">Average Seller Rating</p>
+              </div>
+            </div>
+            <div className="flex items-center">
+              <Briefcase className="w-5 h-5 text-gray-400 mr-3" />
+              <div>
+                <p className="font-medium text-gray-900">{reputation.totalTrades}</p>
+                <p className="text-sm text-gray-600">Completed Trades</p>
+              </div>
+            </div>
+            {reputation.badges && reputation.badges.length > 0 && (
+              <div>
+                <h4 className="text-md font-semibold text-gray-800 mb-2">Your Community Badges</h4>
+                <div className="flex flex-wrap gap-2">
+                  {reputation.badges.map(badge => (
+                    <div key={badge.id} className="flex items-center bg-gray-100 text-gray-700 px-2 py-1 rounded-full text-xs font-medium" title={badge.description}>
+                      <Award className="w-4 h-4 mr-1.5" style={{ color: badge.color }} />
+                      {badge.name}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+            {reputation.totalTrades === 0 && (
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <p className="text-sm text-blue-800">
+                  <strong>Tip:</strong> Start selling items on TuiTrade to build your reputation!
+                  Employers value candidates with positive marketplace history.
+                </p>
+                <button
+                  onClick={() => onNavigate('marketplace-landing')}
+                  className="mt-2 text-blue-600 hover:text-blue-700 text-sm font-medium"
+                >
+                  Browse Marketplace →
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Personal Information */}
       <div className="bg-white rounded-lg shadow-sm border p-6">
@@ -333,7 +390,7 @@ const JobSeekerProfile = ({ onNavigate, currentUser }) => {
               <p className="text-gray-900">{profileData.firstName || 'Not provided'}</p>
             )}
           </div>
-          
+
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Last Name</label>
             {isEditing ? (
@@ -526,7 +583,7 @@ const JobSeekerProfile = ({ onNavigate, currentUser }) => {
   const renderJobAlertsTab = () => (
     <div className="space-y-6">
       <h2 className="text-2xl font-bold text-gray-900">Job Alerts & Preferences</h2>
-      
+
       <div className="bg-white rounded-lg shadow-sm border p-6">
         <h3 className="text-lg font-semibold text-gray-900 mb-4">Job Preferences</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -627,11 +684,10 @@ const JobSeekerProfile = ({ onNavigate, currentUser }) => {
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`flex items-center py-4 px-1 border-b-2 font-medium text-sm ${
-                    activeTab === tab.id
-                      ? 'border-green-500 text-green-600'
-                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                  }`}
+                  className={`flex items-center py-4 px-1 border-b-2 font-medium text-sm ${activeTab === tab.id
+                    ? 'border-green-500 text-green-600'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                    }`}
                 >
                   <Icon size={16} className="mr-2" />
                   {tab.label}

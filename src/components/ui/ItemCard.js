@@ -2,6 +2,7 @@
 import React, { memo, useMemo, useCallback } from 'react';
 import { Heart, MapPin, User, Download, Zap } from 'lucide-react';
 import { formatPrice, timeAgo } from '../../lib/utils';
+import { trackItemClick, trackWatchlistAdd } from '../../lib/apiService';
 
 const ItemCard = memo(({ item, isWatched, onWatchToggle, onItemClick, onAddToCart, onBuyNow, isInCart, viewMode = 'grid', onNavigate }) => {
     const createdDate = useMemo(() =>
@@ -10,10 +11,28 @@ const ItemCard = memo(({ item, isWatched, onWatchToggle, onItemClick, onAddToCar
 
     const handleWatchToggle = useCallback((e) => {
         e.stopPropagation();
+
+        // Track watchlist interaction for personalization
+        if (!isWatched) {
+            trackWatchlistAdd(item.id, item.categoryId, {
+                itemTitle: item.title,
+                itemPrice: item.price,
+                itemLocation: item.location
+            });
+        }
+
         onWatchToggle(item.id);
-    }, [item.id, onWatchToggle]);
+    }, [item.id, item.categoryId, item.title, item.price, item.location, isWatched, onWatchToggle]);
 
     const handleItemClick = useCallback(() => {
+        // Track item click for personalization
+        trackItemClick(item.id, item.categoryId, {
+            itemTitle: item.title,
+            itemPrice: item.price,
+            itemLocation: item.location,
+            fromComponent: 'ItemCard'
+        });
+
         onItemClick(item);
     }, [item, onItemClick]);
 
@@ -87,11 +106,10 @@ const ItemCard = memo(({ item, isWatched, onWatchToggle, onItemClick, onAddToCar
                         {/* Watch button */}
                         <button
                             onClick={handleWatchToggle}
-                            className={`p-2.5 rounded-full transition-all duration-300 shadow-lg backdrop-blur-sm ${
-                                isWatched 
-                                    ? 'bg-red-500 text-white hover:bg-red-600 scale-110' 
+                            className={`p-2.5 rounded-full transition-all duration-300 shadow-lg backdrop-blur-sm ${isWatched
+                                    ? 'bg-red-500 text-white hover:bg-red-600 scale-110'
                                     : 'bg-white/90 text-gray-700 hover:bg-white hover:scale-110'
-                            }`}
+                                }`}
                         >
                             <Heart size={16} fill={isWatched ? 'currentColor' : 'none'} />
                         </button>
@@ -101,7 +119,7 @@ const ItemCard = memo(({ item, isWatched, onWatchToggle, onItemClick, onAddToCar
                     <div className="absolute bottom-0 left-0 right-0 p-4">
                         <div className="text-white">
                             <h4 className="font-bold text-lg mb-2 line-clamp-2 text-shadow">{item.title}</h4>
-                            
+
                             {/* Price and stats row */}
                             <div className="flex items-center justify-between mb-3">
                                 <div className="bg-white/10 backdrop-blur-sm rounded-lg px-3 py-1.5">
