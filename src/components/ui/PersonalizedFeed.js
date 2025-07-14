@@ -5,7 +5,7 @@ import React, { useState, useEffect } from 'react';
 import { Sparkles, TrendingUp, Clock, Heart, Eye, Star, Zap } from 'lucide-react';
 import { getPersonalizedFeed, trackItemClick } from '../../lib/apiService';
 import { useAuth } from '../../context/AuthContext';
-import { useTeReo } from '../ui/TeReoToggle';
+import { useTeReo } from './TeReoToggle';
 
 const PersonalizedFeed = ({ onItemClick, onWatchToggle, watchedItems = [] }) => {
     const [feedItems, setFeedItems] = useState([]);
@@ -205,7 +205,7 @@ const PersonalizedFeed = ({ onItemClick, onWatchToggle, watchedItems = [] }) => 
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         {feedItems.map((item) => {
                             const relevanceBadge = getRelevanceBadge(item);
-                            const isWatched = watchedItems.includes(item.id);
+                            const isWatched = watchedItems?.includes(item.id) || false;
 
                             return (
                                 <div

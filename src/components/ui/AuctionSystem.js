@@ -4,6 +4,7 @@ import { collection, query, orderBy, addDoc, doc, updateDoc, onSnapshot, serverT
 import { db } from '../../lib/firebase';
 import { useAuth } from '../../context/AuthContext';
 import { useNotification } from '../../context/NotificationContext';
+import { useAppContext } from '../../context/AppContext';
 import { formatPrice, timeAgo } from '../../lib/utils';
 import { Clock, Gavel, TrendingUp, DollarSign, AlertCircle, CheckCircle, Trophy, Heart, User, MapPin } from 'lucide-react';
 
@@ -305,9 +306,22 @@ const AuctionInterface = ({ auction, onBidPlaced }) => {
     );
 };
 
-const AuctionCard = ({ auction, onItemClick, onWatchToggle, watchedItems = [], onNavigate }) => {
+const AuctionCard = ({ auction, onItemClick, onNavigate }) => {
     const { currentUser } = useAuth();
     const { showNotification } = useNotification();
+    const contextValue = useAppContext();
+    
+    if (process.env.NODE_ENV === 'development') {
+        console.group('🎯 AuctionCard: Context Analysis');
+        console.log('Context value:', contextValue);
+        console.log('watchedItems:', contextValue?.watchedItems);
+        console.groupEnd();
+    }
+    
+    const { onWatchToggle, watchedItems: rawWatchedItems = [] } = contextValue || {};
+    
+    // Safe array validation
+    const watchedItems = Array.isArray(rawWatchedItems) ? rawWatchedItems : [];
 
     const timeLeft = new Date(auction.endTime) > new Date();
     const currentBid = auction.currentBid || auction.startingBid;

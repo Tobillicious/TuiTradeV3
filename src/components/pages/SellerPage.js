@@ -1,11 +1,20 @@
 import { useState, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import { doc, getDoc, collection, query, where, getDocs } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
+import { useAppContext } from '../../context/AppContext';
 import { FullPageLoader } from '../ui/Loaders';
 import { StarRating, ReviewList } from '../ui/ReviewSystem';
 import ItemCard from '../ui/ItemCard';
 
-const SellerPage = ({ sellerId, onNavigate, onItemClick, onWatchToggle, watchedItems, onAddToCart, cartItems }) => {
+const SellerPage = () => {
+    const { sellerId } = useParams();
+    const navigate = useNavigate();
+    const { onWatchToggle, watchedItems = [], onAddToCart, cartItems = [] } = useAppContext() || {};
+    
+    const handleItemClick = (item) => {
+        navigate(`/item/${item.id}`);
+    };
     const [seller, setSeller] = useState(null);
     const [listings, setListings] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -72,12 +81,11 @@ const SellerPage = ({ sellerId, onNavigate, onItemClick, onWatchToggle, watchedI
                     <ItemCard
                         key={item.id}
                         item={item}
-                        isWatched={watchedItems.includes(item.id)}
+                        isWatched={watchedItems?.includes(item.id) || false}
                         onWatchToggle={onWatchToggle}
-                        onItemClick={onItemClick}
+                        onItemClick={handleItemClick}
                         onAddToCart={onAddToCart}
-                        isInCart={cartItems.some(cartItem => cartItem.id === item.id)}
-                        onNavigate={onNavigate}
+                        isInCart={cartItems?.some(cartItem => cartItem.id === item.id) || false}
                     />
                 ))}
             </div>

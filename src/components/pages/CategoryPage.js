@@ -323,11 +323,11 @@ const CategoryPage = ({ categoryKey, subcategoryKey, onNavigate, onItemClick, on
                                         <ItemCard
                                             key={item.id}
                                             item={item}
-                                            isWatched={watchedItems.includes(item.id)}
+                                            isWatched={watchedItems?.includes(item.id) || false}
                                             onWatchToggle={onWatchToggle}
                                             onItemClick={onItemClick}
                                             onAddToCart={onAddToCart}
-                                            isInCart={cartItems.some(cartItem => cartItem.id === item.id)}
+                                            isInCart={cartItems?.some(cartItem => cartItem.id === item.id) || false}
                                             viewMode={viewMode}
                                             onNavigate={onNavigate}
                                         />

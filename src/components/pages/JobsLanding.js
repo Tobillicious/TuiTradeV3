@@ -1,12 +1,20 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { collection, query, orderBy, limit, getDocs } from 'firebase/firestore';
+import { useNavigate } from 'react-router-dom';
 import { db } from '../../lib/firebase';
 import { LISTINGS_LIMIT } from '../../lib/utils';
+import { useAppContext } from '../../context/AppContext';
 import JobCard from '../ui/JobCard';
 import { Briefcase, MapPin, DollarSign, Clock, Star, TrendingUp, Crown, Sparkles, Building, Users, Award, Zap } from 'lucide-react';
 import { getBilingualText, TE_REO_TRANSLATIONS } from '../../lib/nzLocalizationEnhanced';
 
-const JobsLanding = ({ onNavigate, onWatchToggle, watchedItems, onItemClick, onAddToCart, cartItems }) => {
+const JobsLanding = () => {
+  const { onWatchToggle, watchedItems = [], onAddToCart, cartItems = [] } = useAppContext() || {};
+  const navigate = useNavigate();
+  
+  const handleItemClick = (item) => {
+    navigate(`/item/${item.id}`);
+  };
   const [jobs, setJobs] = useState([]);
   const [featuredJobs, setFeaturedJobs] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -94,14 +102,14 @@ const JobsLanding = ({ onNavigate, onWatchToggle, watchedItems, onItemClick, onA
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
             <button
-              onClick={() => onNavigate('advanced-job-search')}
+              onClick={() => navigate('/advanced-job-search')}
               className="bg-white text-purple-600 px-8 py-3 rounded-lg font-semibold hover:bg-purple-50 transition-all transform hover:scale-105 shadow-lg"
             >
               <Briefcase className="inline mr-2" size={20} />
               {getBilingualText('Search Jobs', 'search_jobs')}
             </button>
             <button
-              onClick={() => onNavigate('create-job')}
+              onClick={() => navigate('/create-job')}
               className="bg-transparent border-2 border-white text-white px-8 py-3 rounded-lg font-semibold hover:bg-white hover:text-purple-600 transition-all"
             >
               {getBilingualText('Post a Job', 'post_job')}
@@ -113,7 +121,7 @@ const JobsLanding = ({ onNavigate, onWatchToggle, watchedItems, onItemClick, onA
             {jobCategories.map((category, index) => (
               <button
                 key={index}
-                onClick={() => onNavigate(category.route, { category: category.name.toLowerCase() })}
+                onClick={() => navigate(`/${category.route}?category=${category.name.toLowerCase()}`)}
                 className="flex flex-col items-center justify-center p-4 bg-white/10 rounded-lg hover:bg-white/20 transition-colors backdrop-blur-sm"
               >
                 <div className={`${category.color} mb-2`}>
@@ -144,9 +152,9 @@ const JobsLanding = ({ onNavigate, onWatchToggle, watchedItems, onItemClick, onA
                   key={job.id}
                   job={job}
                   onSaveJob={() => onWatchToggle(job.id)}
-                  onApplyJob={() => onNavigate('job-application', { job })}
-                  onJobClick={() => onItemClick(job)}
-                  isWatched={watchedItems.includes(job.id)}
+                  onApplyJob={(job) => navigate(`/job-application/${job.id}`)}
+                  onJobClick={() => handleItemClick(job)}
+                  isWatched={watchedItems?.includes(job.id) || false}
                 />
               ))}
             </div>
@@ -188,7 +196,7 @@ const JobsLanding = ({ onNavigate, onWatchToggle, watchedItems, onItemClick, onA
               <p className="text-gray-500 mb-6">Be the first to post a job opportunity!</p>
               <p className="text-sm text-gray-400 italic">Tīmata mai - Start here</p>
               <button
-                onClick={() => onNavigate('create-job')}
+                onClick={() => navigate('/create-job')}
                 className="bg-purple-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-purple-700 transition-colors"
               >
                 Post First Job
@@ -203,9 +211,9 @@ const JobsLanding = ({ onNavigate, onWatchToggle, watchedItems, onItemClick, onA
                   key={job.id}
                   job={job}
                   onSaveJob={() => onWatchToggle(job.id)}
-                  onApplyJob={() => onNavigate('job-application', { job })}
-                  onJobClick={() => onItemClick(job)}
-                  isWatched={watchedItems.includes(job.id)}
+                  onApplyJob={(job) => navigate(`/job-application/${job.id}`)}
+                  onJobClick={() => handleItemClick(job)}
+                  isWatched={watchedItems?.includes(job.id) || false}
                 />
               ))}
             </div>

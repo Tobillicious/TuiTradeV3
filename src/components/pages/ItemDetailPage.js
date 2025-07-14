@@ -74,8 +74,8 @@ const ItemDetailPage = () => {
         </div>
     );
 
-    const isWatched = watchedItems.includes(item.id);
-    const isInCart = cartItems.some(cartItem => cartItem.id === item.id);
+    const isWatched = watchedItems?.includes(item.id) || false;
+    const isInCart = cartItems?.some(cartItem => cartItem.id === item.id) || false;
     const images = item.images || [item.imageUrl];
     const createdDate = item.createdAt?.toDate ? item.createdAt.toDate() : new Date();
     const CategoryIcon = CATEGORIES[item.category]?.icon;

@@ -4,6 +4,7 @@ import { initializeApp } from 'firebase/app';
 import { getAuth, connectAuthEmulator } from 'firebase/auth';
 import { getFirestore, connectFirestoreEmulator } from 'firebase/firestore';
 import { getStorage, connectStorageEmulator } from 'firebase/storage';
+import { getDatabase, connectDatabaseEmulator } from 'firebase/database';
 
 const firebaseConfig = {
   apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
@@ -11,7 +12,8 @@ const firebaseConfig = {
   projectId: process.env.REACT_APP_FIREBASE_PROJECT_ID,
   storageBucket: process.env.REACT_APP_FIREBASE_STORAGE_BUCKET,
   messagingSenderId: process.env.REACT_APP_FIREBASE_MESSAGING_SENDER_ID,
-  appId: process.env.REACT_APP_FIREBASE_APP_ID
+  appId: process.env.REACT_APP_FIREBASE_APP_ID,
+  databaseURL: process.env.REACT_APP_FIREBASE_DATABASE_URL
 };
 
 // Check if we're in development and provide helpful error messages
@@ -24,7 +26,8 @@ const requiredEnvVars = [
   'REACT_APP_FIREBASE_PROJECT_ID',
   'REACT_APP_FIREBASE_STORAGE_BUCKET',
   'REACT_APP_FIREBASE_MESSAGING_SENDER_ID',
-  'REACT_APP_FIREBASE_APP_ID'
+  'REACT_APP_FIREBASE_APP_ID',
+  'REACT_APP_FIREBASE_DATABASE_URL'
 ];
 
 const missingVars = requiredEnvVars.filter(varName => !process.env[varName]);
@@ -51,7 +54,7 @@ if (missingVars.length > 0) {
 }
 
 // Initialize Firebase
-let app, auth, db, storage;
+let app, auth, db, storage, realtimeDb;
 
 try {
   if (missingVars.length > 0 && isDevelopment) {
@@ -88,12 +91,22 @@ try {
         getDownloadURL: () => Promise.reject(new Error('Firebase not configured'))
       })
     };
+
+    realtimeDb = {
+      ref: () => ({
+        set: () => Promise.reject(new Error('Firebase not configured')),
+        on: () => () => {},
+        off: () => {},
+        once: () => Promise.reject(new Error('Firebase not configured'))
+      })
+    };
   } else {
     // Real Firebase initialization
     app = initializeApp(firebaseConfig);
     auth = getAuth(app);
     db = getFirestore(app);
     storage = getStorage(app);
+    realtimeDb = getDatabase(app);
 
     // Note: Firestore persistence disabled to prevent React 19 strict mode conflicts
 
@@ -103,6 +116,7 @@ try {
         connectAuthEmulator(auth, 'http://localhost:9099');
         connectFirestoreEmulator(db, 'localhost', 8080);
         connectStorageEmulator(storage, 'localhost', 9199);
+        connectDatabaseEmulator(realtimeDb, 'localhost', 9000);
         console.log('🔗 Connected to Firebase emulators');
       } catch (emulatorError) {
         console.warn('⚠️  Failed to connect to emulators:', emulatorError);
@@ -120,9 +134,10 @@ try {
     auth = { onAuthStateChanged: () => () => { }, signOut: () => Promise.resolve(), currentUser: null };
     db = { collection: () => ({ add: () => Promise.reject(error), get: () => Promise.reject(error) }) };
     storage = { ref: () => ({ put: () => Promise.reject(error) }) };
+    realtimeDb = { ref: () => ({ set: () => Promise.reject(error), on: () => () => {}, off: () => {} }) };
   } else {
     throw error;
   }
 }
 
-export { auth, db, storage };
+export { auth, db, storage, realtimeDb };

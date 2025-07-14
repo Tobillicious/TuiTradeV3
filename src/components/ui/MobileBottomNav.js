@@ -65,11 +65,14 @@ const MobileBottomNav = ({
     ];
 
     const isActive = (itemId) => {
-        if (itemId === 'home' && currentPage === 'home') return true;
-        if (itemId === 'search' && currentPage === 'search-results') return true;
-        if (itemId === 'categories' && currentPage.includes('landing')) return true;
-        if (itemId === 'watchlist' && currentPage === 'watchlist') return true;
-        if (itemId === 'cart' && currentPage === 'cart') return true;
+        // Safely handle currentPage that might be undefined
+        const page = currentPage || '';
+        
+        if (itemId === 'home' && page === 'home') return true;
+        if (itemId === 'search' && page === 'search-results') return true;
+        if (itemId === 'categories' && page.includes('landing')) return true;
+        if (itemId === 'watchlist' && page === 'watchlist') return true;
+        if (itemId === 'cart' && page === 'cart') return true;
         return false;
     };
 

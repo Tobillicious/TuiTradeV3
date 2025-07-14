@@ -1,5 +1,7 @@
 // Neighbourhood Detail Page - Local Community Hub
 import React, { useState, useEffect, useCallback } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import { useAppContext } from '../../context/AppContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   MapPin, 
@@ -27,7 +29,14 @@ import neighbourhoodService, { NEIGHBOURHOOD_ACTIVITIES } from '../../lib/neighb
 import { useTeReo, TeReoText } from '../ui/TeReoToggle';
 import ItemCard from '../ui/ItemCard';
 
-const NeighbourhoodDetailPage = ({ neighbourhoodId, onNavigate, currentUser, onWatchToggle, watchedItems, onItemClick, onAddToCart, cartItems }) => {
+const NeighbourhoodDetailPage = () => {
+    const { neighbourhoodId } = useParams();
+    const navigate = useNavigate();
+    const { onWatchToggle, watchedItems = [], onAddToCart, cartItems = [], currentUser } = useAppContext() || {};
+    
+    const handleItemClick = (item) => {
+        navigate(`/item/${item.id}`);
+    };
   const { getText } = useTeReo();
   const [neighbourhood, setNeighbourhood] = useState(null);
   const [activeTab, setActiveTab] = useState('feed');
@@ -255,7 +264,7 @@ const NeighbourhoodDetailPage = ({ neighbourhoodId, onNavigate, currentUser, onW
                 </div>
               </div>
               <button 
-                onClick={() => onItemClick(item)}
+                onClick={() => handleItemClick(item)}
                 className="w-full mt-4 bg-gray-100 text-gray-700 py-2 rounded-lg hover:bg-gray-200 transition-colors"
               >
                 View Details
@@ -346,7 +355,7 @@ const NeighbourhoodDetailPage = ({ neighbourhoodId, onNavigate, currentUser, onW
           <h2 className="text-xl font-semibold text-gray-700 mb-2">Neighbourhood not found</h2>
           <p className="text-gray-500 mb-4">The neighbourhood you're looking for doesn't exist or has been removed.</p>
           <button
-            onClick={() => onNavigate('neighbourhoods')}
+            onClick={() => navigate('/neighbourhoods')}
             className="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition-colors"
           >
             Browse Neighbourhoods
@@ -363,12 +372,12 @@ const NeighbourhoodDetailPage = ({ neighbourhoodId, onNavigate, currentUser, onW
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           {/* Breadcrumb */}
           <div className="flex items-center text-sm text-gray-500 mb-4">
-            <button onClick={() => onNavigate('home')} className="hover:text-green-600 flex items-center">
+            <button onClick={() => navigate('/')} className="hover:text-green-600 flex items-center">
               <Home size={16} className="mr-2" />
               Home
             </button>
             <ChevronRight size={16} className="mx-2" />
-            <button onClick={() => onNavigate('neighbourhoods')} className="hover:text-green-600">
+            <button onClick={() => navigate('/neighbourhoods')} className="hover:text-green-600">
               Neighbourhoods
             </button>
             <ChevronRight size={16} className="mx-2" />

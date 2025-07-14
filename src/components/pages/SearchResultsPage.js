@@ -7,14 +7,14 @@ import ItemCard from '../ui/ItemCard';
 import JobCard from '../ui/JobCard';
 import { AuctionCard } from '../ui/AuctionSystem';
 import { Search, Home, ChevronRight, Grid, List } from 'lucide-react';
-import { useTeReo, TeReoText } from '../ui/TeReoToggle';
-import { useAuth } from '../../context/AuthContext';
+import { /* useTeReo, */ TeReoText } from '../ui/TeReoToggle';
+// import { useAuth } from '../../context/AuthContext';
 import { trackEvent } from '../../lib/analytics';
 import { LISTINGS_LIMIT } from '../../lib/utils';
 
 const SearchResultsPage = () => {
-    const { getText } = useTeReo();
-    const { currentUser } = useAuth();
+    // const { getText } = useTeReo();
+    // const { currentUser } = useAuth();
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();
     
@@ -161,7 +161,7 @@ const SearchResultsPage = () => {
     // Load search results when parameters change
     useEffect(() => {
         searchData();
-    }, [searchQuery, categoryFilter, locationFilter, searchType, minPrice, maxPrice, condition]);
+    }, [searchQuery, categoryFilter, locationFilter, searchType, minPrice, maxPrice, condition, searchData]);
 
     // Filtered and sorted results
     const filteredResults = useMemo(() => {
@@ -250,17 +250,6 @@ const SearchResultsPage = () => {
         );
     };
 
-    const handleApplyFilters = (newFilters) => {
-        const params = new URLSearchParams();
-        if (searchQuery) params.set('q', searchQuery);
-        if (newFilters.category) params.set('category', newFilters.category);
-        if (newFilters.location) params.set('location', newFilters.location);
-        if (newFilters.minPrice) params.set('minPrice', newFilters.minPrice);
-        if (newFilters.maxPrice) params.set('maxPrice', newFilters.maxPrice);
-        if (newFilters.condition) params.set('condition', newFilters.condition);
-        
-        navigate(`/search?${params.toString()}`);
-    };
 
     const handleSearchTypeChange = (type) => {
         setSearchType(type);
@@ -521,7 +510,7 @@ const SearchResultsPage = () => {
                                         onSaveJob={() => handleSaveItem(item.id)}
                                         onApplyJob={() => navigate(`/job-application/${item.id}`)}
                                         onJobClick={() => handleItemClick(item)}
-                                        isWatched={watchedItems.includes(item.id)}
+                                        isWatched={watchedItems?.includes(item.id) || false}
                                         compact={viewMode === 'list'}
                                     />
                                 );
@@ -531,8 +520,6 @@ const SearchResultsPage = () => {
                                         key={item.id}
                                         auction={item}
                                         onItemClick={() => handleItemClick(item)}
-                                        onWatchToggle={() => handleSaveItem(item.id)}
-                                        watchedItems={watchedItems}
                                         onNavigate={(path) => navigate(path)}
                                     />
                                 );
@@ -541,11 +528,10 @@ const SearchResultsPage = () => {
                                     <ItemCard
                                         key={item.id}
                                         item={item}
-                                        onWatchToggle={() => handleSaveItem(item.id)}
                                         onItemClick={() => handleItemClick(item)}
                                         onAddToCart={() => setCartItems(prev => [...prev, item])}
-                                        isWatched={watchedItems.includes(item.id)}
-                                        isInCart={cartItems.some(cartItem => cartItem.id === item.id)}
+                                        isWatched={watchedItems?.includes(item.id) || false}
+                                        isInCart={cartItems?.some(cartItem => cartItem.id === item.id) || false}
                                         viewMode={viewMode}
                                         onNavigate={(path) => navigate(path)}
                                     />

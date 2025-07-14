@@ -3,7 +3,7 @@ import { collection, query, where, limit, getDocs } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
 import ItemCard from './ItemCard';
 
-const RelatedItems = ({ currentItem, onItemClick, onWatchToggle, watchedItems, onNavigate }) => {
+const RelatedItems = ({ currentItem, onItemClick, onWatchToggle, watchedItems = [], onNavigate }) => {
     const [related, setRelated] = useState([]);
 
     useEffect(() => {
@@ -44,7 +44,7 @@ const RelatedItems = ({ currentItem, onItemClick, onWatchToggle, watchedItems, o
                     <ItemCard
                         key={item.id}
                         item={item}
-                        isWatched={watchedItems.includes(item.id)}
+                        isWatched={watchedItems?.includes(item.id) || false}
                         onWatchToggle={onWatchToggle}
                         onItemClick={onItemClick}
                         onNavigate={onNavigate}

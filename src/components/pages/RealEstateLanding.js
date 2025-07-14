@@ -1,13 +1,21 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { collection, query, orderBy, limit, getDocs } from 'firebase/firestore';
+import { useNavigate } from 'react-router-dom';
 import { db } from '../../lib/firebase';
 import { LISTINGS_LIMIT } from '../../lib/utils';
+import { useAppContext } from '../../context/AppContext';
 import ItemCard from '../ui/ItemCard';
 import { AuctionCard } from '../ui/AuctionSystem';
 import { Home, Building, MapPin, DollarSign, Star, TrendingUp, Crown, Sparkles, Shield, Users, Award, Zap } from 'lucide-react';
 import { getBilingualText, TE_REO_TRANSLATIONS } from '../../lib/nzLocalizationEnhanced';
 
-const RealEstateLanding = ({ onNavigate, onWatchToggle, watchedItems, onItemClick, onAddToCart, cartItems }) => {
+const RealEstateLanding = () => {
+  const { onWatchToggle, watchedItems = [], onAddToCart, cartItems = [] } = useAppContext() || {};
+  const navigate = useNavigate();
+  
+  const handleItemClick = (item) => {
+    navigate(`/item/${item.id}`);
+  };
   const [listings, setListings] = useState([]);
   const [featuredListings, setFeaturedListings] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -109,14 +117,14 @@ const RealEstateLanding = ({ onNavigate, onWatchToggle, watchedItems, onItemClic
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
             <button
-              onClick={() => onNavigate('search-results', { category: 'real-estate' })}
+              onClick={() => navigate('/search?category=real-estate')}
               className="bg-white text-green-600 px-8 py-3 rounded-lg font-semibold hover:bg-green-50 transition-all transform hover:scale-105 shadow-lg"
             >
               <Home className="inline mr-2" size={20} />
               {getBilingualText('Browse Properties', 'browse_properties')}
             </button>
             <button
-              onClick={() => onNavigate('create-listing', { category: 'real-estate' })}
+              onClick={() => navigate('/create-listing?category=real-estate')}
               className="bg-transparent border-2 border-white text-white px-8 py-3 rounded-lg font-semibold hover:bg-white hover:text-green-600 transition-all"
             >
               {getBilingualText('List Your Property', 'list_property')}
@@ -128,7 +136,7 @@ const RealEstateLanding = ({ onNavigate, onWatchToggle, watchedItems, onItemClic
             {propertyCategories.map((category, index) => (
               <button
                 key={index}
-                onClick={() => onNavigate(category.route, { subcategory: category.name.toLowerCase() })}
+                onClick={() => navigate(`/search?category=real-estate&subcategory=${category.name.toLowerCase()}`)}
                 className="flex flex-col items-center justify-center p-4 bg-white/10 rounded-lg hover:bg-white/20 transition-colors backdrop-blur-sm"
               >
                 <div className={`${category.color} mb-2`}>
@@ -159,21 +167,16 @@ const RealEstateLanding = ({ onNavigate, onWatchToggle, watchedItems, onItemClic
                   <AuctionCard
                     key={item.id}
                     auction={item}
-                    onItemClick={onItemClick}
-                    onWatchToggle={onWatchToggle}
-                    watchedItems={watchedItems}
-                    onNavigate={onNavigate}
+                    onItemClick={handleItemClick}
                   />
                 ) : (
                   <ItemCard
                     key={item.id}
                     item={item}
-                    isWatched={watchedItems.includes(item.id)}
-                    onWatchToggle={onWatchToggle}
-                    onItemClick={onItemClick}
+                    isWatched={watchedItems?.includes(item.id) || false}
+                    onItemClick={handleItemClick}
                     onAddToCart={onAddToCart}
-                    isInCart={cartItems.some(cartItem => cartItem.id === item.id)}
-                    onNavigate={onNavigate}
+                    isInCart={cartItems?.some(cartItem => cartItem.id === item.id) || false}
                   />
                 )
               ))}
@@ -213,7 +216,7 @@ const RealEstateLanding = ({ onNavigate, onWatchToggle, watchedItems, onItemClic
               <p className="text-gray-500 mb-6">Be the first to list a property on TuiTrade!</p>
               <p className="text-sm text-gray-400 italic">Tīmata mai - Start here</p>
               <button
-                onClick={() => onNavigate('create-listing', { category: 'real-estate' })}
+                onClick={() => navigate('/create-listing?category=real-estate')}
                 className="bg-green-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-green-700 transition-colors"
               >
                 List First Property
@@ -228,21 +231,16 @@ const RealEstateLanding = ({ onNavigate, onWatchToggle, watchedItems, onItemClic
                   <AuctionCard
                     key={item.id}
                     auction={item}
-                    onItemClick={onItemClick}
-                    onWatchToggle={onWatchToggle}
-                    watchedItems={watchedItems}
-                    onNavigate={onNavigate}
+                    onItemClick={handleItemClick}
                   />
                 ) : (
                   <ItemCard
                     key={item.id}
                     item={item}
-                    isWatched={watchedItems.includes(item.id)}
-                    onWatchToggle={onWatchToggle}
-                    onItemClick={onItemClick}
+                    isWatched={watchedItems?.includes(item.id) || false}
+                    onItemClick={handleItemClick}
                     onAddToCart={onAddToCart}
-                    isInCart={cartItems.some(cartItem => cartItem.id === item.id)}
-                    onNavigate={onNavigate}
+                    isInCart={cartItems?.some(cartItem => cartItem.id === item.id) || false}
                   />
                 )
               ))}

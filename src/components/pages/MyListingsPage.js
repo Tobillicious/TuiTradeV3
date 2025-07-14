@@ -167,11 +167,11 @@ const MyListingsPage = ({ onNavigate, onItemClick, onWatchToggle, watchedItems, 
                             ) : (
                                 <ItemCard
                                     item={item}
-                                    isWatched={watchedItems.includes(item.id)}
+                                    isWatched={watchedItems?.includes(item.id) || false}
                                     onWatchToggle={onWatchToggle}
                                     onItemClick={onItemClick}
                                     onAddToCart={onAddToCart}
-                                    isInCart={cartItems.some(cartItem => cartItem.id === item.id)}
+                                    isInCart={cartItems?.some(cartItem => cartItem.id === item.id) || false}
                                     onNavigate={onNavigate}
                                 />
                             )}
