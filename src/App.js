@@ -295,6 +295,17 @@ function AppContent() {
                                         </svg>
                                     </button>
 
+                                    {/* AI Jobs Search */}
+                                    <button
+                                        onClick={() => handleNavClick('/advanced-job-search')}
+                                        className={`hidden md:flex items-center space-x-2 px-3 py-2 rounded-lg transition-colors ${isDarkMode ? 'text-gray-300 hover:text-green-400 hover:bg-gray-700' : 'text-gray-700 hover:text-green-600 hover:bg-gray-100'}`}
+                                    >
+                                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2-2v2m8 0V6a2 2 0 012 2v6a2 2 0 01-2 2H8a2 2 0 01-2-2V8a2 2 0 012-2h8zM12 10h.01" />
+                                        </svg>
+                                        <span className="text-sm font-medium">🤖 AI Jobs</span>
+                                    </button>
+
                                     {/* Watchlist */}
                                     <button
                                         onClick={() => currentUser ? handleNavClick('/watchlist') : setIsAuthModalOpen(true)}
@@ -341,15 +352,28 @@ function AppContent() {
                                             </button>
 
                                             {isProfileMenuOpen && (
-                                                <div className={`absolute right-0 mt-2 w-48 rounded-xl shadow-xl py-2 z-50 ring-1 ring-opacity-5 animate-fade-in-up ${isDarkMode ? 'bg-gray-800 ring-gray-700' : 'bg-white ring-black'}`}>
+                                                <div className={`absolute right-0 mt-2 w-64 rounded-xl shadow-xl py-2 z-50 ring-1 ring-opacity-5 animate-fade-in-up ${isDarkMode ? 'bg-gray-800 ring-gray-700' : 'bg-white ring-black'}`}>
+                                                    {/* Personal Section */}
+                                                    <div className="px-4 py-2">
+                                                        <p className={`text-xs font-medium ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>Personal</p>
+                                                    </div>
                                                     <button
                                                         onClick={() => {
-                                                            handleNavClick('/profile');
+                                                            handleNavClick('/profiles');
                                                             setIsProfileMenuOpen(false);
                                                         }}
                                                         className={`block w-full text-left px-4 py-2 text-sm transition-colors ${isDarkMode ? 'text-gray-300 hover:bg-gray-700 hover:text-green-400' : 'text-gray-700 hover:bg-gray-100 hover:text-green-600'}`}
                                                     >
-                                                        Profile
+                                                        👤 Profile Manager
+                                                    </button>
+                                                    <button
+                                                        onClick={() => {
+                                                            handleNavClick('/social-profile');
+                                                            setIsProfileMenuOpen(false);
+                                                        }}
+                                                        className={`block w-full text-left px-4 py-2 text-sm transition-colors ${isDarkMode ? 'text-gray-300 hover:bg-gray-700 hover:text-green-400' : 'text-gray-700 hover:bg-gray-100 hover:text-green-600'}`}
+                                                    >
+                                                        🏆 Social Profile & Achievements
                                                     </button>
                                                     <button
                                                         onClick={() => {
@@ -358,7 +382,7 @@ function AppContent() {
                                                         }}
                                                         className={`block w-full text-left px-4 py-2 text-sm transition-colors ${isDarkMode ? 'text-gray-300 hover:bg-gray-700 hover:text-green-400' : 'text-gray-700 hover:bg-gray-100 hover:text-green-600'}`}
                                                     >
-                                                        My Listings
+                                                        📦 My Listings
                                                     </button>
                                                     <button
                                                         onClick={() => {
@@ -367,14 +391,49 @@ function AppContent() {
                                                         }}
                                                         className={`block w-full text-left px-4 py-2 text-sm transition-colors ${isDarkMode ? 'text-gray-300 hover:bg-gray-700 hover:text-green-400' : 'text-gray-700 hover:bg-gray-100 hover:text-green-600'}`}
                                                     >
-                                                        Orders
+                                                        🛒 Orders
                                                     </button>
-                                                    <hr className={`my-1 ${isDarkMode ? 'border-gray-700' : 'border-gray-200'}`} />
+
+                                                    {/* Professional Section */}
+                                                    <hr className={`my-2 ${isDarkMode ? 'border-gray-700' : 'border-gray-200'}`} />
+                                                    <div className="px-4 py-2">
+                                                        <p className={`text-xs font-medium ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>Professional</p>
+                                                    </div>
+                                                    <button
+                                                        onClick={() => {
+                                                            handleNavClick('/job-seeker-profile');
+                                                            setIsProfileMenuOpen(false);
+                                                        }}
+                                                        className={`block w-full text-left px-4 py-2 text-sm transition-colors ${isDarkMode ? 'text-gray-300 hover:bg-gray-700 hover:text-green-400' : 'text-gray-700 hover:bg-gray-100 hover:text-green-600'}`}
+                                                    >
+                                                        💼 Job Seeker Profile
+                                                    </button>
+                                                    <button
+                                                        onClick={() => {
+                                                            handleNavClick('/employer-dashboard');
+                                                            setIsProfileMenuOpen(false);
+                                                        }}
+                                                        className={`block w-full text-left px-4 py-2 text-sm transition-colors ${isDarkMode ? 'text-gray-300 hover:bg-gray-700 hover:text-green-400' : 'text-gray-700 hover:bg-gray-100 hover:text-green-600'}`}
+                                                    >
+                                                        🏢 Employer Dashboard
+                                                    </button>
+                                                    <button
+                                                        onClick={() => {
+                                                            handleNavClick('/analytics-dashboard');
+                                                            setIsProfileMenuOpen(false);
+                                                        }}
+                                                        className={`block w-full text-left px-4 py-2 text-sm transition-colors ${isDarkMode ? 'text-gray-300 hover:bg-gray-700 hover:text-green-400' : 'text-gray-700 hover:bg-gray-100 hover:text-green-600'}`}
+                                                    >
+                                                        📊 Analytics Dashboard
+                                                    </button>
+
+                                                    {/* Actions */}
+                                                    <hr className={`my-2 ${isDarkMode ? 'border-gray-700' : 'border-gray-200'}`} />
                                                     <button
                                                         onClick={handleLogout}
                                                         className={`block w-full text-left px-4 py-2 text-sm transition-colors ${isDarkMode ? 'text-red-400 hover:bg-gray-700' : 'text-red-600 hover:bg-red-50'}`}
                                                     >
-                                                        Sign Out
+                                                        🚪 Sign Out
                                                     </button>
                                                 </div>
                                             )}

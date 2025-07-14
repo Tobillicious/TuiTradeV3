@@ -32,7 +32,7 @@ const UsedGoodsLanding = lazy(() => import('./components/pages/UsedGoodsLanding'
 const NewGoodsLanding = lazy(() => import('./components/pages/NewGoodsLanding'));
 const CommunityLanding = lazy(() => import('./components/pages/CommunityLanding'));
 
-// Job Pages
+// Job Pages  
 const JobApplicationPage = lazy(() => import('./components/pages/JobApplicationPage'));
 const EmployerDashboard = lazy(() => import('./components/pages/EmployerDashboard'));
 const CreateJobPage = lazy(() => import('./components/pages/CreateJobPage'));
@@ -42,6 +42,9 @@ const ApplicationsManagementPage = lazy(() => import('./components/pages/Applica
 const ApplicationFormBuilder = lazy(() => import('./components/pages/ApplicationFormBuilder'));
 const AdvancedJobSearch = lazy(() => import('./components/pages/AdvancedJobSearch'));
 const AnalyticsDashboard = lazy(() => import('./components/pages/AnalyticsDashboard'));
+
+// Enhanced Profile & Social Pages
+const UserProfile = lazy(() => import('./components/pages/UserProfile'));
 
 // Support Pages
 const HelpCenterPage = lazy(() => import('./components/pages/HelpCenterPage'));
@@ -105,6 +108,10 @@ const router = createBrowserRouter([
             { path: 'application-form-builder/:jobId', element: <ApplicationFormBuilder /> },
             { path: 'advanced-job-search', element: <AdvancedJobSearch /> },
             { path: 'analytics-dashboard', element: <AnalyticsDashboard /> },
+
+            // Enhanced Social & Community Routes
+            { path: 'user-profile/:userId', element: <UserProfile /> },
+            { path: 'social-profile', element: <UserProfile /> },
 
             // Support Pages
             { path: 'help', element: <HelpCenterPage /> },
