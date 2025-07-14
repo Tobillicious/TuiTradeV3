@@ -295,6 +295,17 @@ function AppContent() {
                                         </svg>
                                     </button>
 
+                                    {/* Profile Manager - Featured Access */}
+                                    <button
+                                        onClick={() => handleNavClick('/profiles')}
+                                        className={`hidden lg:flex items-center space-x-2 px-3 py-2 rounded-lg border-2 transition-colors ${isDarkMode ? 'border-green-500 text-green-400 hover:bg-green-500 hover:text-white' : 'border-green-500 text-green-600 hover:bg-green-500 hover:text-white'}`}
+                                    >
+                                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                        </svg>
+                                        <span className="text-sm font-bold">👤 Profiles</span>
+                                    </button>
+
                                     {/* AI Jobs Search */}
                                     <button
                                         onClick={() => handleNavClick('/advanced-job-search')}
@@ -304,6 +315,17 @@ function AppContent() {
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2-2v2m8 0V6a2 2 0 012 2v6a2 2 0 01-2 2H8a2 2 0 01-2-2V8a2 2 0 012-2h8zM12 10h.01" />
                                         </svg>
                                         <span className="text-sm font-medium">🤖 AI Jobs</span>
+                                    </button>
+
+                                    {/* Analytics Dashboard */}
+                                    <button
+                                        onClick={() => handleNavClick('/analytics-dashboard')}
+                                        className={`hidden lg:flex items-center space-x-2 px-3 py-2 rounded-lg transition-colors ${isDarkMode ? 'text-gray-300 hover:text-green-400 hover:bg-gray-700' : 'text-gray-700 hover:text-green-600 hover:bg-gray-100'}`}
+                                    >
+                                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                                        </svg>
+                                        <span className="text-sm font-medium">📊 Analytics</span>
                                     </button>
 
                                     {/* Watchlist */}

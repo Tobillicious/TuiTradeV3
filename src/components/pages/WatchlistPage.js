@@ -6,7 +6,7 @@ import { useAuth } from '../../context/AuthContext';
 import { FullPageLoader } from '../ui/Loaders';
 // Removed unused import
 import { formatPrice } from '../../lib/utils';
-import { Eye, Home, ChevronRight, Bell, BellOff, AlertTriangle, Clock, TrendingUp, TrendingDown, Download, X, MapPin, User } from 'lucide-react';
+import { Eye, Heart, Home, ChevronRight, Bell, BellOff, AlertTriangle, Clock, TrendingUp, TrendingDown, Download, X, MapPin, User } from 'lucide-react';
 
 const WatchlistPage = ({ onNavigate, onItemClick, onWatchToggle, watchedItems, onAddToCart, cartItems }) => {
     const [watchedListings, setWatchedListings] = useState([]);

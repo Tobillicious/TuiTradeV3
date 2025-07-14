@@ -38,6 +38,12 @@ const ProfileManager = ({ onNavigate }) => {
   const [loading, setLoading] = useState(true);
   const [accountType, setAccountType] = useState('individual');
   const [showCreateProfile, setShowCreateProfile] = useState(false);
+  const [profileStats, setProfileStats] = useState({
+    totalConnections: 0,
+    totalTransactions: 0,
+    totalJobs: 0,
+    impactScore: 0
+  });
 
   // Profile icons mapping
   const profileIcons = {
@@ -240,8 +246,87 @@ const ProfileManager = ({ onNavigate }) => {
             </div>
           </div>
 
-          {/* Main Profile Content */}
-          <div className="lg:col-span-2">
+          {/* Integrated Impact Dashboard */}
+          <div className="lg:col-span-2 space-y-6">
+            {/* Cross-Platform Impact Summary */}
+            <div className="bg-gradient-to-br from-green-50 to-blue-50 rounded-xl border-2 border-green-200 p-6">
+              <div className="flex items-center justify-between mb-6">
+                <div>
+                  <h3 className="text-xl font-bold text-gray-900 flex items-center">
+                    <Star className="w-6 h-6 text-yellow-500 mr-2" />
+                    Your Community Impact
+                  </h3>
+                  <p className="text-gray-600 mt-1">Making a difference across all platforms • Mahi atawhai</p>
+                </div>
+                <div className="bg-white rounded-full p-3 shadow-md">
+                  <Heart className="w-6 h-6 text-red-500" />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                <div className="bg-white rounded-lg p-4 text-center shadow-sm">
+                  <div className="text-2xl font-bold text-green-600">{profileStats.totalConnections}</div>
+                  <div className="text-sm text-gray-600">Connections</div>
+                </div>
+                <div className="bg-white rounded-lg p-4 text-center shadow-sm">
+                  <div className="text-2xl font-bold text-blue-600">{profileStats.totalTransactions}</div>
+                  <div className="text-sm text-gray-600">Transactions</div>
+                </div>
+                <div className="bg-white rounded-lg p-4 text-center shadow-sm">
+                  <div className="text-2xl font-bold text-purple-600">{profileStats.totalJobs}</div>
+                  <div className="text-sm text-gray-600">Job Activities</div>
+                </div>
+                <div className="bg-white rounded-lg p-4 text-center shadow-sm">
+                  <div className="text-2xl font-bold text-orange-600">{profileStats.impactScore}</div>
+                  <div className="text-sm text-gray-600">Impact Score</div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <motion.button
+                  onClick={() => onNavigate('/analytics-dashboard')}
+                  whileHover={{ scale: 1.02 }}
+                  className="bg-white rounded-lg p-4 text-left shadow-sm hover:shadow-md transition-all border-l-4 border-green-500"
+                >
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h4 className="font-semibold text-gray-900">📊 Analytics Dashboard</h4>
+                      <p className="text-sm text-gray-600">View detailed impact metrics</p>
+                    </div>
+                    <ChevronRight className="w-5 h-5 text-gray-400" />
+                  </div>
+                </motion.button>
+
+                <motion.button
+                  onClick={() => onNavigate('/employer-dashboard')}
+                  whileHover={{ scale: 1.02 }}
+                  className="bg-white rounded-lg p-4 text-left shadow-sm hover:shadow-md transition-all border-l-4 border-blue-500"
+                >
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h4 className="font-semibold text-gray-900">🏢 Employer Tools</h4>
+                      <p className="text-sm text-gray-600">Create opportunities for others</p>
+                    </div>
+                    <ChevronRight className="w-5 h-5 text-gray-400" />
+                  </div>
+                </motion.button>
+              </div>
+
+              <div className="mt-6 p-4 bg-gradient-to-r from-green-500 to-blue-500 rounded-lg text-white">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h4 className="font-bold">Lives Changed: {Math.floor(profileStats.impactScore / 10)}</h4>
+                    <p className="text-sm opacity-90">Through marketplace transactions, job placements, and community connections</p>
+                  </div>
+                  <div className="text-right">
+                    <div className="text-2xl">🌟</div>
+                    <div className="text-xs opacity-90">Every interaction matters</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Main Profile Content */}
             {currentProfile ? (
               <ProfileEditor 
                 profile={currentProfile}

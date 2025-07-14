@@ -13,7 +13,7 @@ import { useTeReo, TeReoText } from '../ui/TeReoToggle';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { 
   doc, updateDoc, getDoc, setDoc, collection, query, 
-  where, orderBy, getDocs, serverTimestamp 
+  where, orderBy, getDocs, serverTimestamp, limit, addDoc
 } from 'firebase/firestore';
 import { db, storage } from '../../lib/firebase';
 

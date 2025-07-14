@@ -5,6 +5,7 @@ import { db } from '../../lib/firebase';
 import { LISTINGS_LIMIT } from '../../lib/utils';
 import { useAppContext } from '../../context/AppContext';
 import JobCard from '../ui/JobCard';
+import MagicBento from '../ui/MagicBento';
 import { Briefcase, MapPin, DollarSign, Clock, Star, TrendingUp, Crown, Sparkles, Building, Users, Award, Zap } from 'lucide-react';
 import { getBilingualText, TE_REO_TRANSLATIONS } from '../../lib/nzLocalizationEnhanced';
 
@@ -134,30 +135,47 @@ const JobsLanding = () => {
         </div>
       </div>
 
-      {/* Featured Jobs Section */}
+      {/* Featured Jobs Section - Enhanced with MagicBento */}
       {featuredJobs.length > 0 && (
         <div className="bg-gradient-to-br from-purple-50 to-blue-50 py-16">
           <div className="max-w-7xl mx-auto px-4">
             <div className="text-center mb-12">
               <div className="flex items-center justify-center mb-4">
                 <Sparkles className="w-8 h-8 text-purple-500 mr-3" />
-                <h2 className="text-3xl font-bold text-gray-900">Featured Opportunities</h2>
+                <h2 className="text-3xl font-bold text-gray-900">Life-Changing Opportunities</h2>
                 <Crown className="w-8 h-8 text-yellow-500 ml-3" />
               </div>
-              <p className="text-gray-600">Top jobs with great benefits and growth potential</p>
+              <p className="text-gray-600">Jobs that make a difference • Mahi ka pai</p>
+              <div className="mt-4 flex items-center justify-center space-x-4">
+                <div className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-medium">
+                  ✨ Enhanced Discovery
+                </div>
+                <div className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">
+                  💼 Career Growth
+                </div>
+                <div className="bg-purple-100 text-purple-800 px-3 py-1 rounded-full text-sm font-medium">
+                  🌟 Social Impact
+                </div>
+              </div>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {featuredJobs.map(job => (
-                <JobCard
-                  key={job.id}
-                  job={job}
-                  onSaveJob={() => onWatchToggle(job.id)}
-                  onApplyJob={(job) => navigate(`/job-application/${job.id}`)}
-                  onJobClick={() => handleItemClick(job)}
-                  isWatched={watchedItems?.includes(job.id) || false}
-                />
-              ))}
-            </div>
+            
+            <MagicBento
+              jobs={featuredJobs}
+              textAutoHide={true}
+              enableStars={true}
+              enableSpotlight={true}
+              enableBorderGlow={true}
+              enableTilt={true}
+              enableMagnetism={true}
+              clickEffect={true}
+              spotlightRadius={300}
+              particleCount={15}
+              glowColor="34, 197, 94"
+              onJobClick={(job) => navigate(`/job-application/${job.id}`)}
+              onWatchToggle={onWatchToggle}
+              watchedItems={watchedItems}
+              className="mb-8"
+            />
           </div>
         </div>
       )}

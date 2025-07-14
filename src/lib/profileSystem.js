@@ -15,7 +15,8 @@ import {
   limit,
   arrayUnion,
   arrayRemove,
-  serverTimestamp 
+  serverTimestamp,
+  setDoc
 } from 'firebase/firestore';
 import { db } from './firebase';
 
