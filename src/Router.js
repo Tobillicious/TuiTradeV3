@@ -7,6 +7,8 @@ import ErrorBoundary from './components/ui/ErrorBoundary';
 // Lazy load page components for better performance
 const HomePage = lazy(() => import('./components/pages/HomePage'));
 const ProfilePage = lazy(() => import('./components/pages/ProfilePage'));
+const ProfileManager = lazy(() => import('./components/pages/ProfileManager'));
+const EnhancedProfilePage = lazy(() => import('./components/pages/EnhancedProfilePage'));
 const MyListingsPage = lazy(() => import('./components/pages/MyListingsPage'));
 const WatchlistPage = lazy(() => import('./components/pages/WatchlistPage'));
 const CreateListingPage = lazy(() => import('./components/pages/CreateListingPage'));
@@ -68,6 +70,8 @@ const router = createBrowserRouter([
             // Main Pages
             { index: true, element: <HomePage /> },
             { path: 'profile', element: <ProfilePage /> },
+            { path: 'profiles', element: <ProfileManager /> },
+            { path: 'enhanced-profile', element: <EnhancedProfilePage /> },
             { path: 'my-listings', element: <MyListingsPage /> },
             { path: 'watchlist', element: <WatchlistPage /> },
             { path: 'create-listing', element: <CreateListingPage /> },
