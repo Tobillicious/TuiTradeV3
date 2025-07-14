@@ -23,7 +23,8 @@ const WatchlistPage = ({ onNavigate, onItemClick, onWatchToggle, watchedItems, o
     }, [currentUser, watchedItems]);
 
     const fetchWatchlist = async () => {
-        if (!currentUser || watchedItems.length === 0) {
+        // Defensive programming: handle undefined/null watchedItems
+        if (!currentUser || !watchedItems || !Array.isArray(watchedItems) || watchedItems.length === 0) {
             setWatchedListings([]);
             setLoading(false);
             return;
@@ -31,37 +32,64 @@ const WatchlistPage = ({ onNavigate, onItemClick, onWatchToggle, watchedItems, o
 
         setLoading(true);
         try {
-            // Fetch watched listings
-            const listingsQuery = query(
-                collection(db, 'listings'),
-                where('__name__', 'in', watchedItems)
-            );
-            const listingsSnapshot = await getDocs(listingsQuery);
-            const listings = listingsSnapshot.docs.map(doc => ({
-                id: doc.id,
-                ...doc.data(),
-                createdAt: doc.data().createdAt?.toDate(),
-                listingType: doc.data().listingType || 'fixed-price'
-            }));
+            // Firestore 'in' queries have a limit of 10 items, so we need to batch them
+            const batchSize = 10;
+            const allListings = [];
+            const allAuctions = [];
 
-            // Fetch watched auctions
-            const auctionsQuery = query(
-                collection(db, 'auctions'),
-                where('__name__', 'in', watchedItems)
-            );
-            const auctionsSnapshot = await getDocs(auctionsQuery);
-            const auctions = auctionsSnapshot.docs.map(doc => ({
-                id: doc.id,
-                ...doc.data(),
-                createdAt: doc.data().createdAt?.toDate(),
-                endTime: doc.data().endTime?.toDate(),
-                listingType: 'auction'
-            }));
+            // Process watchedItems in batches of 10
+            for (let i = 0; i < watchedItems.length; i += batchSize) {
+                const batch = watchedItems.slice(i, i + batchSize);
+                
+                // Fetch watched listings in this batch
+                try {
+                    const listingsQuery = query(
+                        collection(db, 'listings'),
+                        where('__name__', 'in', batch)
+                    );
+                    const listingsSnapshot = await getDocs(listingsQuery);
+                    const listings = listingsSnapshot.docs.map(doc => ({
+                        id: doc.id,
+                        ...doc.data(),
+                        createdAt: doc.data().createdAt?.toDate(),
+                        listingType: doc.data().listingType || 'fixed-price'
+                    }));
+                    allListings.push(...listings);
+                } catch (listingError) {
+                    console.warn('Error fetching listings batch:', listingError);
+                }
 
-            const allWatched = [...listings, ...auctions];
+                // Fetch watched auctions in this batch
+                try {
+                    const auctionsQuery = query(
+                        collection(db, 'auctions'),
+                        where('__name__', 'in', batch)
+                    );
+                    const auctionsSnapshot = await getDocs(auctionsQuery);
+                    const auctions = auctionsSnapshot.docs.map(doc => ({
+                        id: doc.id,
+                        ...doc.data(),
+                        createdAt: doc.data().createdAt?.toDate(),
+                        endTime: doc.data().endTime?.toDate(),
+                        listingType: 'auction'
+                    }));
+                    allAuctions.push(...auctions);
+                } catch (auctionError) {
+                    console.warn('Error fetching auctions batch:', auctionError);
+                }
+            }
+
+            const allWatched = [...allListings, ...allAuctions];
             setWatchedListings(allWatched);
+            
+            // Show success message if we have items
+            if (allWatched.length > 0) {
+                console.log(`✅ Successfully loaded ${allWatched.length} watched items`);
+            }
         } catch (error) {
             console.error('Error fetching watchlist:', error);
+            // Set empty array on error to prevent crashes
+            setWatchedListings([]);
         } finally {
             setLoading(false);
         }
@@ -139,7 +167,35 @@ const WatchlistPage = ({ onNavigate, onItemClick, onWatchToggle, watchedItems, o
         setNotifications(newNotifications);
     };
 
-    if (loading) return <FullPageLoader message="Loading your watchlist..." />;
+    if (loading) {
+        return (
+            <div className="min-h-screen bg-gray-50 pt-20">
+                <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                    <div className="mb-8">
+                        <div className="h-8 bg-gray-200 rounded-lg w-48 mb-2 animate-pulse"></div>
+                        <div className="h-4 bg-gray-200 rounded w-32 animate-pulse"></div>
+                    </div>
+                    
+                    {/* Skeleton grid */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                        {[...Array(8)].map((_, index) => (
+                            <div key={index} className="bg-white rounded-xl overflow-hidden shadow-sm border border-gray-100">
+                                <div className="aspect-[4/5] bg-gray-200 animate-pulse"></div>
+                                <div className="p-4 space-y-3">
+                                    <div className="h-4 bg-gray-200 rounded animate-pulse"></div>
+                                    <div className="h-6 bg-gray-200 rounded w-24 animate-pulse"></div>
+                                    <div className="flex justify-between">
+                                        <div className="h-4 bg-gray-200 rounded w-16 animate-pulse"></div>
+                                        <div className="h-4 bg-gray-200 rounded w-12 animate-pulse"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="bg-gray-50 flex-grow">
@@ -298,16 +354,69 @@ const WatchlistPage = ({ onNavigate, onItemClick, onWatchToggle, watchedItems, o
                         ))}
                     </div>
                 ) : (
-                    <div className="text-center py-12">
-                        <Eye className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                        <p className="text-gray-500 text-lg mb-2">Your watchlist is empty</p>
-                        <p className="text-gray-400 mb-6">Click the heart icon on any item to add it here</p>
-                        <button
-                            onClick={() => onNavigate('home')}
-                            className="bg-green-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-green-700 transition-colors"
-                        >
-                            Browse Items
-                        </button>
+                    <div className="text-center py-16 px-8">
+                        {/* Creative animated empty state */}
+                        <div className="relative mb-8">
+                            <div className="w-32 h-32 mx-auto relative">
+                                <div className="absolute inset-0 bg-gradient-to-br from-green-100 to-green-200 rounded-full animate-pulse"></div>
+                                <div className="absolute inset-4 bg-white rounded-full flex items-center justify-center">
+                                    <Heart className="w-12 h-12 text-green-600" />
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <h2 className="text-2xl font-bold text-gray-900 mb-3">
+                            Your Watchlist is Waiting!
+                        </h2>
+                        <p className="text-gray-600 text-lg mb-2">
+                            Start building your collection of favorite items
+                        </p>
+                        <p className="text-gray-500 mb-8 max-w-md mx-auto">
+                            💡 Pro tip: Click the <Heart className="w-4 h-4 inline mx-1 text-red-500" /> on any item to save it here. 
+                            You'll get notified about price changes and auction updates!
+                        </p>
+                        
+                        {/* Action buttons */}
+                        <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+                            <button
+                                onClick={() => onNavigate('/')}
+                                className="bg-green-600 text-white px-8 py-3 rounded-xl font-semibold hover:bg-green-700 transition-all transform hover:scale-105 shadow-lg"
+                            >
+                                🛍️ Browse Marketplace
+                            </button>
+                            <button
+                                onClick={() => onNavigate('/jobs')}
+                                className="bg-blue-600 text-white px-8 py-3 rounded-xl font-semibold hover:bg-blue-700 transition-all transform hover:scale-105 shadow-lg"
+                            >
+                                💼 Explore Jobs
+                            </button>
+                        </div>
+                        
+                        {/* Popular categories */}
+                        <div className="mt-12 max-w-2xl mx-auto">
+                            <p className="text-gray-600 mb-6">Or start with these popular categories:</p>
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                {[
+                                    { name: 'Motors', icon: '🚗', path: '/motors' },
+                                    { name: 'Property', icon: '🏠', path: '/real-estate' },
+                                    { name: 'Electronics', icon: '📱', path: '/category/electronics' },
+                                    { name: 'Fashion', icon: '👕', path: '/category/fashion' }
+                                ].map((category) => (
+                                    <button
+                                        key={category.name}
+                                        onClick={() => onNavigate(category.path)}
+                                        className="p-4 rounded-xl bg-white border-2 border-gray-100 hover:border-green-300 hover:shadow-md transition-all text-center group"
+                                    >
+                                        <div className="text-2xl mb-2 group-hover:scale-110 transition-transform">
+                                            {category.icon}
+                                        </div>
+                                        <div className="text-sm font-medium text-gray-700 group-hover:text-green-600">
+                                            {category.name}
+                                        </div>
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
                     </div>
                 )}
             </div>
