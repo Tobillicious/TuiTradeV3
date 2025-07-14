@@ -9,6 +9,7 @@
 import { useEffect, useRef, useMemo, useCallback, useState } from 'react';
 import { trackEvent } from '../../lib/analytics';
 
+// AGENT_TASK: Refactor PerformanceOptimizer class to support plugin-based metrics.
 // Performance monitoring and optimization utilities
 class PerformanceOptimizer {
   constructor() {

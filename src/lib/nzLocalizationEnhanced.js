@@ -73,7 +73,7 @@ export const TE_REO_TRANSLATIONS = {
     'growth': 'tipu', // growth
     'opportunity': 'rēhia', // opportunity
     'impact': 'pānga', // impact/effect
-    'difference': 'rereketanga' // difference
+    'difference': 'rereketanga', // difference
     'verified': 'whakamana', // verified
     'rating': 'whakatauranga', // rating
     'review': 'arotake', // review

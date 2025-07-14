@@ -18,6 +18,8 @@ import { AppProvider } from './context/AppContext';
 import { NotificationProvider, useNotification } from './context/NotificationContext';
 import { ThemeProvider, useTheme } from './context/ThemeContext';
 import { TeReoProvider } from './components/ui/TeReoToggle';
+import { AccessibilityProvider } from './components/ui/AccessibilityProvider';
+import SocialProofIndicators from './components/ui/SocialProofIndicators';
 import { trackEvent, setUserId, trackPageView } from './lib/analytics';
 import { PreloadCriticalResources } from './components/ui/PerformanceOptimizer';
 
@@ -604,6 +606,13 @@ function AppContent() {
                         </div>
                     </footer>
                 </div>
+                
+                {/* Floating Social Proof Indicators */}
+                <SocialProofIndicators 
+                    position="floating"
+                    showRecentActivity={true}
+                    maxRecentItems={5}
+                />
             </AppProvider>
         </AuthContext.Provider>
     );
@@ -614,9 +623,11 @@ export default function App() {
         <ErrorBoundary>
             <ThemeProvider>
                 <TeReoProvider>
-                    <NotificationProvider>
-                        <AppContent />
-                    </NotificationProvider>
+                    <AccessibilityProvider>
+                        <NotificationProvider>
+                            <AppContent />
+                        </NotificationProvider>
+                    </AccessibilityProvider>
                 </TeReoProvider>
             </ThemeProvider>
         </ErrorBoundary>

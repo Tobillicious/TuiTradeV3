@@ -223,3 +223,356 @@ html {
 .will-change-opacity {
   will-change: opacity;
 }
+
+/* =============================================
+   ACCESSIBILITY STYLES
+   -----------------------------------------
+   Universal design styles for inclusive access
+   ============================================= */
+
+/* Screen Reader Only Content */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* High Contrast Mode */
+.high-contrast {
+  --text-primary: #000000;
+  --text-secondary: #333333;
+  --bg-primary: #ffffff;
+  --bg-secondary: #f5f5f5;
+  --border-color: #000000;
+  --link-color: #0000ee;
+  --link-visited: #551a8b;
+  --button-bg: #000000;
+  --button-text: #ffffff;
+  --error-color: #ff0000;
+  --success-color: #008000;
+}
+
+.high-contrast * {
+  color: var(--text-primary) !important;
+  background-color: var(--bg-primary) !important;
+  border-color: var(--border-color) !important;
+}
+
+.high-contrast button,
+.high-contrast .btn {
+  background-color: var(--button-bg) !important;
+  color: var(--button-text) !important;
+  border: 2px solid var(--border-color) !important;
+}
+
+.high-contrast a {
+  color: var(--link-color) !important;
+  text-decoration: underline !important;
+}
+
+.high-contrast a:visited {
+  color: var(--link-visited) !important;
+}
+
+/* Large Click Targets */
+.large-click-targets button,
+.large-click-targets .btn,
+.large-click-targets a,
+.large-click-targets input,
+.large-click-targets select,
+.large-click-targets textarea {
+  min-height: 44px;
+  min-width: 44px;
+  padding: 12px 16px;
+}
+
+.large-click-targets .icon-button {
+  width: 48px;
+  height: 48px;
+}
+
+/* Enhanced Focus Indicators */
+.enhanced-focus *:focus,
+.enhanced-focus *:focus-visible {
+  outline: 3px solid #10b981 !important;
+  outline-offset: 3px !important;
+  box-shadow: 0 0 0 6px rgba(16, 185, 129, 0.3) !important;
+  border-radius: 4px;
+}
+
+.enhanced-focus button:focus,
+.enhanced-focus .btn:focus {
+  transform: scale(1.05);
+  transition: transform 0.2s ease;
+}
+
+/* Reduced Motion */
+.reduced-motion,
+.reduced-motion *,
+.reduced-motion *::before,
+.reduced-motion *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+  scroll-behavior: auto !important;
+}
+
+.reduced-motion .motion-reduce-safe {
+  animation: none !important;
+  transition: none !important;
+}
+
+/* Color Blind Friendly */
+.color-blind-friendly {
+  --red-replacement: #d2691e;
+  --green-replacement: #4169e1;
+  --yellow-replacement: #ffd700;
+}
+
+.color-blind-friendly .text-red-500,
+.color-blind-friendly .text-red-600 {
+  color: var(--red-replacement) !important;
+}
+
+.color-blind-friendly .text-green-500,
+.color-blind-friendly .text-green-600 {
+  color: var(--green-replacement) !important;
+}
+
+.color-blind-friendly .bg-red-500,
+.color-blind-friendly .bg-red-600 {
+  background-color: var(--red-replacement) !important;
+}
+
+.color-blind-friendly .bg-green-500,
+.color-blind-friendly .bg-green-600 {
+  background-color: var(--green-replacement) !important;
+}
+
+/* Simplified UI */
+.simplified-ui {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+}
+
+.simplified-ui * {
+  border-radius: 4px !important;
+  box-shadow: none !important;
+  text-shadow: none !important;
+}
+
+.simplified-ui .complex-animation,
+.simplified-ui .gradient,
+.simplified-ui .shadow-lg {
+  animation: none !important;
+  background: #f5f5f5 !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1) !important;
+}
+
+.simplified-ui button,
+.simplified-ui .btn {
+  background: linear-gradient(to bottom, #ffffff, #e5e5e5) !important;
+  border: 1px solid #999999 !important;
+  color: #333333 !important;
+}
+
+.simplified-ui button:hover,
+.simplified-ui .btn:hover {
+  background: linear-gradient(to bottom, #f0f0f0, #d0d0d0) !important;
+}
+
+/* Text Scaling */
+:root {
+  --accessibility-text-scale: 1;
+}
+
+.accessibility-text-scaling {
+  font-size: calc(1rem * var(--accessibility-text-scale));
+}
+
+.accessibility-text-scaling h1 {
+  font-size: calc(2.25rem * var(--accessibility-text-scale));
+}
+
+.accessibility-text-scaling h2 {
+  font-size: calc(1.875rem * var(--accessibility-text-scale));
+}
+
+.accessibility-text-scaling h3 {
+  font-size: calc(1.5rem * var(--accessibility-text-scale));
+}
+
+.accessibility-text-scaling h4 {
+  font-size: calc(1.25rem * var(--accessibility-text-scale));
+}
+
+.accessibility-text-scaling h5 {
+  font-size: calc(1.125rem * var(--accessibility-text-scale));
+}
+
+.accessibility-text-scaling small {
+  font-size: calc(0.875rem * var(--accessibility-text-scale));
+}
+
+/* Keyboard Navigation */
+.keyboard-navigation {
+  --focus-ring-color: #10b981;
+  --focus-ring-offset: 2px;
+  --focus-ring-width: 2px;
+}
+
+.keyboard-navigation [tabindex]:focus,
+.keyboard-navigation button:focus,
+.keyboard-navigation a:focus,
+.keyboard-navigation input:focus,
+.keyboard-navigation select:focus,
+.keyboard-navigation textarea:focus {
+  outline: var(--focus-ring-width) solid var(--focus-ring-color);
+  outline-offset: var(--focus-ring-offset);
+  box-shadow: 0 0 0 calc(var(--focus-ring-width) + var(--focus-ring-offset)) rgba(16, 185, 129, 0.2);
+}
+
+.keyboard-navigation .skip-link {
+  position: absolute;
+  top: -40px;
+  left: 6px;
+  background: #000000;
+  color: #ffffff;
+  padding: 8px;
+  text-decoration: none;
+  z-index: 1000;
+  border-radius: 4px;
+}
+
+.keyboard-navigation .skip-link:focus {
+  top: 6px;
+}
+
+/* Voice Navigation Feedback */
+.voice-navigation-active {
+  position: relative;
+}
+
+.voice-navigation-active::after {
+  content: "🎤";
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background: rgba(16, 185, 129, 0.9);
+  color: white;
+  padding: 8px 12px;
+  border-radius: 20px;
+  font-size: 14px;
+  z-index: 1000;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+/* Range Slider Accessibility */
+.slider-green::-webkit-slider-thumb {
+  appearance: none;
+  height: 20px;
+  width: 20px;
+  border-radius: 50%;
+  background: #10b981;
+  cursor: pointer;
+  border: 2px solid #ffffff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.slider-green::-moz-range-thumb {
+  height: 20px;
+  width: 20px;
+  border-radius: 50%;
+  background: #10b981;
+  cursor: pointer;
+  border: 2px solid #ffffff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.slider-green:focus::-webkit-slider-thumb {
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.3);
+}
+
+.slider-green:focus::-moz-range-thumb {
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.3);
+}
+
+/* Print Styles for Accessibility */
+@media print {
+  .accessibility-provider * {
+    background: white !important;
+    color: black !important;
+    text-shadow: none !important;
+    box-shadow: none !important;
+  }
+  
+  .accessibility-provider a[href]:after {
+    content: " (" attr(href) ")";
+  }
+  
+  .accessibility-provider .sr-only {
+    position: static;
+    width: auto;
+    height: auto;
+    clip: auto;
+    white-space: normal;
+  }
+}
+
+/* High DPI Display Support */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  .accessibility-provider .icon-small {
+    transform: scale(0.5);
+    transform-origin: top left;
+  }
+  
+  .accessibility-provider .icon-large {
+    transform: scale(1.5);
+    transform-origin: top left;
+  }
+}
+
+/* Dark Mode Accessibility */
+@media (prefers-color-scheme: dark) {
+  .accessibility-provider:not(.high-contrast) {
+    --text-primary: #ffffff;
+    --text-secondary: #e5e5e5;
+    --bg-primary: #1a1a1a;
+    --bg-secondary: #2d2d2d;
+    --border-color: #444444;
+  }
+}
+
+/* Touch Device Enhancements */
+@media (pointer: coarse) {
+  .accessibility-provider button,
+  .accessibility-provider .btn,
+  .accessibility-provider a {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  .accessibility-provider .touch-target {
+    padding: 12px;
+    margin: 4px;
+  }
+}
+
+/* Animation Preferences */
+@media (prefers-reduced-motion: reduce) {
+  .accessibility-provider * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

@@ -13,9 +13,13 @@ import { AuctionCard } from '../ui/AuctionSystem';
 import Carousel from '../ui/Carousel';
 import Counter from '../ui/Counter';
 import SpotlightCard from '../ui/SpotlightCard';
+import TestimonialSystem from '../ui/TestimonialSystem';
+import SocialProofIndicators from '../ui/SocialProofIndicators';
+import LiveImpactTracker from '../ui/LiveImpactTracker';
 import { Tag, Shield, Star, MessageCircle, ChevronDown } from 'lucide-react';
 import { getBilingualText, TE_REO_TRANSLATIONS } from '../../lib/nzLocalizationEnhanced';
 
+// AGENT_TASK: Extract context destructuring and validation into a custom hook for reuse.
 const HomePage = () => {
     // Enhanced context destructuring with detailed logging
     const contextValue = useAppContext();
@@ -277,6 +281,25 @@ const HomePage = () => {
                 </div>
             </div>
 
+            {/* Live Impact Tracker */}
+            <div className="bg-gradient-to-br from-gray-50 to-white py-20">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <LiveImpactTracker />
+                </div>
+            </div>
+
+            {/* Social Proof Indicators */}
+            <div className="bg-white py-16">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <SocialProofIndicators 
+                        position="inline"
+                        showRecentActivity={true}
+                        showStats={true}
+                        showTrustSignals={true}
+                    />
+                </div>
+            </div>
+
             {/* Enhanced Categories Section with Carousel */}
             <div className="bg-gradient-to-br from-gray-50 to-white py-20">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -519,6 +542,19 @@ const HomePage = () => {
                             </SpotlightCard>
                         </motion.div>
                     </div>
+                </div>
+            </div>
+
+            {/* Testimonials & Success Stories */}
+            <div className="bg-gray-50 py-20">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <TestimonialSystem 
+                        displayMode="carousel"
+                        category="all"
+                        maxItems={6}
+                        autoPlay={true}
+                        showStats={true}
+                    />
                 </div>
             </div>
 

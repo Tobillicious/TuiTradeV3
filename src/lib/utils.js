@@ -10,6 +10,7 @@ import {
     ShoppingCart, Car, Briefcase, Home as HomeIcon, Wrench, Gift
 } from 'lucide-react';
 
+// AGENT_TASK: Add unit tests for CATEGORIES and related utility functions.
 export const CATEGORIES = {
     marketplace: {
         name: 'Marketplace',
