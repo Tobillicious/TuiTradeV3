@@ -1,3 +1,9 @@
+// =============================================
+// NotificationContext.js - Notification State Management
+// ------------------------------------------------------
+// Provides context and provider for notification state and helpers.
+// Used for showing, managing, and updating notifications globally.
+// =============================================
 // src/context/NotificationContext.js
 import { createContext, useContext, useState, useCallback } from 'react';
 

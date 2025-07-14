@@ -1,15 +1,19 @@
-// Advanced Shipping Calculator Component
-// Integrates with NZ Post API and provides real-time shipping estimates
+// =============================================
+// ShippingCalculator.js - NZ Shipping Cost Estimator
+// --------------------------------------------------
+// Provides a UI and logic for calculating real-time shipping costs and options
+// for NZ regions, integrating with NZ Post API and category data.
+// =============================================
 
 import React, { useState, useEffect, useMemo } from 'react';
-import { 
-    Package, Truck, MapPin, Clock, DollarSign, Calculator, 
+import {
+    Package, Truck, MapPin, Clock, DollarSign, Calculator,
     Info, AlertCircle, CheckCircle, Navigation, Package2,
     Calendar, Star, Shield, ArrowRight
 } from 'lucide-react';
-import { 
-    calculateShipping, 
-    getAvailableServices, 
+import {
+    calculateShipping,
+    getAvailableServices,
     formatShippingCost,
     SHIPPING_SERVICES,
     PACKAGE_TYPES,
@@ -18,9 +22,9 @@ import {
 } from '../../lib/shippingService';
 import { NZ_REGIONS } from '../../lib/nzLocalization';
 
-const ShippingCalculator = ({ 
-    item, 
-    sellerLocation, 
+const ShippingCalculator = ({
+    item,
+    sellerLocation,
     onShippingSelected,
     showFullCalculator = false,
     className = ""
@@ -65,31 +69,31 @@ const ShippingCalculator = ({
 
     const calculateShippingRates = async () => {
         if (!buyerLocation || !sellerLocation) return;
-        
+
         setIsCalculating(true);
         setError(null);
-        
+
         try {
             const availableServices = getAvailableServices(
                 sellerLocation,
                 buyerLocation,
                 getPackageDetails
             );
-            
+
             if (availableServices.length === 0) {
                 setError('Shipping not available to this location');
                 setShippingOptions([]);
                 return;
             }
-            
+
             setShippingOptions(availableServices);
-            
+
             // Auto-select the first option if none selected
             if (!selectedOption) {
                 setSelectedOption(availableServices[0]);
                 onShippingSelected && onShippingSelected(availableServices[0]);
             }
-            
+
         } catch (err) {
             setError('Failed to calculate shipping rates');
             console.error('Shipping calculation error:', err);
@@ -137,7 +141,7 @@ const ShippingCalculator = ({
                 <Calculator className="w-5 h-5 text-gray-600 mr-2" />
                 <h3 className="font-medium text-gray-900">Shipping Estimate</h3>
             </div>
-            
+
             <div className="space-y-3">
                 <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -190,7 +194,7 @@ const ShippingCalculator = ({
                                 </div>
                             </div>
                         ))}
-                        
+
                         {shippingOptions.length > 2 && (
                             <button
                                 onClick={() => setShowAdvanced(true)}
@@ -259,15 +263,14 @@ const ShippingCalculator = ({
                             <button
                                 key={key}
                                 onClick={() => setPackageType(value)}
-                                className={`p-3 rounded-lg border-2 transition-all ${
-                                    packageType === value
+                                className={`p-3 rounded-lg border-2 transition-all ${packageType === value
                                         ? 'border-green-500 bg-green-50 text-green-700'
                                         : 'border-gray-200 hover:border-gray-300'
-                                }`}
+                                    }`}
                             >
                                 <div className="text-center">
                                     <div className="text-sm font-medium">
-                                        {key.split('_').map(word => 
+                                        {key.split('_').map(word =>
                                             word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
                                         ).join(' ')}
                                     </div>
@@ -318,22 +321,20 @@ const ShippingCalculator = ({
                             {shippingOptions.map((option, index) => {
                                 const IconComponent = getServiceIcon(option.service);
                                 const badge = getServiceBadge(option.service);
-                                
+
                                 return (
                                     <div
                                         key={index}
                                         onClick={() => handleOptionSelect(option)}
-                                        className={`p-4 rounded-lg border-2 cursor-pointer transition-all ${
-                                            selectedOption?.service === option.service
+                                        className={`p-4 rounded-lg border-2 cursor-pointer transition-all ${selectedOption?.service === option.service
                                                 ? 'border-green-500 bg-green-50'
                                                 : 'border-gray-200 hover:border-gray-300'
-                                        }`}
+                                            }`}
                                     >
                                         <div className="flex items-center justify-between">
                                             <div className="flex items-center space-x-3">
-                                                <IconComponent className={`w-5 h-5 ${
-                                                    selectedOption?.service === option.service ? 'text-green-600' : 'text-gray-600'
-                                                }`} />
+                                                <IconComponent className={`w-5 h-5 ${selectedOption?.service === option.service ? 'text-green-600' : 'text-gray-600'
+                                                    }`} />
                                                 <div>
                                                     <div className="flex items-center space-x-2">
                                                         <h4 className="font-medium text-gray-900">{option.name}</h4>

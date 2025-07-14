@@ -1,19 +1,23 @@
-// Advanced Monitoring and Analytics Service - Comprehensive application monitoring
-// Handles performance tracking, error reporting, user analytics, and business metrics
+// =============================================
+// monitoringService.js - Monitoring & Alerting Utilities
+// ------------------------------------------------------
+// Provides helpers for monitoring app health, error tracking, and alerting.
+// Used for performance, error, and security monitoring.
+// =============================================
 
-import { 
-  doc, 
-  setDoc, 
-  getDoc, 
-  collection, 
-  addDoc, 
-  getDocs, 
-  query, 
-  where, 
-  orderBy, 
-  limit, 
+import {
+  doc,
+  setDoc,
+  getDoc,
+  collection,
+  addDoc,
+  getDocs,
+  query,
+  where,
+  orderBy,
+  limit,
   serverTimestamp,
-  increment 
+  increment
 } from 'firebase/firestore';
 import { db } from './firebase';
 
@@ -43,14 +47,14 @@ const EVENT_TYPES = {
   // Page views and navigation
   PAGE_VIEW: 'page_view',
   NAVIGATION: 'navigation',
-  
+
   // User interactions
   BUTTON_CLICK: 'button_click',
   FORM_SUBMIT: 'form_submit',
   SEARCH: 'search',
   FILTER_APPLY: 'filter_apply',
   SORT_CHANGE: 'sort_change',
-  
+
   // Job-related events
   JOB_VIEW: 'job_view',
   JOB_APPLY: 'job_apply',
@@ -58,24 +62,24 @@ const EVENT_TYPES = {
   JOB_SHARE: 'job_share',
   JOB_CREATE: 'job_create',
   JOB_EDIT: 'job_edit',
-  
+
   // Application events
   APPLICATION_START: 'application_start',
   APPLICATION_SUBMIT: 'application_submit',
   APPLICATION_SAVE: 'application_save',
   CV_UPLOAD: 'cv_upload',
-  
+
   // Business events
   USER_SIGNUP: 'user_signup',
   USER_LOGIN: 'user_login',
   USER_LOGOUT: 'user_logout',
   PROFILE_UPDATE: 'profile_update',
-  
+
   // E-commerce events
   ITEM_VIEW: 'item_view',
   ADD_TO_CART: 'add_to_cart',
   PURCHASE: 'purchase',
-  
+
   // Performance events
   PERFORMANCE_METRIC: 'performance_metric',
   ERROR: 'error',
@@ -347,7 +351,7 @@ class UserAnalytics {
     const sampleRate = MONITORING_CONFIG.sampleRates.userActions;
     if (Math.random() <= sampleRate) {
       this.eventQueue.push(event);
-      
+
       if (this.eventQueue.length >= this.batchSize) {
         this.flushEvents();
       }
@@ -474,7 +478,7 @@ class BusinessMetrics {
     try {
       const endDate = new Date();
       const startDate = new Date(endDate.getTime() - (days * 24 * 60 * 60 * 1000));
-      
+
       const metricsQuery = query(
         collection(db, 'businessMetrics'),
         where('name', '==', metricName),

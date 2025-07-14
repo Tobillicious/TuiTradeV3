@@ -1,3 +1,9 @@
+// =============================================
+// orders.js - Order Management Utilities
+// --------------------------------------
+// Provides helpers for managing order lifecycle, status, and integration
+// with payment and notification systems. Used for buyer/seller order flows.
+// =============================================
 // src/lib/orders.js
 import { collection, addDoc, doc, updateDoc, getDoc, getDocs, query, where, orderBy, serverTimestamp } from 'firebase/firestore';
 import { db } from './firebase';
@@ -29,46 +35,46 @@ export const createOrder = async (orderData) => {
             // Buyer information
             buyerId: orderData.buyerId,
             buyerEmail: orderData.buyerEmail,
-            
+
             // Seller information
             sellerId: orderData.sellerId,
             sellerEmail: orderData.sellerEmail,
-            
+
             // Item information
             itemId: orderData.itemId,
             itemTitle: orderData.itemTitle,
             itemDescription: orderData.itemDescription,
             itemImages: orderData.itemImages || [],
             itemCategory: orderData.itemCategory,
-            
+
             // Pricing
             itemPrice: orderData.itemPrice,
             serviceFee: orderData.serviceFee || 0,
             totalAmount: orderData.totalAmount,
             currency: orderData.currency || 'NZD',
-            
+
             // Shipping information
             shippingAddress: orderData.shippingAddress,
             shippingMethod: orderData.shippingMethod || 'standard',
             shippingCost: orderData.shippingCost || 0,
-            
+
             // Status tracking
             orderStatus: ORDER_STATUS.PENDING,
             paymentStatus: PAYMENT_STATUS.PENDING,
-            
+
             // Timestamps
             createdAt: serverTimestamp(),
             updatedAt: serverTimestamp(),
-            
+
             // Payment tracking
             paymentIntentId: null,
             transactionId: null,
-            
+
             // Delivery tracking
             trackingNumber: null,
             estimatedDelivery: null,
             actualDelivery: null,
-            
+
             // Additional data
             notes: orderData.notes || '',
             metadata: orderData.metadata || {}
@@ -199,17 +205,17 @@ export const getUserOrders = async (userId, role = 'buyer') => {
 // Calculate service fee (TuiTrade's commission)
 export const calculateServiceFee = (itemPrice, listingType = 'fixed-price') => {
     const baseFee = 0.05; // 5% base fee
-    
+
     // Different fees for different listing types
     const feeRates = {
         'fixed-price': 0.05, // 5%
         'auction': 0.075,    // 7.5%
         'classified': 0.03   // 3%
     };
-    
+
     const rate = feeRates[listingType] || baseFee;
     const fee = itemPrice * rate;
-    
+
     // Minimum fee of $1 NZD
     return Math.max(fee, 1.00);
 };
@@ -297,7 +303,7 @@ export const getOrderStats = async (sellerId, timeRange = 30) => {
 
         orders.forEach(order => {
             stats.totalRevenue += order.itemPrice || 0;
-            
+
             if (order.orderStatus === ORDER_STATUS.DELIVERED) {
                 stats.completedOrders++;
             } else if ([ORDER_STATUS.PENDING, ORDER_STATUS.CONFIRMED, ORDER_STATUS.PROCESSING].includes(order.orderStatus)) {

@@ -1,3 +1,9 @@
+// =============================================
+// NotificationBell.js - Real-Time Notification UI
+// -----------------------------------------------
+// Provides the notification bell, dropdown, unread count, and notification
+// management UI. Integrates with pushNotificationService and Te Reo Māori.
+// =============================================
 // src/components/ui/NotificationBell.js
 import { useState, useEffect, useRef } from 'react';
 import { Bell, X, Check, Settings, MessageCircle, ShoppingCart, Star, Package, Clock } from 'lucide-react';
@@ -7,6 +13,7 @@ import pushNotificationService from '../../lib/pushNotificationService';
 import { timeAgo } from '../../lib/utils';
 import { useTeReo, TeReoText } from './TeReoToggle';
 
+// NotificationBell component: Handles notification state, dropdown, and actions
 const NotificationBell = ({ onNavigate }) => {
     const [notifications, setNotifications] = useState([]);
     const [unreadCount, setUnreadCount] = useState(0);

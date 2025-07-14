@@ -1,14 +1,18 @@
-// Te Reo Māori Language Toggle Component
-// Provides bilingual text switching throughout the application
+// =============================================
+// TeReoToggle.js - Te Reo Māori Language Integration
+// --------------------------------------------------
+// Provides context, toggle, and helpers for bilingual (English/Te Reo Māori)
+// support throughout the app. Used for UI text, categories, locations, etc.
+// =============================================
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { Languages } from 'lucide-react';
 import { TE_REO_TRANSLATIONS, getBilingualText } from '../../lib/nzLocalizationEnhanced';
 
-// Context for Te Reo Māori state
+// TeReoContext: Context for Te Reo state
 const TeReoContext = createContext();
 
-// Provider component
+// TeReoProvider: Provider for Te Reo mode and translation helpers
 export const TeReoProvider = ({ children }) => {
   const [isTeReoMode, setIsTeReoMode] = useState(() => {
     // Check localStorage for saved preference
@@ -51,7 +55,7 @@ export const TeReoProvider = ({ children }) => {
   );
 };
 
-// Hook to use Te Reo context
+// useTeReo: Hook for accessing Te Reo context
 export const useTeReo = () => {
   const context = useContext(TeReoContext);
   if (!context) {
@@ -67,7 +71,7 @@ export const useTeReo = () => {
   return context;
 };
 
-// Toggle button component
+// TeReoToggle: UI toggle button for switching language mode
 export const TeReoToggle = ({ className = '' }) => {
   const { isTeReoMode, toggleTeReoMode } = useTeReo();
   const [isHovered, setIsHovered] = useState(false);
@@ -79,15 +83,13 @@ export const TeReoToggle = ({ className = '' }) => {
     <div className="relative" onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
       <button
         onClick={toggleTeReoMode}
-        className={`relative flex items-center w-32 h-8 rounded-full transition-colors duration-300 focus:outline-none ${
-          isTeReoMode ? 'bg-blue-600' : 'bg-gray-300'
-        } ${className}`}
+        className={`relative flex items-center w-32 h-8 rounded-full transition-colors duration-300 focus:outline-none ${isTeReoMode ? 'bg-blue-600' : 'bg-gray-300'
+          } ${className}`}
         aria-label={isTeReoMode ? 'Switch to English' : 'Switch to Te Reo Māori'}
       >
         <span
-          className={`absolute left-1 top-1 bottom-1 w-6 h-6 bg-white rounded-full shadow-md transform transition-transform duration-300 ${
-            isTeReoMode ? 'translate-x-24' : ''
-          }`}
+          className={`absolute left-1 top-1 bottom-1 w-6 h-6 bg-white rounded-full shadow-md transform transition-transform duration-300 ${isTeReoMode ? 'translate-x-24' : ''
+            }`}
         />
         <div className="flex justify-around w-full text-xs font-bold">
           <span className={isTeReoMode ? 'text-white' : 'text-gray-500'}>English</span>
@@ -104,7 +106,8 @@ export const TeReoToggle = ({ className = '' }) => {
   );
 };
 
-// Text component that automatically switches based on mode
+// TeReoText, TeReoCategoryText, TeReoLocationText, TeReoGreeting, etc.:
+// Components for rendering bilingual or Māori-specific text
 export const TeReoText = ({
   english,
   teReoKey,

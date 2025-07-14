@@ -1,5 +1,9 @@
-// New Zealand Shipping Service
-// Integrates with NZ Post API and provides comprehensive shipping solutions
+// =============================================
+// shippingService.js - NZ Shipping Logic & Integration
+// ----------------------------------------------------
+// Provides helpers for calculating shipping costs, integrating with NZ Post API,
+// and managing shipping options for listings and orders.
+// =============================================
 
 import { NZ_REGIONS, SHIPPING_ZONES } from './nzLocalization';
 
@@ -97,10 +101,10 @@ export const DELIVERY_TIMEFRAMES = {
 // Main shipping calculation function
 export const calculateShipping = (origin, destination, packageDetails, options = {}) => {
     const { weight = 1, dimensions = null, service = SHIPPING_SERVICES.STANDARD, express = false } = options;
-    
+
     // Determine shipping zone
     const zone = determineShippingZone(origin, destination);
-    
+
     // Get base rates for the zone
     const zoneRates = SHIPPING_RATES[zone];
     if (!zoneRates) {
@@ -113,7 +117,7 @@ export const calculateShipping = (origin, destination, packageDetails, options =
     // Select service
     const selectedService = express ? SHIPPING_SERVICES.EXPRESS : service;
     const serviceRates = zoneRates[selectedService];
-    
+
     if (!serviceRates) {
         return {
             error: 'Selected shipping service not available',
@@ -127,9 +131,9 @@ export const calculateShipping = (origin, destination, packageDetails, options =
     const dimensionalWeight = dimensions ? calculateDimensionalWeight(dimensions) : 0;
     const actualWeight = Math.max(weight, dimensionalWeight);
     const adjustedWeightCost = Math.max(0, actualWeight - 1) * serviceRates.perKg;
-    
+
     const totalCost = baseCost + adjustedWeightCost;
-    
+
     // Apply surcharges
     const surcharges = calculateSurcharges(zone, selectedService, packageDetails);
     const finalCost = totalCost + surcharges.total;
@@ -150,7 +154,7 @@ export const calculateShipping = (origin, destination, packageDetails, options =
 export const determineShippingZone = (origin, destination) => {
     const originRegion = extractRegion(origin);
     const destinationRegion = extractRegion(destination);
-    
+
     // Metro zones
     if (isMetroArea(destinationRegion, 'Auckland')) {
         return SHIPPING_ZONES.METRO_AUCKLAND;
@@ -161,7 +165,7 @@ export const determineShippingZone = (origin, destination) => {
     if (isMetroArea(destinationRegion, 'Christchurch')) {
         return SHIPPING_ZONES.METRO_CHRISTCHURCH;
     }
-    
+
     // Island zones
     if (isNorthIsland(destinationRegion)) {
         return SHIPPING_ZONES.NORTH_ISLAND;
@@ -169,7 +173,7 @@ export const determineShippingZone = (origin, destination) => {
     if (isSouthIsland(destinationRegion)) {
         return SHIPPING_ZONES.SOUTH_ISLAND;
     }
-    
+
     // Rural/remote
     return SHIPPING_ZONES.RURAL;
 };
@@ -177,31 +181,31 @@ export const determineShippingZone = (origin, destination) => {
 // Extract region from location string
 const extractRegion = (location) => {
     if (!location) return null;
-    
+
     const locationLower = location.toLowerCase();
-    
+
     // Check for specific regions
     for (const [key, region] of Object.entries(NZ_REGIONS)) {
         if (locationLower.includes(region.name.toLowerCase())) {
             return region;
         }
     }
-    
+
     return null;
 };
 
 // Check if location is in metro area
 const isMetroArea = (region, city) => {
     if (!region) return false;
-    
+
     const metroAreas = {
         'Auckland': ['Auckland', 'North Shore', 'Waitakere', 'Manukau'],
         'Wellington': ['Wellington', 'Lower Hutt', 'Upper Hutt', 'Porirua'],
         'Christchurch': ['Christchurch', 'Riccarton', 'Papanui']
     };
-    
+
     const metros = metroAreas[city];
-    return metros && metros.some(metro => 
+    return metros && metros.some(metro =>
         region.name.toLowerCase().includes(metro.toLowerCase())
     );
 };
@@ -209,24 +213,24 @@ const isMetroArea = (region, city) => {
 // Check if region is North Island
 const isNorthIsland = (region) => {
     if (!region) return false;
-    
+
     const northIslandRegions = [
         'Northland', 'Auckland', 'Waikato', 'Bay of Plenty', 'Gisborne',
         'Hawke\'s Bay', 'Taranaki', 'Manawatū-Whanganui', 'Wellington'
     ];
-    
+
     return northIslandRegions.includes(region.name);
 };
 
 // Check if region is South Island
 const isSouthIsland = (region) => {
     if (!region) return false;
-    
+
     const southIslandRegions = [
         'Tasman', 'Nelson', 'Marlborough', 'West Coast', 'Canterbury',
         'Timaru', 'Otago', 'Southland'
     ];
-    
+
     return southIslandRegions.includes(region.name);
 };
 
@@ -243,7 +247,7 @@ const calculateSurcharges = (zone, service, packageDetails) => {
         breakdown: [],
         total: 0
     };
-    
+
     // Rural delivery surcharge
     if (zone === SHIPPING_ZONES.RURAL) {
         surcharges.breakdown.push({
@@ -253,7 +257,7 @@ const calculateSurcharges = (zone, service, packageDetails) => {
         });
         surcharges.total += 3.50;
     }
-    
+
     // Oversized package surcharge
     if (packageDetails && isOversized(packageDetails)) {
         surcharges.breakdown.push({
@@ -263,7 +267,7 @@ const calculateSurcharges = (zone, service, packageDetails) => {
         });
         surcharges.total += 5.00;
     }
-    
+
     // Fragile item surcharge
     if (packageDetails && packageDetails.fragile) {
         surcharges.breakdown.push({
@@ -273,7 +277,7 @@ const calculateSurcharges = (zone, service, packageDetails) => {
         });
         surcharges.total += 2.50;
     }
-    
+
     // Signature required surcharge
     if (packageDetails && packageDetails.signatureRequired) {
         surcharges.breakdown.push({
@@ -283,20 +287,20 @@ const calculateSurcharges = (zone, service, packageDetails) => {
         });
         surcharges.total += 2.00;
     }
-    
+
     return surcharges;
 };
 
 // Check if package is oversized
 const isOversized = (packageDetails) => {
     const { length = 0, width = 0, height = 0, weight = 0 } = packageDetails;
-    
+
     // Standard size limits
     const maxLength = 105;
     const maxWidth = 105;
     const maxHeight = 105;
     const maxWeight = 25;
-    
+
     return length > maxLength || width > maxWidth || height > maxHeight || weight > maxWeight;
 };
 
@@ -312,11 +316,11 @@ const generateTrackingNumber = () => {
 export const getAvailableServices = (origin, destination, packageDetails = {}) => {
     const zone = determineShippingZone(origin, destination);
     const zoneRates = SHIPPING_RATES[zone];
-    
+
     if (!zoneRates) {
         return [];
     }
-    
+
     return Object.keys(zoneRates).map(service => ({
         service,
         name: formatServiceName(service),
@@ -335,7 +339,7 @@ const formatServiceName = (service) => {
         [SHIPPING_SERVICES.RURAL]: 'Rural Delivery',
         [SHIPPING_SERVICES.PICKUP]: 'Local Pickup'
     };
-    
+
     return names[service] || service;
 };
 

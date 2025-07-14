@@ -1,17 +1,23 @@
+// =============================================
+// profileSystem.js - User Profile Management
+// ------------------------------------------
+// Provides helpers for managing user profiles, badges, and social features.
+// Used for community, reputation, and user dashboard features.
+// =============================================
 // Comprehensive Multi-Profile System for TuiTrade
 // Supports Professional, Personal, Community, Marketplace, and Employment profiles
 // with relationship-based privacy controls
 
-import { 
-  collection, 
-  doc, 
-  addDoc, 
-  updateDoc, 
-  getDoc, 
-  getDocs, 
-  query, 
-  where, 
-  orderBy, 
+import {
+  collection,
+  doc,
+  addDoc,
+  updateDoc,
+  getDoc,
+  getDocs,
+  query,
+  where,
+  orderBy,
   limit,
   arrayUnion,
   arrayRemove,
@@ -177,10 +183,10 @@ class ProfileSystem {
       };
 
       const docRef = await addDoc(collection(db, 'profiles'), profile);
-      
+
       // Update user's profile list
       await this.updateUserProfileList(userId, docRef.id, profileType);
-      
+
       return docRef.id;
     } catch (error) {
       console.error('Error creating profile:', error);
@@ -197,7 +203,7 @@ class ProfileSystem {
       }
 
       const profile = profileDoc.data();
-      
+
       // Check if viewer has permission to see this profile
       const canView = await this.checkProfileVisibility(profile, viewerId);
       if (!canView) {
@@ -220,14 +226,14 @@ class ProfileSystem {
         where('isActive', '==', true),
         orderBy('profileType')
       );
-      
+
       const profilesSnapshot = await getDocs(profilesQuery);
       const profiles = [];
 
       for (const doc of profilesSnapshot.docs) {
         const profile = doc.data();
         const canView = await this.checkProfileVisibility(profile, viewerId);
-        
+
         if (canView) {
           profiles.push({ id: doc.id, ...profile });
         } else {
@@ -256,22 +262,22 @@ class ProfileSystem {
     switch (visibility) {
       case 'public':
         return true;
-      
+
       case 'friends':
         return await this.checkRelationship(profile.userId, viewerId, ['friend', 'innerCircle']);
-      
+
       case 'innerCircle':
         return await this.checkRelationship(profile.userId, viewerId, ['innerCircle']);
-      
+
       case 'marketplace':
         return await this.checkMarketplaceInteraction(profile.userId, viewerId);
-      
+
       case 'community':
         return await this.checkCommunityConnection(profile.userId, viewerId);
-      
+
       case 'employers':
         return await this.checkEmployerAccess(viewerId);
-      
+
       default:
         return false;
     }
@@ -320,7 +326,7 @@ class ProfileSystem {
         where('participants', 'array-contains-any', [userId, viewerId]),
         limit(1)
       );
-      
+
       const snapshot = await getDocs(transactionsQuery);
       return !snapshot.empty;
     } catch (error) {
@@ -334,10 +340,10 @@ class ProfileSystem {
     try {
       const userDoc = await getDoc(doc(db, 'users', userId));
       const viewerDoc = await getDoc(doc(db, 'users', viewerId));
-      
+
       const userNeighbourhood = userDoc.data()?.neighbourhood;
       const viewerNeighbourhood = viewerDoc.data()?.neighbourhood;
-      
+
       return userNeighbourhood && viewerNeighbourhood && userNeighbourhood === viewerNeighbourhood;
     } catch (error) {
       console.error('Error checking community connection:', error);
@@ -350,7 +356,7 @@ class ProfileSystem {
     try {
       const userDoc = await getDoc(doc(db, 'users', viewerId));
       const userData = userDoc.data();
-      
+
       return userData?.accountType === 'business' || userData?.isEmployer === true;
     } catch (error) {
       console.error('Error checking employer access:', error);
@@ -376,7 +382,7 @@ class ProfileSystem {
     try {
       const relationshipId = `${userId1}_${userId2}`;
       const reverseRelationshipId = `${userId2}_${userId1}`;
-      
+
       const relationshipData = {
         users: [userId1, userId2],
         level,
@@ -389,7 +395,7 @@ class ProfileSystem {
       // Create both directions for easier querying
       await setDoc(doc(db, 'relationships', relationshipId), relationshipData);
       await setDoc(doc(db, 'relationships', reverseRelationshipId), relationshipData);
-      
+
       return true;
     } catch (error) {
       console.error('Error updating relationship:', error);
@@ -401,7 +407,7 @@ class ProfileSystem {
   async searchProfiles(searchTerm, searchType = 'all', viewerId = null) {
     try {
       let profilesQuery;
-      
+
       if (searchType === 'all') {
         profilesQuery = query(
           collection(db, 'profiles'),
@@ -422,11 +428,11 @@ class ProfileSystem {
 
       for (const doc of snapshot.docs) {
         const profile = doc.data();
-        
+
         // Simple text matching (you'd want to use a proper search service in production)
         const matchesSearch = profile.displayName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                             profile.tagline?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                             profile.skills?.some(skill => skill.toLowerCase().includes(searchTerm.toLowerCase()));
+          profile.tagline?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          profile.skills?.some(skill => skill.toLowerCase().includes(searchTerm.toLowerCase()));
 
         if (matchesSearch) {
           const canView = await this.checkProfileVisibility(profile, viewerId);

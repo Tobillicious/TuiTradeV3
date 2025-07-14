@@ -1,6 +1,9 @@
-// src/components/pages/HelpCenterPage.js
+// Help Center - Comprehensive support for life-changing platform
+// Designed to empower users and maximize their positive impact
+
 import React, { useState } from 'react';
-import { ArrowLeft, Search, HelpCircle, MessageCircle, Phone, Mail, FileText, Shield, DollarSign, Truck, User, Settings, ShoppingBag, CreditCard, AlertTriangle, CheckCircle, ChevronDown, ChevronRight } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { ArrowLeft, Search, HelpCircle, MessageCircle, Phone, Mail, FileText, Shield, DollarSign, Truck, User, Settings, ShoppingBag, CreditCard, AlertTriangle, CheckCircle, ChevronDown, ChevronRight, Heart, Star, Globe, Award, Zap, Users } from 'lucide-react';
 
 const HelpCenterPage = ({ onNavigate }) => {
     const [searchQuery, setSearchQuery] = useState('');

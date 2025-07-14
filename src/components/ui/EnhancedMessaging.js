@@ -1,3 +1,10 @@
+// =============================================
+// EnhancedMessaging.js - Real-Time Messaging UI/UX
+// ------------------------------------------------
+// Provides the real-time messaging interface, including typing indicators,
+// message status (sending, sent, delivered, read), and improved UX.
+// Integrates with notification and Te Reo Māori systems.
+// =============================================
 // src/components/ui/EnhancedMessaging.js
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { collection, query, where, orderBy, onSnapshot, addDoc, doc, updateDoc, serverTimestamp, getDoc } from 'firebase/firestore';

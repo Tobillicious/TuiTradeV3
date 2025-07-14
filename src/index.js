@@ -1,3 +1,9 @@
+// =============================================
+// index.js - React App Entry Point
+// --------------------------------
+// Bootstraps the React application, applies global styles, registers service worker,
+// and renders the AppRouter (main app shell and routing).
+// =============================================
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import './index.css'; // This line imports all the Tailwind styles

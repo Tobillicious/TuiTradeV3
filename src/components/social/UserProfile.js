@@ -2,20 +2,20 @@
 // Comprehensive profile with ratings, badges, and community features
 
 import React, { useState, useEffect, useMemo } from 'react';
-import { 
-    Star, MapPin, Calendar, Award, Shield, Heart, MessageCircle, 
+import {
+    Star, MapPin, Calendar, Award, Shield, Heart, MessageCircle,
     Settings, Edit, Camera, Users, TrendingUp, Package, Eye,
     CheckCircle, AlertCircle, Crown, Badge, Gift
 } from 'lucide-react';
 import { SELLER_LEVELS, ACHIEVEMENT_BADGES, calculateTrustScore } from '../../lib/communityFeatures';
 import { formatNZCurrency } from '../../lib/nzLocalization';
 
-const UserProfile = ({ 
-    userId, 
-    isOwnProfile = false, 
-    onFollow, 
-    onMessage, 
-    onEdit 
+const UserProfile = ({
+    userId,
+    isOwnProfile = false,
+    onFollow,
+    onMessage,
+    onEdit
 }) => {
     const [user, setUser] = useState(null);
     const [activeTab, setActiveTab] = useState('overview');
@@ -24,7 +24,12 @@ const UserProfile = ({
     const [recentListings, setRecentListings] = useState([]);
     const [reviews, setReviews] = useState([]);
 
-    // Mock user data - in real app, fetch from database
+    // ========== AI Agent Guidance ==========
+    // The following mockUser and related logic are for development only.
+    // NEXT STEPS: Replace with real Firestore or API integration for user profiles.
+    // - Fetch user data from the database instead of using hardcoded mock data.
+    // - Remove or disable mockUser in production.
+    // Note: Claude or future agents may override these suggestions if they disagree.
     const mockUser = {
         id: userId,
         displayName: 'Sarah Johnson',
@@ -89,14 +94,14 @@ const UserProfile = ({
 
     const sellerLevel = useMemo(() => {
         if (!user) return 'new';
-        
+
         for (const [level, requirements] of Object.entries(SELLER_LEVELS).reverse()) {
             const meetsRequirements = Object.entries(requirements.requirements || {}).every(([key, value]) => {
                 if (key === 'trustScore') return trustScore >= value;
                 if (key.includes('Verified')) return user.verification[key];
                 return user.stats[key] >= value;
             });
-            
+
             if (meetsRequirements) return level;
         }
         return 'new';
@@ -117,7 +122,7 @@ const UserProfile = ({
     const renderHeader = () => (
         <div className="relative">
             {/* Cover Photo */}
-            <div 
+            <div
                 className="h-48 md:h-64 bg-gradient-to-r from-green-400 to-blue-500 relative"
                 style={user.coverPhoto ? { backgroundImage: `url(${user.coverPhoto})`, backgroundSize: 'cover', backgroundPosition: 'center' } : {}}
             >
@@ -143,15 +148,14 @@ const UserProfile = ({
                                 <Camera size={14} />
                             </button>
                         )}
-                        
+
                         {/* Trust Score Badge */}
                         <div className="absolute -top-2 -right-2 bg-white rounded-full p-1 shadow-lg">
-                            <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold ${
-                                trustScore >= 95 ? 'bg-green-500 text-white' :
-                                trustScore >= 85 ? 'bg-blue-500 text-white' :
-                                trustScore >= 70 ? 'bg-yellow-500 text-white' :
-                                'bg-gray-500 text-white'
-                            }`}>
+                            <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold ${trustScore >= 95 ? 'bg-green-500 text-white' :
+                                    trustScore >= 85 ? 'bg-blue-500 text-white' :
+                                        trustScore >= 70 ? 'bg-yellow-500 text-white' :
+                                            'bg-gray-500 text-white'
+                                }`}>
                                 {trustScore}
                             </div>
                         </div>
@@ -189,11 +193,10 @@ const UserProfile = ({
                                     <>
                                         <button
                                             onClick={() => setIsFollowing(!isFollowing)}
-                                            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                                                isFollowing 
-                                                    ? 'bg-gray-200 text-gray-700 hover:bg-gray-300' 
+                                            className={`px-4 py-2 rounded-lg font-medium transition-colors ${isFollowing
+                                                    ? 'bg-gray-200 text-gray-700 hover:bg-gray-300'
                                                     : 'bg-green-600 text-white hover:bg-green-700'
-                                            }`}
+                                                }`}
                                         >
                                             {isFollowing ? 'Following' : 'Follow'}
                                         </button>
@@ -260,11 +263,10 @@ const UserProfile = ({
                     <button
                         key={tab.id}
                         onClick={() => setActiveTab(tab.id)}
-                        className={`py-3 px-1 border-b-2 font-medium text-sm flex items-center ${
-                            activeTab === tab.id
+                        className={`py-3 px-1 border-b-2 font-medium text-sm flex items-center ${activeTab === tab.id
                                 ? 'border-green-500 text-green-600'
                                 : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                        }`}
+                            }`}
                     >
                         <tab.icon size={16} className="mr-2" />
                         {tab.label}
@@ -316,11 +318,10 @@ const UserProfile = ({
                                     <div className="flex-1">
                                         <h4 className="font-medium text-gray-900 line-clamp-1">{listing.title}</h4>
                                         <p className="text-green-600 font-semibold">{formatNZCurrency(listing.price)}</p>
-                                        <span className={`inline-block px-2 py-1 text-xs rounded-full ${
-                                            listing.status === 'active' 
-                                                ? 'bg-green-100 text-green-800' 
+                                        <span className={`inline-block px-2 py-1 text-xs rounded-full ${listing.status === 'active'
+                                                ? 'bg-green-100 text-green-800'
                                                 : 'bg-gray-100 text-gray-800'
-                                        }`}>
+                                            }`}>
                                             {listing.status}
                                         </span>
                                     </div>
@@ -388,12 +389,12 @@ const UserProfile = ({
                     </h3>
                     <div className="grid grid-cols-2 gap-3">
                         {user.badges.slice(0, 4).map(badgeKey => {
-                            const badge = Object.values(ACHIEVEMENT_BADGES).flatMap(category => 
+                            const badge = Object.values(ACHIEVEMENT_BADGES).flatMap(category =>
                                 Object.entries(category)
                             ).find(([key]) => key === badgeKey)?.[1];
-                            
+
                             if (!badge) return null;
-                            
+
                             return (
                                 <div key={badgeKey} className="text-center p-3 bg-gray-50 rounded-lg">
                                     <div className="text-2xl mb-1">{badge.icon}</div>

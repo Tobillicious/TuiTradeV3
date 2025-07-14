@@ -1,3 +1,9 @@
+// =============================================
+// PerformanceMonitor.js - Core Web Vitals Overlay & Reporting
+// -----------------------------------------------------------
+// Provides a development-time overlay and reporting for Core Web Vitals
+// and other performance metrics. Used to monitor and optimize user experience.
+// =============================================
 // Enhanced Performance Monitor Component
 // Tracks Core Web Vitals and provides performance insights
 
@@ -240,8 +246,8 @@ const PerformanceMonitor = ({ onClose, isVisible = false }) => {
                             <div className="w-full bg-gray-200 rounded-full h-3">
                                 <div
                                     className={`h-3 rounded-full transition-all ${performanceScore >= 90 ? 'bg-green-500' :
-                                            performanceScore >= 70 ? 'bg-yellow-500' :
-                                                'bg-red-500'
+                                        performanceScore >= 70 ? 'bg-yellow-500' :
+                                            'bg-red-500'
                                         }`}
                                     style={{ width: `${performanceScore}%` }}
                                 ></div>

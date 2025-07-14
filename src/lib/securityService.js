@@ -1,5 +1,9 @@
-// Advanced Security Service - Comprehensive application security layer
-// Handles CSRF, XSS protection, content security, and threat detection
+// =============================================
+// securityService.js - Security & Compliance Utilities
+// ----------------------------------------------------
+// Provides helpers for enforcing security best practices, input validation,
+// and compliance checks throughout the app.
+// =============================================
 
 import { doc, setDoc, getDoc, updateDoc, collection, query, where, getDocs, orderBy, limit } from 'firebase/firestore';
 import { db } from './firebase';
@@ -99,7 +103,7 @@ class SecurityService {
     const csp = Object.entries(CSP_DIRECTIVES)
       .map(([directive, values]) => `${directive} ${values.join(' ')}`)
       .join('; ');
-    
+
     const meta = document.createElement('meta');
     meta.httpEquiv = 'Content-Security-Policy';
     meta.content = csp;
@@ -127,7 +131,7 @@ class SecurityService {
     const array = new Uint8Array(32);
     crypto.getRandomValues(array);
     const token = Array.from(array, byte => byte.toString(16).padStart(2, '0')).join('');
-    
+
     // Store in session storage
     sessionStorage.setItem('csrf_token', token);
     return token;
@@ -295,11 +299,11 @@ class SecurityService {
   static async checkAccountLockout(userId) {
     try {
       const lockoutDoc = await getDoc(doc(db, 'accountLockouts', userId));
-      
+
       if (lockoutDoc.exists()) {
         const lockoutData = lockoutDoc.data();
         const now = Date.now();
-        
+
         if (now < lockoutData.lockedUntil.toMillis()) {
           const remainingTime = Math.ceil((lockoutData.lockedUntil.toMillis() - now) / 1000 / 60);
           return {
@@ -324,9 +328,9 @@ class SecurityService {
     try {
       const lockoutRef = doc(db, 'accountLockouts', userId);
       const lockoutDoc = await getDoc(lockoutRef);
-      
+
       let attempts = 1;
-      
+
       if (lockoutDoc.exists()) {
         const data = lockoutDoc.data();
         attempts = (data.attempts || 0) + 1;
@@ -335,7 +339,7 @@ class SecurityService {
       if (attempts >= SECURITY_CONFIG.maxLoginAttempts) {
         // Lock the account
         const lockoutTime = new Date(Date.now() + SECURITY_CONFIG.lockoutDuration);
-        
+
         await setDoc(lockoutRef, {
           attempts,
           lockedUntil: lockoutTime,
@@ -422,7 +426,7 @@ class SecurityService {
 
     sessionStorage.setItem('session_id', sessionId);
     sessionStorage.setItem('session_data', JSON.stringify(sessionData));
-    
+
     return sessionId;
   }
 
@@ -439,7 +443,7 @@ class SecurityService {
       // Update last activity
       sessionData.lastActivity = now;
       sessionStorage.setItem('session_data', JSON.stringify(sessionData));
-      
+
       return true;
     } catch (error) {
       this.clearSession();
@@ -463,7 +467,7 @@ class SecurityService {
   static validateOrigin(origin) {
     try {
       const url = new URL(origin);
-      return SECURITY_CONFIG.trustedDomains.some(domain => 
+      return SECURITY_CONFIG.trustedDomains.some(domain =>
         url.hostname === domain || url.hostname.endsWith(`.${domain}`)
       );
     } catch (error) {
@@ -534,11 +538,11 @@ class SecurityService {
 
       events.forEach(event => {
         metrics.eventsByType[event.eventType] = (metrics.eventsByType[event.eventType] || 0) + 1;
-        
+
         if (event.eventType === SECURITY_EVENTS.LOGIN_FAILURE) {
           metrics.failedLogins++;
         }
-        
+
         if ([
           SECURITY_EVENTS.XSS_ATTEMPT,
           SECURITY_EVENTS.SQL_INJECTION_ATTEMPT,

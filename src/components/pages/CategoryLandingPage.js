@@ -57,6 +57,12 @@ const CategoryLandingPage = ({
         }
     ], []);
 
+    // ========== AI Agent Guidance ==========
+    // The following featuredListings array is mock data for development only.
+    // NEXT STEPS: Replace with real Firestore or API integration for featured listings.
+    // - Fetch listings from the database instead of using hardcoded mock data.
+    // - Remove or disable mock data in production.
+    // Note: Claude or future agents may override these suggestions if they disagree.
     const renderHeroSection = () => (
         <div className={`bg-gradient-to-r ${heroGradient} text-white relative overflow-hidden`}>
             <div className="absolute inset-0 bg-black/20"></div>

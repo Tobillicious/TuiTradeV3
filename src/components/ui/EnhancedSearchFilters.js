@@ -1,3 +1,9 @@
+// =============================================
+// EnhancedSearchFilters.js - Advanced Search & Filtering UI
+// --------------------------------------------------------
+// Provides advanced, category-specific search filters and real-time filtering UI.
+// Used on landing pages and search results for improved discoverability.
+// =============================================
 // Enhanced Search Filters Component
 // Combines marketplace and job search with category-specific filters
 
@@ -262,8 +268,8 @@ const EnhancedSearchFilters = ({
                     <button
                         onClick={() => onSearchTypeChange('marketplace')}
                         className={`px-4 py-2 text-sm font-medium flex items-center ${searchType === 'marketplace'
-                                ? 'bg-green-600 text-white'
-                                : 'bg-white text-gray-700 hover:bg-gray-50'
+                            ? 'bg-green-600 text-white'
+                            : 'bg-white text-gray-700 hover:bg-gray-50'
                             }`}
                     >
                         <Grid className="mr-2" size={16} />
@@ -272,8 +278,8 @@ const EnhancedSearchFilters = ({
                     <button
                         onClick={() => onSearchTypeChange('jobs')}
                         className={`px-4 py-2 text-sm font-medium flex items-center ${searchType === 'jobs'
-                                ? 'bg-green-600 text-white'
-                                : 'bg-white text-gray-700 hover:bg-gray-50'
+                            ? 'bg-green-600 text-white'
+                            : 'bg-white text-gray-700 hover:bg-gray-50'
                             }`}
                     >
                         <Briefcase className="mr-2" size={16} />
@@ -285,8 +291,8 @@ const EnhancedSearchFilters = ({
                     <button
                         onClick={() => onViewModeChange('grid')}
                         className={`p-2 rounded ${viewMode === 'grid'
-                                ? 'bg-green-600 text-white'
-                                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                            ? 'bg-green-600 text-white'
+                            : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                             }`}
                     >
                         <Grid size={16} />
@@ -294,8 +300,8 @@ const EnhancedSearchFilters = ({
                     <button
                         onClick={() => onViewModeChange('list')}
                         className={`p-2 rounded ${viewMode === 'list'
-                                ? 'bg-green-600 text-white'
-                                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                            ? 'bg-green-600 text-white'
+                            : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                             }`}
                     >
                         <List size={16} />

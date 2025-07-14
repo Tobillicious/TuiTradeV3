@@ -1,3 +1,10 @@
+// =============================================
+// App.js - Main Application Shell & Routing
+// -----------------------------------------
+// Entry point for the React app. Handles global providers (auth, theme, notifications, Te Reo),
+// routing, layout, and top-level state. Integrates category navigation, search, modals, and mobile nav.
+// Key integration points: Te Reo Māori, performance monitoring, notifications, and context providers.
+// =============================================
 import React, { useState, useEffect, useCallback, Suspense } from 'react';
 import { onAuthStateChanged } from 'firebase/auth';
 import { collection, onSnapshot, doc, deleteDoc, setDoc } from 'firebase/firestore';
@@ -26,6 +33,9 @@ import EnhancedCheckoutModal from './components/modals/EnhancedCheckoutModal';
 import './App.css';
 
 function AppContent() {
+    // =============================================
+    // AppContent: Main app logic, state, handlers, and UI layout
+    // =============================================
     const [currentUser, setCurrentUser] = useState(null);
     const [isAuthReady, setIsAuthReady] = useState(false);
     const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
@@ -47,6 +57,7 @@ function AppContent() {
     const location = useLocation();
 
     // --- HOOKS ---
+    // useEffect hooks: Auth state, analytics, menu handling, watchlist sync
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, user => {
             setCurrentUser(user);
@@ -93,6 +104,7 @@ function AppContent() {
     }, [currentUser]);
 
     // --- HANDLERS ---
+    // Handlers: Logout, watch toggle, search, cart, navigation, etc.
     const handleLogout = async () => {
         const { signOut } = await import('firebase/auth');
         await signOut(auth);

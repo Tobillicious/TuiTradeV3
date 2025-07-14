@@ -1,3 +1,9 @@
+// =============================================
+// communityFeatures.js - Community & Social Utilities
+// ---------------------------------------------------
+// Provides helpers for community features, forums, following, and user interactions.
+// Used for the CommunityLanding page and social trading features.
+// =============================================
 // Community and Social Features for TuiTrade
 // Building a vibrant marketplace community
 

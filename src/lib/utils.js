@@ -1,3 +1,9 @@
+// =============================================
+// utils.js - General Utilities & Category Definitions
+// ---------------------------------------------------
+// Contains helper functions, constants, and category/subcategory definitions
+// used throughout the app for listings, navigation, and UI logic.
+// =============================================
 // src/lib/utils.js
 
 import {

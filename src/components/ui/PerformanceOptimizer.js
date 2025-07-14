@@ -1,3 +1,10 @@
+// =============================================
+// PerformanceOptimizer.js - Performance Monitoring & Optimization
+// --------------------------------------------------------------
+// Provides utilities and hooks for monitoring Core Web Vitals,
+// resource timing, bundle analysis, and performance optimization.
+// Used throughout the app to track and improve user experience.
+// =============================================
 // src/components/ui/PerformanceOptimizer.js
 import { useEffect, useRef, useMemo, useCallback, useState } from 'react';
 import { trackEvent } from '../../lib/analytics';

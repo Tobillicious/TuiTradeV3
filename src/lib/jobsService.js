@@ -1,3 +1,9 @@
+// =============================================
+// jobsService.js - Job Data Management & Integration
+// --------------------------------------------------
+// Provides helpers for fetching, updating, and integrating job data from Firestore
+// or external job boards. Used for job listings, search, and application flows.
+// =============================================
 // Real Job Service - Firestore integration for job listings and applications
 // Replaces mock data with actual database operations
 

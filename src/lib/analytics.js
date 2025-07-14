@@ -1,3 +1,9 @@
+// =============================================
+// analytics.js - Analytics & Event Tracking Utilities
+// ---------------------------------------------------
+// Provides helpers for tracking user events, page views, and performance metrics.
+// Integrates with analytics providers for monitoring app usage and engagement.
+// =============================================
 // Analytics and User Tracking System for TuiTrade
 class AnalyticsManager {
   constructor() {
@@ -7,20 +13,20 @@ class AnalyticsManager {
     this.pageViews = [];
     this.userProperties = {};
     this.startTime = Date.now();
-    
+
     this.init();
   }
 
   init() {
     // Set up session tracking
     this.setupSessionTracking();
-    
+
     // Track page visibility changes
     this.setupVisibilityTracking();
-    
+
     // Track user interactions
     this.setupInteractionTracking();
-    
+
     // Send data periodically
     this.setupPeriodicSync();
   }
@@ -136,7 +142,7 @@ class AnalyticsManager {
     try {
       // In a real app, this would send to your analytics service
       // For now, we'll store in localStorage and console.log
-      
+
       const analyticsData = {
         eventType,
         eventData,
@@ -149,12 +155,12 @@ class AnalyticsManager {
       // Store in localStorage for now
       const stored = JSON.parse(localStorage.getItem('tuitrade_analytics') || '[]');
       stored.push(analyticsData);
-      
+
       // Keep only last 1000 events
       if (stored.length > 1000) {
         stored.splice(0, stored.length - 1000);
       }
-      
+
       localStorage.setItem('tuitrade_analytics', JSON.stringify(stored));
 
       // Log in development
@@ -198,7 +204,7 @@ class AnalyticsManager {
   // Setup visibility tracking
   setupVisibilityTracking() {
     let visibilityStart = Date.now();
-    
+
     document.addEventListener('visibilitychange', () => {
       if (document.hidden) {
         this.trackEvent('page_blur', {
@@ -217,7 +223,7 @@ class AnalyticsManager {
     document.addEventListener('click', (event) => {
       const target = event.target;
       const tagName = target.tagName.toLowerCase();
-      
+
       if (['button', 'a', 'input'].includes(tagName)) {
         this.trackEvent('click', {
           element: tagName,
@@ -251,7 +257,7 @@ class AnalyticsManager {
   async syncAnalytics() {
     try {
       const stored = JSON.parse(localStorage.getItem('tuitrade_analytics') || '[]');
-      
+
       if (stored.length > 0) {
         // In production, send to your analytics service
         // await fetch('/api/analytics/batch', {
@@ -259,7 +265,7 @@ class AnalyticsManager {
         //   headers: { 'Content-Type': 'application/json' },
         //   body: JSON.stringify(stored)
         // });
-        
+
         // Clear sent data
         // localStorage.removeItem('tuitrade_analytics');
       }
@@ -271,7 +277,7 @@ class AnalyticsManager {
   // Get analytics summary
   getAnalyticsSummary() {
     const stored = JSON.parse(localStorage.getItem('tuitrade_analytics') || '[]');
-    
+
     return {
       totalEvents: stored.length,
       sessionId: this.sessionId,
@@ -286,7 +292,7 @@ class AnalyticsManager {
   // A/B Testing support
   getExperimentVariant(experimentName) {
     const storedVariants = JSON.parse(localStorage.getItem('tuitrade_experiments') || '{}');
-    
+
     if (storedVariants[experimentName]) {
       return storedVariants[experimentName];
     }
@@ -295,12 +301,12 @@ class AnalyticsManager {
     const variant = Math.random() < 0.5 ? 'A' : 'B';
     storedVariants[experimentName] = variant;
     localStorage.setItem('tuitrade_experiments', JSON.stringify(storedVariants));
-    
+
     this.trackEvent('experiment_assignment', {
       experimentName,
       variant
     });
-    
+
     return variant;
   }
 
@@ -315,28 +321,34 @@ class AnalyticsManager {
   }
 }
 
+// ========== AI Agent Guidance ==========
+// The following analytics logic stores events in localStorage and logs to console for development.
+// NEXT STEPS: Integrate a real analytics backend (e.g., Google Analytics, Segment, custom API).
+// - Replace or supplement localStorage logic with API calls to analytics service.
+// - Ensure privacy and compliance for user data.
+// Note: Claude or future agents may override these suggestions if they disagree.
 // Create singleton instance
 export const analytics = new AnalyticsManager();
 
 // Convenience functions
 export const trackPageView = (page, data) => analytics.trackPageView(page, data);
 export const trackEvent = (eventName, data) => analytics.trackEvent(eventName, data);
-export const trackEngagement = (action, category, label, value) => 
+export const trackEngagement = (action, category, label, value) =>
   analytics.trackEngagement(action, category, label, value);
-export const trackSearch = (query, resultCount, filters) => 
+export const trackSearch = (query, resultCount, filters) =>
   analytics.trackSearch(query, resultCount, filters);
-export const trackItemInteraction = (action, itemId, itemData) => 
+export const trackItemInteraction = (action, itemId, itemData) =>
   analytics.trackItemInteraction(action, itemId, itemData);
-export const trackConversion = (type, value, itemId) => 
+export const trackConversion = (type, value, itemId) =>
   analytics.trackConversion(type, value, itemId);
 export const trackError = (error, context) => analytics.trackError(error, context);
-export const trackPerformance = (metric, value, context) => 
+export const trackPerformance = (metric, value, context) =>
   analytics.trackPerformance(metric, value, context);
 export const setUserId = (userId) => analytics.setUserId(userId);
 export const setUserProperty = (key, value) => analytics.setUserProperty(key, value);
-export const getExperimentVariant = (experimentName) => 
+export const getExperimentVariant = (experimentName) =>
   analytics.getExperimentVariant(experimentName);
-export const trackExperimentConversion = (experimentName, conversionType) => 
+export const trackExperimentConversion = (experimentName, conversionType) =>
   analytics.trackExperimentConversion(experimentName, conversionType);
 
 export default analytics;

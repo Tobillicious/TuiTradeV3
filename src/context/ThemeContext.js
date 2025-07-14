@@ -1,3 +1,9 @@
+// =============================================
+// ThemeContext.js - Dark/Light Theme State Management
+// ---------------------------------------------------
+// Provides context and provider for dark/light mode theme switching.
+// Used throughout the app for consistent theming and user preference.
+// =============================================
 // src/context/ThemeContext.js
 import { createContext, useContext, useState, useEffect } from 'react';
 
@@ -17,15 +23,15 @@ export const ThemeProvider = ({ children }) => {
     useEffect(() => {
         try {
             // Check for saved theme preference or default to light mode
-            const savedTheme = typeof window !== 'undefined' && window.localStorage 
-                ? localStorage.getItem('theme') 
+            const savedTheme = typeof window !== 'undefined' && window.localStorage
+                ? localStorage.getItem('theme')
                 : null;
-            
+
             // Check if matchMedia is available (not available in Jest/JSDOM)
-            const prefersDark = typeof window !== 'undefined' && window.matchMedia 
-                ? window.matchMedia('(prefers-color-scheme: dark)').matches 
+            const prefersDark = typeof window !== 'undefined' && window.matchMedia
+                ? window.matchMedia('(prefers-color-scheme: dark)').matches
                 : false;
-            
+
             if (savedTheme) {
                 setIsDarkMode(savedTheme === 'dark');
             } else if (prefersDark) {
@@ -49,7 +55,7 @@ export const ThemeProvider = ({ children }) => {
                     root.classList.remove('dark');
                 }
             }
-            
+
             // Save theme preference
             if (typeof window !== 'undefined' && window.localStorage) {
                 localStorage.setItem('theme', isDarkMode ? 'dark' : 'light');

@@ -1,3 +1,10 @@
+// =============================================
+// firebase.js - Firebase Configuration & Initialization
+// -----------------------------------------------------
+// Handles Firebase app setup, environment validation, and provides
+// initialized services (auth, firestore, storage, realtime db) for the app.
+// Includes development-time mocks for missing env vars.
+// =============================================
 // src/lib/firebase.js
 
 import { initializeApp } from 'firebase/app';
@@ -95,8 +102,8 @@ try {
     realtimeDb = {
       ref: () => ({
         set: () => Promise.reject(new Error('Firebase not configured')),
-        on: () => () => {},
-        off: () => {},
+        on: () => () => { },
+        off: () => { },
         once: () => Promise.reject(new Error('Firebase not configured'))
       })
     };
@@ -134,10 +141,17 @@ try {
     auth = { onAuthStateChanged: () => () => { }, signOut: () => Promise.resolve(), currentUser: null };
     db = { collection: () => ({ add: () => Promise.reject(error), get: () => Promise.reject(error) }) };
     storage = { ref: () => ({ put: () => Promise.reject(error) }) };
-    realtimeDb = { ref: () => ({ set: () => Promise.reject(error), on: () => () => {}, off: () => {} }) };
+    realtimeDb = { ref: () => ({ set: () => Promise.reject(error), on: () => () => { }, off: () => { } }) };
   } else {
     throw error;
   }
 }
+
+// ========== AI Agent Guidance ==========
+// The following block provides a MOCK Firebase implementation for development when env vars are missing.
+// NEXT STEPS: Replace with real Firebase config and remove mocks for production.
+// - Ensure all required env vars are set in .env
+// - Remove or disable mock objects before deploying to production.
+// Note: Claude or future agents may override these suggestions if they disagree.
 
 export { auth, db, storage, realtimeDb };

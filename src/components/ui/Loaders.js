@@ -1,3 +1,9 @@
+// =============================================
+// Loaders.js - Loading Spinners & Skeletons
+// ------------------------------------------
+// Provides reusable loading indicators and skeleton components for async UI states.
+// Used throughout the app for better UX during data fetching and transitions.
+// =============================================
 // src/components/ui/Loaders.js
 import React from 'react';
 import { Loader2, AlertCircle, CheckCircle } from 'lucide-react';

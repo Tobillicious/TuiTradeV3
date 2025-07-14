@@ -1,14 +1,18 @@
-// Enhanced Category Browser Component
-// Navigate deep category hierarchies with brand/model selection
+// =============================================
+// CategoryBrowser.js - Category Navigation UI
+// -------------------------------------------
+// Provides a UI component for browsing and navigating deep category hierarchies.
+// Used on landing pages and throughout the app for category selection.
+// =============================================
 
 import React, { useState, useMemo, useCallback } from 'react';
 import { ChevronRight, ChevronDown, Search, Star, Tag, Filter, ArrowLeft } from 'lucide-react';
 import { ENHANCED_CATEGORIES, getBrandsForCategory, getAttributesForCategory } from '../../lib/enhancedCategories';
 
-const CategoryBrowser = ({ 
-    onCategorySelect, 
-    selectedPath = [], 
-    showBrands = true, 
+const CategoryBrowser = ({
+    onCategorySelect,
+    selectedPath = [],
+    showBrands = true,
     showFilters = true,
     mode = 'browse' // 'browse', 'select', 'filter'
 }) => {
@@ -22,7 +26,7 @@ const CategoryBrowser = ({
     // Get current category data based on selected path
     const currentCategory = useMemo(() => {
         let current = ENHANCED_CATEGORIES;
-        
+
         for (const pathItem of selectedPath) {
             if (current[pathItem]?.subcategories) {
                 current = current[pathItem].subcategories;
@@ -30,7 +34,7 @@ const CategoryBrowser = ({
                 break;
             }
         }
-        
+
         return current;
     }, [selectedPath]);
 
@@ -49,14 +53,14 @@ const CategoryBrowser = ({
     // Filter categories based on search
     const filteredCategories = useMemo(() => {
         if (!searchTerm) return currentCategory;
-        
+
         const filtered = {};
         Object.entries(currentCategory).forEach(([key, category]) => {
             if (category.name?.toLowerCase().includes(searchTerm.toLowerCase())) {
                 filtered[key] = category;
             }
         });
-        
+
         return filtered;
     }, [currentCategory, searchTerm]);
 
@@ -74,13 +78,13 @@ const CategoryBrowser = ({
 
     const handleCategoryClick = useCallback((categoryKey, categoryData) => {
         const newPath = [...selectedPath, categoryKey];
-        
+
         if (categoryData.subcategories) {
             // Navigate deeper
             setBreadcrumb(prev => [...prev, { key: categoryKey, name: categoryData.name }]);
             setViewLevel(prev => prev + 1);
         }
-        
+
         onCategorySelect({
             path: newPath,
             category: categoryData,
@@ -93,7 +97,7 @@ const CategoryBrowser = ({
     const handleBrandSelect = useCallback((brandKey, brandData) => {
         setSelectedBrand(brandKey);
         setSelectedModel(null);
-        
+
         onCategorySelect({
             path: selectedPath,
             brand: brandKey,
@@ -104,7 +108,7 @@ const CategoryBrowser = ({
 
     const handleModelSelect = useCallback((modelKey, modelData) => {
         setSelectedModel(modelKey);
-        
+
         onCategorySelect({
             path: selectedPath,
             brand: selectedBrand,
@@ -161,7 +165,7 @@ const CategoryBrowser = ({
             {Object.entries(filteredCategories).map(([key, category]) => {
                 const isExpanded = expandedCategories.has(key);
                 const hasSubcategories = category.subcategories && Object.keys(category.subcategories).length > 0;
-                
+
                 return (
                     <div
                         key={key}
@@ -186,7 +190,7 @@ const CategoryBrowser = ({
                                 <ChevronRight className="text-gray-400" size={16} />
                             )}
                         </div>
-                        
+
                         {category.subcategories && (
                             <div className="mt-3 text-xs text-gray-500">
                                 {Object.keys(category.subcategories).length} subcategories
@@ -212,11 +216,10 @@ const CategoryBrowser = ({
                         <button
                             key={brandKey}
                             onClick={() => handleBrandSelect(brandKey, brandData)}
-                            className={`p-3 border rounded-lg text-left transition-colors ${
-                                selectedBrand === brandKey
+                            className={`p-3 border rounded-lg text-left transition-colors ${selectedBrand === brandKey
                                     ? 'border-green-500 bg-green-50 text-green-700'
                                     : 'border-gray-200 hover:border-gray-300'
-                            }`}
+                                }`}
                         >
                             <div className="font-medium">{brandData.name}</div>
                             {brandData.models && (
@@ -245,11 +248,10 @@ const CategoryBrowser = ({
                         <button
                             key={modelKey}
                             onClick={() => handleModelSelect(modelKey, modelData)}
-                            className={`p-3 border rounded-lg text-left transition-colors ${
-                                selectedModel === modelKey
+                            className={`p-3 border rounded-lg text-left transition-colors ${selectedModel === modelKey
                                     ? 'border-green-500 bg-green-50 text-green-700'
                                     : 'border-gray-200 hover:border-gray-300'
-                            }`}
+                                }`}
                         >
                             <div className="font-medium">{modelData.name}</div>
                             {modelData.variants && (
@@ -323,12 +325,12 @@ export const QuickCategorySelector = ({ onSelect, selectedPath = [] }) => {
 
     const formatSelection = () => {
         if (selectedPath.length === 0) return 'Select Category';
-        
+
         let display = selectedPath.map(path => {
             const parts = path.split('-');
             return parts.map(part => part.charAt(0).toUpperCase() + part.slice(1)).join(' ');
         }).join(' › ');
-        
+
         return display;
     };
 
@@ -346,7 +348,7 @@ export const QuickCategorySelector = ({ onSelect, selectedPath = [] }) => {
                     <ChevronDown className={`transform transition-transform ${isOpen ? 'rotate-180' : ''}`} size={16} />
                 </div>
             </button>
-            
+
             {isOpen && (
                 <div className="absolute top-full left-0 right-0 z-50 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-96 overflow-y-auto">
                     <CategoryBrowser

@@ -1,5 +1,9 @@
-// Advanced Data Validation Service - Comprehensive input validation and business logic
-// Handles complex validation rules, business constraints, and data integrity
+// =============================================
+// validationService.js - Input Validation Utilities
+// -------------------------------------------------
+// Provides helpers for validating user input, forms, and data integrity
+// throughout the app. Used for security and user experience.
+// =============================================
 
 import SecurityService from './securityService';
 
@@ -110,7 +114,7 @@ class ValidationService {
 
   static validateRange(value, min, max, fieldName) {
     const numValue = Number(value);
-    
+
     if (isNaN(numValue)) {
       return {
         isValid: false,
@@ -223,7 +227,7 @@ class ValidationService {
     if (!requiredCheck.isValid) return requiredCheck;
 
     const emailPattern = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/;
-    
+
     if (!emailPattern.test(email)) {
       return {
         isValid: false,
@@ -240,7 +244,7 @@ class ValidationService {
       '10minutemail.com', 'tempmail.org', 'guerrillamail.com',
       'mailinator.com', 'yopmail.com', 'throwaway.email'
     ];
-    
+
     const domain = email.split('@')[1]?.toLowerCase();
     if (disposableDomains.includes(domain)) {
       return {
@@ -263,7 +267,7 @@ class ValidationService {
 
     // Use SecurityService for comprehensive password validation
     const strengthCheck = SecurityService.validatePasswordStrength(password);
-    
+
     if (!strengthCheck.isValid) {
       return {
         isValid: false,
@@ -284,7 +288,7 @@ class ValidationService {
     };
 
     const password_lower = password.toLowerCase();
-    
+
     for (const [key, value] of Object.entries(userData_lower)) {
       if (value && value.length > 2 && password_lower.includes(value)) {
         return {
@@ -644,13 +648,13 @@ class ValidationService {
   // Data sanitization methods
   static sanitizeUserData(userData) {
     const sanitized = {};
-    
+
     Object.entries(userData).forEach(([key, value]) => {
       if (typeof value === 'string') {
         sanitized[key] = SecurityService.sanitizeInput(value, {
-          maxLength: key === 'bio' ? BUSINESS_RULES.user.bioLength.max : 
-                    key.includes('name') ? BUSINESS_RULES.user.nameLength.max : 
-                    500
+          maxLength: key === 'bio' ? BUSINESS_RULES.user.bioLength.max :
+            key.includes('name') ? BUSINESS_RULES.user.nameLength.max :
+              500
         });
       } else {
         sanitized[key] = value;
@@ -662,13 +666,13 @@ class ValidationService {
 
   static sanitizeJobData(jobData) {
     const sanitized = {};
-    
+
     Object.entries(jobData).forEach(([key, value]) => {
       if (typeof value === 'string') {
         sanitized[key] = SecurityService.sanitizeInput(value, {
           maxLength: key === 'description' ? BUSINESS_RULES.job.descriptionLength.max :
-                    key === 'title' ? BUSINESS_RULES.job.titleLength.max :
-                    1000,
+            key === 'title' ? BUSINESS_RULES.job.titleLength.max :
+              1000,
           allowHTML: key === 'description' // Allow basic HTML in job descriptions
         });
       } else {
@@ -681,13 +685,13 @@ class ValidationService {
 
   static sanitizeApplicationData(applicationData) {
     const sanitized = {};
-    
+
     Object.entries(applicationData).forEach(([key, value]) => {
       if (typeof value === 'string') {
         sanitized[key] = SecurityService.sanitizeInput(value, {
           maxLength: key === 'coverLetter' ? BUSINESS_RULES.application.coverLetterLength.max :
-                    key === 'experience' ? BUSINESS_RULES.application.experienceLength.max :
-                    500
+            key === 'experience' ? BUSINESS_RULES.application.experienceLength.max :
+              500
         });
       } else {
         sanitized[key] = value;
@@ -699,13 +703,13 @@ class ValidationService {
 
   static sanitizeCompanyData(companyData) {
     const sanitized = {};
-    
+
     Object.entries(companyData).forEach(([key, value]) => {
       if (typeof value === 'string') {
         sanitized[key] = SecurityService.sanitizeInput(value, {
           maxLength: key === 'description' ? BUSINESS_RULES.company.descriptionLength.max :
-                    key === 'name' ? BUSINESS_RULES.company.nameLength.max :
-                    500
+            key === 'name' ? BUSINESS_RULES.company.nameLength.max :
+              500
         });
       } else {
         sanitized[key] = value;

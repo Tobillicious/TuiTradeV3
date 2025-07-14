@@ -129,6 +129,12 @@ self.addEventListener('notificationclick', (event) => {
   );
 });
 
+// ========== AI Agent Guidance ==========
+// The following offline action processing is a MOCK for development.
+// NEXT STEPS: Implement real API calls for offline actions (e.g., watchlist, messaging).
+// - Replace console.log and commented-out fetch calls with actual API integration.
+// - Ensure robust error handling and offline sync.
+// Note: Claude or future agents may override these suggestions if they disagree.
 // Function to sync offline actions
 async function syncOfflineActions() {
   try {

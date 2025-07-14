@@ -1,3 +1,9 @@
+// =============================================
+// TeReoAudit.js - Te Reo Māori Coverage Audit Tool
+// ------------------------------------------------
+// Provides a tool for auditing and reporting Te Reo Māori coverage
+// across the app. Used to ensure bilingual support and identify gaps.
+// =============================================
 // Te Reo Māori Audit Component
 // Helps identify areas that need translation coverage and improve Māori language integration
 
@@ -221,8 +227,8 @@ const TeReoAudit = ({ onClose }) => {
                                         <div className="flex items-center justify-between mb-2">
                                             <h4 className="font-medium text-gray-900">{section.name}</h4>
                                             <span className={`px-2 py-1 rounded-full text-xs font-medium ${section.coverage >= 90 ? 'bg-green-100 text-green-800' :
-                                                    section.coverage >= 75 ? 'bg-yellow-100 text-yellow-800' :
-                                                        'bg-red-100 text-red-800'
+                                                section.coverage >= 75 ? 'bg-yellow-100 text-yellow-800' :
+                                                    'bg-red-100 text-red-800'
                                                 }`}>
                                                 {section.coverage.toFixed(1)}%
                                             </span>
@@ -235,8 +241,8 @@ const TeReoAudit = ({ onClose }) => {
                                             <div className="w-full bg-gray-200 rounded-full h-2">
                                                 <div
                                                     className={`h-2 rounded-full transition-all ${section.coverage >= 90 ? 'bg-green-500' :
-                                                            section.coverage >= 75 ? 'bg-yellow-500' :
-                                                                'bg-red-500'
+                                                        section.coverage >= 75 ? 'bg-yellow-500' :
+                                                            'bg-red-500'
                                                         }`}
                                                     style={{ width: `${section.coverage}%` }}
                                                 ></div>

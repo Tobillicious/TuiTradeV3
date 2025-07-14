@@ -1,3 +1,9 @@
+// =============================================
+// nzLocalizationEnhanced.js - NZ & Te Reo Māori Localization Utilities
+// --------------------------------------------------------------------
+// Provides enhanced localization helpers, translation dictionaries, and
+// bilingual support for UI, categories, and region-specific features.
+// =============================================
 // Enhanced New Zealand Localization with Te Reo Māori Integration
 // Comprehensive NZ-specific data including real suburbs, postcodes, and bilingual elements
 
@@ -48,6 +54,26 @@ export const TE_REO_TRANSLATIONS = {
     'pickup': 'tiki', // pickup
     'payment': 'utu', // payment
     'secure': 'haumaru', // secure
+    'trustworthy': 'pono', // trustworthy/honest
+    'quality': 'kounga', // quality
+    'authentic': 'taketake', // authentic/genuine
+    'pride': 'whakapehapeha', // pride
+    'respect': 'whakatōhea', // respect
+    'unity': 'kotahitanga', // unity
+    'strength': 'kaha', // strength
+    'wisdom': 'māramatanga', // wisdom/understanding
+    'care': 'manaaki', // care/hospitality
+    'love': 'aroha', // love
+    'family': 'whānau', // family
+    'people': 'tangata', // people
+    'success': 'angitu', // success
+    'dream': 'moemoea', // dream
+    'future': 'taima', // future
+    'change': 'huringa', // change
+    'growth': 'tipu', // growth
+    'opportunity': 'rēhia', // opportunity
+    'impact': 'pānga', // impact/effect
+    'difference': 'rereketanga' // difference
     'verified': 'whakamana', // verified
     'rating': 'whakatauranga', // rating
     'review': 'arotake', // review

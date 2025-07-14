@@ -1,3 +1,10 @@
+// =============================================
+// AppContext.js - Global App State Context
+// ---------------------------------------------
+// Provides a context for global app state (user, watchlist, cart, handlers).
+// Used for sharing state and actions across the app without prop drilling.
+// Includes development-time validation and logging for debugging.
+// =============================================
 // src/context/AppContext.js
 import React, { createContext, useContext } from 'react';
 import { validateContextState } from '../lib/debugUtils';
@@ -8,10 +15,10 @@ const defaultAppContext = {
     currentUser: null,
     watchedItems: [],
     cartItems: [],
-    onWatchToggle: () => {},
-    onAddToCart: () => {},
-    onBuyNow: () => {},
-    onContactSeller: () => {},
+    onWatchToggle: () => { },
+    onAddToCart: () => { },
+    onBuyNow: () => { },
+    onContactSeller: () => { },
 };
 
 const AppContext = createContext(defaultAppContext);
@@ -21,7 +28,7 @@ export const AppProvider = ({ children, value }) => {
     if (process.env.NODE_ENV === 'development') {
         console.group('🔧 AppProvider: Validating provided value');
         console.log('Provided value:', value);
-        
+
         if (value) {
             Object.entries(value).forEach(([key, val]) => {
                 if ((key === 'watchedItems' || key === 'cartItems') && !Array.isArray(val)) {
@@ -34,7 +41,7 @@ export const AppProvider = ({ children, value }) => {
 
     // Merge provided values with defaults to ensure all properties exist
     const safeValue = { ...defaultAppContext, ...value };
-    
+
     // Enhanced array validation
     safeValue.watchedItems = Array.isArray(safeValue.watchedItems) ? safeValue.watchedItems : [];
     safeValue.cartItems = Array.isArray(safeValue.cartItems) ? safeValue.cartItems : [];
@@ -50,16 +57,16 @@ export const AppProvider = ({ children, value }) => {
 
 export const useAppContext = () => {
     const context = useContext(AppContext);
-    
+
     if (process.env.NODE_ENV === 'development') {
         console.group('🔍 useAppContext: Hook called');
         console.log('Raw context:', context);
     }
-    
+
     if (!context) {
         logError('Context', 'useAppContext used outside AppProvider!', null, 'useAppContext');
         console.trace('Call stack:');
-        
+
         if (process.env.NODE_ENV === 'development') {
             // Alert in development to make this obvious
             window.debugDetector?.handleError({
@@ -68,11 +75,11 @@ export const useAppContext = () => {
                 stack: new Error().stack
             });
         }
-        
+
         console.groupEnd();
         return defaultAppContext;
     }
-    
+
     // Enhanced safety check with logging
     const safeContext = {
         ...context,
@@ -86,7 +93,7 @@ export const useAppContext = () => {
             receivedType: typeof context.watchedItems,
             receivedValue: context.watchedItems
         }, 'useAppContext');
-        
+
         window.debugDetector?.handleError({
             type: 'Context Data Error',
             message: `watchedItems was ${typeof context.watchedItems} instead of array`,
@@ -94,13 +101,13 @@ export const useAppContext = () => {
             stack: new Error().stack
         });
     }
-    
+
     if (!Array.isArray(context.cartItems)) {
         logError('ContextData', 'Fixed cartItems - was not an array', {
             receivedType: typeof context.cartItems,
             receivedValue: context.cartItems
         }, 'useAppContext');
-        
+
         window.debugDetector?.handleError({
             type: 'Context Data Error',
             message: `cartItems was ${typeof context.cartItems} instead of array`,
@@ -115,6 +122,6 @@ export const useAppContext = () => {
         logContextState('useAppContext', 'App', safeContext);
         console.groupEnd();
     }
-    
+
     return safeContext;
 };

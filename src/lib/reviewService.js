@@ -1,5 +1,9 @@
-// Comprehensive Review and Rating Service - Trust and reputation system
-// Handles user reviews, ratings, seller verification, and trust metrics
+// =============================================
+// reviewService.js - Review & Rating Management
+// ---------------------------------------------
+// Provides helpers for managing user/item reviews and ratings, including
+// Firestore integration and aggregation logic. Used for trust and reputation.
+// =============================================
 
 import {
   collection,

@@ -1,3 +1,9 @@
+// =============================================
+// pushNotificationService.js - Push Notification Logic
+// ----------------------------------------------------
+// Handles push notification registration, delivery, and management
+// for real-time user notifications. Integrates with NotificationBell and context.
+// =============================================
 // src/lib/pushNotificationService.js
 import { getMessaging, getToken, onMessage, isSupported } from 'firebase/messaging';
 import { doc, setDoc, updateDoc, arrayUnion, arrayRemove, onSnapshot, collection, query, where, orderBy, limit } from 'firebase/firestore';

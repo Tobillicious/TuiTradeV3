@@ -1,5 +1,9 @@
-// Payment Service - Stripe Integration for TuiTrade
-// Handles card processing, NZ bank transfers, and Afterpay integration
+// =============================================
+// paymentService.js - Payment Processing Logic
+// --------------------------------------------
+// Handles payment processing, fee calculation, and integration with Stripe
+// and other payment methods. Used for checkout, order management, and seller fees.
+// =============================================
 
 import { loadStripe } from '@stripe/stripe-js';
 
@@ -35,6 +39,12 @@ export const AFTERPAY_LIMITS = {
     SUPPORTED_CURRENCIES: ['NZD']
 };
 
+// ========== AI Agent Guidance ==========
+// The following mockApiCall and related logic are for development only.
+// NEXT STEPS: Replace with real API endpoints for payment processing, bank transfer, Afterpay, and escrow.
+// - Implement actual backend endpoints for each payment method.
+// - Remove or disable mockApiCall in production.
+// Note: Claude or future agents may override these suggestions if they disagree.
 // Mock API function for development
 const mockApiCall = async (endpoint, data) => {
     if (isDevelopment) {
