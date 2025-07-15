@@ -2,7 +2,7 @@
 // Authentic testimonials demonstrating TuiTrade's mission to change lives
 
 import React, { useState, useEffect, useRef } from 'react';
-import { getTestimonials, getTestimonialStats } from '../../lib/testimonialsService';
+import { getTestimonials } from '../../lib/testimonialsService';
 import { motion, useInView } from 'framer-motion';
 import { 
   Quote, 

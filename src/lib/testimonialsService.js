@@ -17,8 +17,7 @@ import {
   where,
   orderBy,
   limit,
-  serverTimestamp,
-  runTransaction
+  serverTimestamp
 } from 'firebase/firestore';
 import { db } from './firebase';
 
@@ -52,6 +51,13 @@ export const getTestimonials = async (options = {}) => {
       verified = true
     } = options;
 
+    // For now, return fallback testimonials to prevent errors
+    // This can be updated once the Firebase collection is properly set up
+    console.log('Using fallback testimonials - Firebase collection not yet initialized');
+    return getFallbackTestimonials(options);
+    
+    // TODO: Uncomment this code once Firebase testimonials collection is set up
+    /*
     let q = collection(db, 'testimonials');
     
     // Apply filters
@@ -87,6 +93,7 @@ export const getTestimonials = async (options = {}) => {
     });
     
     return testimonials;
+    */
   } catch (error) {
     console.error('Error fetching testimonials:', error);
     // Return fallback testimonials if Firebase fails

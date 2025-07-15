@@ -94,7 +94,7 @@ window.clearDebugErrors = () => {
 };
 
 // Context validation function
-export function validateContextState(contextName, state) {
+export const validateContextState = (contextName, state) => {
     if (!state) {
         console.warn(`⚠️ ${contextName} context state is null/undefined`);
         return false;
@@ -102,10 +102,10 @@ export function validateContextState(contextName, state) {
     
     console.log(`✅ ${contextName} context validation passed`, state);
     return true;
-}
+};
 
 // Safe array operation function
-export function safeArrayOperation(array, operation, fallback = []) {
+export const safeArrayOperation = (array, operation, fallback = []) => {
     try {
         if (!Array.isArray(array)) {
             console.warn(`⚠️ safeArrayOperation: Expected array but received ${typeof array}`, array);
@@ -116,7 +116,7 @@ export function safeArrayOperation(array, operation, fallback = []) {
         console.error('🚨 safeArrayOperation error:', error);
         return fallback;
     }
-}
+};
 
 console.log('🔍 Debug detector active - monitoring for runtime errors');
 console.log('💡 Use window.getErrorReport() to see all caught errors');
