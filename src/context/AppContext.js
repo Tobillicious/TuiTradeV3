@@ -7,8 +7,8 @@
 // =============================================
 // src/context/AppContext.js
 import React, { createContext, useContext } from 'react';
-// import { validateContextState } from '../lib/debugUtils'; // Temporarily disabled
-import { logContextState, logError, logWarn } from '../lib/logger';
+import { logContextState, logError } from '../lib/logger';
+import { validateContextState } from '../lib/debugUtils';
 
 // Provide safe default values to prevent undefined errors
 const defaultAppContext = {
@@ -48,8 +48,7 @@ export const AppProvider = ({ children, value }) => {
 
     if (process.env.NODE_ENV === 'development') {
         console.log('🛡️ AppProvider: Final safe value:', safeValue);
-        // TODO: Re-enable validation once import issue is resolved
-        // validateContextState('App', safeValue);
+        validateContextState('App', safeValue);
         logContextState('AppProvider', 'App', safeValue);
     }
 
