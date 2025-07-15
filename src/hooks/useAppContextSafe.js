@@ -3,7 +3,7 @@
 // Prevents common errors with missing context values
 
 import { useAppContext } from '../context/AppContext';
-import { safeArrayOperation } from '../lib/debugUtils';
+// import { safeArrayOperation } from '../lib/debugUtils'; // Temporarily disabled
 
 export const useAppContextSafe = () => {
   const contextValue = useAppContext();
@@ -31,8 +31,8 @@ export const useAppContextSafe = () => {
   } = contextValue || {};
   
   // Use safe array operations to prevent includes() and other array method errors
-  const watchedItems = safeArrayOperation(rawWatchedItems, Array.prototype.includes, []);
-  const cartItems = safeArrayOperation(rawCartItems, Array.prototype.includes, []);
+  const watchedItems = Array.isArray(rawWatchedItems) ? rawWatchedItems : [];
+  const cartItems = Array.isArray(rawCartItems) ? rawCartItems : [];
   
   // Helper functions for common operations
   const isItemWatched = (itemId) => {
