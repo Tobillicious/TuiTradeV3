@@ -2,6 +2,7 @@
 // Authentic testimonials demonstrating TuiTrade's mission to change lives
 
 import React, { useState, useEffect, useRef } from 'react';
+import { getTestimonials, getTestimonialStats } from '../../lib/testimonialsService';
 import { motion, useInView } from 'framer-motion';
 import { 
   Quote, 
@@ -40,182 +41,26 @@ const TestimonialSystem = ({
   const containerRef = useRef(null);
   const isInView = useInView(containerRef, { once: true, threshold: 0.1 });
 
-  // Real testimonials showcasing life-changing impact
-  const realTestimonials = [
-    {
-      id: 1,
-      name: "Sarah Williams",
-      location: "Auckland, NZ",
-      category: "jobs",
-      occupation: "Single Mother → Software Developer",
-      avatar: "/images/testimonials/sarah.jpg",
-      rating: 5,
-      date: "2024-01-15",
-      verified: true,
-      impactType: "career_change",
-      content: "TuiTrade's job platform changed everything for my family. After being unemployed for 8 months, I found a remote coding role that lets me support my children while building a career. The employers here actually care about people, not just profit.",
-      maoriContent: "I TuiTrade i whakataone ai taku whānau katoa. He roa au kore mahi, ā kua kitea he mahi rorohiko e āwhina ana i ahau me aku tamariki.",
-      beforeAfter: {
-        before: "Unemployed single mother struggling to pay rent",
-        after: "Full-time software developer earning $85k annually"
-      },
-      childrenHelped: 2,
-      monthlyIncome: 7000,
-      videoUrl: "/videos/testimonials/sarah-story.mp4",
-      tags: ["career-change", "remote-work", "family-support", "coding"],
-      metrics: {
-        livesChanged: 3, // Sarah + 2 children
-        economicImpact: 85000,
-        timeToSuccess: "3 months"
-      }
-    },
-    {
-      id: 2,
-      name: "Te Whetu Māori",
-      location: "Rotorua, NZ",
-      category: "community",
-      occupation: "Community Organizer",
-      avatar: "/images/testimonials/te-whetu.jpg",
-      rating: 5,
-      date: "2024-02-20",
-      verified: true,
-      impactType: "community_building",
-      content: "Through TuiTrade, our marae connected with families who needed support. We've helped 15 whānau find housing, jobs, and community connections. This platform understands our values - it's about people helping people.",
-      maoriContent: "Nā TuiTrade i whakahono ai tō mātou marae ki ngā whānau hiakai. Kua āwhina mātou i ngā whānau 15 ki te kimi whare, mahi, hoki ai ki te hapori.",
-      beforeAfter: {
-        before: "Isolated families struggling without community support",
-        after: "Connected network of 15 families with stable housing and employment"
-      },
-      childrenHelped: 23,
-      communitiesConnected: 3,
-      tags: ["maori-culture", "community-support", "housing", "whakapapa"],
-      metrics: {
-        livesChanged: 47, // 15 families × average 3.1 people
-        communitiesHelped: 3,
-        timeToSuccess: "6 months"
-      }
-    },
-    {
-      id: 3,
-      name: "Michael Chen",
-      location: "Wellington, NZ",
-      category: "marketplace",
-      occupation: "Small Business Owner",
-      avatar: "/images/testimonials/michael.jpg",
-      rating: 5,
-      date: "2024-03-10",
-      verified: true,
-      impactType: "business_growth",
-      content: "I started selling handmade furniture on TuiTrade during COVID lockdowns. Now I employ 4 people and we've furnished homes for 200+ families. Every sale helps another family create a warm, loving home environment.",
-      maoriContent: "I tīmata ai au ki te hoko taputapu ringa mā TuiTrade. Ināianei he kaiwhakarato au mō ngā tangata 4, ā kua whakaritea ngā whare mō ngā whānau 200+.",
-      beforeAfter: {
-        before: "Unemployed during COVID with carpentry skills",
-        after: "Successful business owner employing 4 people"
-      },
-      businessRevenue: 180000,
-      employeesCreated: 4,
-      familiesServed: 234,
-      tags: ["small-business", "craftsmanship", "employment", "covid-recovery"],
-      metrics: {
-        livesChanged: 12, // Michael + 4 employees + families
-        jobsCreated: 4,
-        economicImpact: 180000,
-        timeToSuccess: "8 months"
-      }
-    },
-    {
-      id: 4,
-      name: "Emma Thompson",
-      location: "Christchurch, NZ",
-      category: "housing",
-      occupation: "Student → Homeowner",
-      avatar: "/images/testimonials/emma.jpg",
-      rating: 5,
-      date: "2024-01-28",
-      verified: true,
-      impactType: "housing_success",
-      content: "TuiTrade's housing network helped me find affordable accommodation near university. The landlord became a mentor, and now I'm studying to become a teacher. This platform creates genuine human connections, not just transactions.",
-      maoriContent: "Nā te rōpū whare o TuiTrade au i kitea ai he whare rau-rawa i tata ki te whare wānanga. He ākonga kaiako au ināianei.",
-      beforeAfter: {
-        before: "Homeless student sleeping in car",
-        after: "Stable housing, academic success, future teacher"
-      },
-      educationLevel: "University Graduate",
-      mentoredBy: "Landlord who became life coach",
-      tags: ["education", "housing-stability", "mentorship", "youth-development"],
-      metrics: {
-        livesChanged: 1,
-        educationImpact: true,
-        futureTeachingImpact: 25, // estimated students per year
-        timeToSuccess: "2 months"
-      }
-    },
-    {
-      id: 5,
-      name: "David and Maria Santos",
-      location: "Hamilton, NZ",
-      category: "family",
-      occupation: "Refugees → Restaurant Owners",
-      avatar: "/images/testimonials/santos-family.jpg",
-      rating: 5,
-      date: "2024-02-14",
-      verified: true,
-      impactType: "refugee_integration",
-      content: "We arrived in New Zealand with nothing. TuiTrade community helped us start a food truck, and now we own a restaurant employing 8 people. Our children feel proud of their heritage and their new home.",
-      maoriContent: "I tae mai mātou ki Aotearoa kāore he mea. Nā te hapori TuiTrade mātou i āwhina ai ki te tīmata i tētahi tarawene kai, ā he whare kai tō mātou ināianei.",
-      beforeAfter: {
-        before: "Recently arrived refugees with no income or connections",
-        after: "Successful restaurant owners contributing to local economy"
-      },
-      businessRevenue: 240000,
-      employeesCreated: 8,
-      childrenSupported: 3,
-      culturalContribution: "Authentic Brazilian cuisine",
-      tags: ["refugee-support", "cultural-integration", "family-business", "community-growth"],
-      metrics: {
-        livesChanged: 19, // Family of 5 + 8 employees + their families (est 6 more)
-        jobsCreated: 8,
-        economicImpact: 240000,
-        culturalImpact: true,
-        timeToSuccess: "14 months"
-      }
-    },
-    {
-      id: 6,
-      name: "James Tuhoro",
-      location: "Tauranga, NZ",
-      category: "youth",
-      occupation: "At-risk Youth → Youth Mentor",
-      avatar: "/images/testimonials/james.jpg",
-      rating: 5,
-      date: "2024-03-05",
-      verified: true,
-      impactType: "youth_transformation",
-      content: "TuiTrade gave me my first real job opportunity when no one else would. Now I mentor other rangatahi who've had similar struggles. Breaking the cycle isn't just about one person - it's about lifting the whole community.",
-      maoriContent: "Nā TuiTrade au i whakaahua ai ki tētahi mahi tuturu i a au kore ai he mea kē. Ināianei he kaitārape au mō ētahi atu rangatahi.",
-      beforeAfter: {
-        before: "At-risk youth with criminal record, no employment prospects",
-        after: "Full-time youth mentor preventing crime in community"
-      },
-      youthMentored: 12,
-      crimePrevention: "Estimated 8 young people diverted from crime",
-      communityRole: "Youth advocate and gang prevention specialist",
-      tags: ["youth-development", "crime-prevention", "mentorship", "second-chances"],
-      metrics: {
-        livesChanged: 25, // James + 12 mentored youth + families impacted
-        crimeReduction: 8,
-        communityImpact: true,
-        timeToSuccess: "6 months"
-      }
-    }
-  ];
 
+  // Load testimonials from Firebase
   useEffect(() => {
-    const filtered = filter === 'all' 
-      ? realTestimonials 
-      : realTestimonials.filter(t => t.category === filter);
-    setTestimonials(filtered.slice(0, maxItems));
-  }, [filter, maxItems, realTestimonials]);
+    const loadTestimonials = async () => {
+      try {
+        const testimonialsData = await getTestimonials({
+          category: filter,
+          maxItems,
+          featured: displayMode === 'featured',
+          verified: true
+        });
+        setTestimonials(testimonialsData);
+      } catch (error) {
+        console.error('Error loading testimonials:', error);
+        // Fallback handled by testimonialsService
+      }
+    };
+
+    loadTestimonials();
+  }, [filter, maxItems, displayMode]);
 
   useEffect(() => {
     if (!isPlaying || displayMode !== 'carousel') return;

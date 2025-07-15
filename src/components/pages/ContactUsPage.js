@@ -1,7 +1,8 @@
 // ContactUsPage - Life-changing support connection hub
 // Designed to connect community members with support that transforms lives
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { getTestimonials } from '../../lib/testimonialsService';
 import { ArrowLeft, Mail, Phone, MessageCircle, MapPin, Clock, Send, CheckCircle, AlertCircle, User, FileText, Star, Heart, Target, Users, Award, Sparkles, Home, Baby, Shield } from 'lucide-react';
 
 const ContactUsPage = ({ onNavigate }) => {
@@ -13,6 +14,89 @@ const ContactUsPage = ({ onNavigate }) => {
         category: 'general'
     });
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [testimonials, setTestimonials] = useState([]);
+
+    // Load real testimonials from Firebase
+    useEffect(() => {
+        const loadTestimonials = async () => {
+            try {
+                const testimonialsData = await getTestimonials({
+                    category: 'all',
+                    maxItems: 3,
+                    featured: true,
+                    verified: true
+                });
+                
+                // Transform to match ContactUs page format
+                const contactTestimonials = testimonialsData.map(t => ({
+                    name: t.name?.split(' ')[0] + ' ' + (t.name?.split(' ')[1]?.[0] || '') + '.',
+                    location: t.location || 'New Zealand',
+                    rating: t.rating || 5,
+                    comment: t.content || '',
+                    date: formatTimeAgo(t.date),
+                    impact: getImpactSummary(t)
+                }));
+                
+                setTestimonials(contactTestimonials);
+            } catch (error) {
+                console.error('Error loading testimonials:', error);
+                // Keep fallback testimonials if Firebase fails
+                setTestimonials(getFallbackTestimonials());
+            }
+        };
+
+        loadTestimonials();
+    }, []);
+
+    // Helper function to format time ago
+    const formatTimeAgo = (date) => {
+        if (!date) return 'recently';
+        const now = new Date();
+        const diffDays = Math.floor((now - new Date(date)) / (1000 * 60 * 60 * 24));
+        
+        if (diffDays === 0) return 'today';
+        if (diffDays === 1) return '1 day ago';
+        if (diffDays < 7) return `${diffDays} days ago`;
+        if (diffDays < 30) return `${Math.floor(diffDays / 7)} week${Math.floor(diffDays / 7) > 1 ? 's' : ''} ago`;
+        return `${Math.floor(diffDays / 30)} month${Math.floor(diffDays / 30) > 1 ? 's' : ''} ago`;
+    };
+
+    // Helper function to get impact summary
+    const getImpactSummary = (testimonial) => {
+        if (testimonial.category === 'jobs') return 'Life-changing employment';
+        if (testimonial.category === 'community') return 'Community leadership';
+        if (testimonial.category === 'housing') return 'Housing stability';
+        if (testimonial.category === 'marketplace') return 'Business success';
+        return 'Positive life impact';
+    };
+
+    // Fallback testimonials when Firebase is unavailable
+    const getFallbackTestimonials = () => [
+        {
+            name: "Sarah W.",
+            location: "Auckland",
+            rating: 5,
+            comment: "The support team helped me navigate selling items to fund my children's school uniforms. They understood my situation and connected me with buyers who truly cared about helping our family.",
+            date: "3 days ago",
+            impact: "Funded children's education"
+        },
+        {
+            name: "Te Aroha M.",
+            location: "Rotorua",
+            rating: 5,
+            comment: "When I was struggling to find work, the support team helped me optimize my job search and connected me with employers who value potential over perfect CVs. Now I'm employed and supporting my whānau.",
+            date: "1 week ago",
+            impact: "Life-changing employment"
+        },
+        {
+            name: "Michael C.",
+            location: "Wellington",
+            rating: 5,
+            comment: "The community support team helped me understand how to use the platform to support other families in need. They showed me how every small action creates ripple effects of positive change.",
+            date: "5 days ago",
+            impact: "Community leadership"
+        }
+    ];
     const [submitStatus, setSubmitStatus] = useState(null);
 
     const contactMethods = [
@@ -108,32 +192,6 @@ const ContactUsPage = ({ onNavigate }) => {
         }, 2000);
     };
 
-    const testimonials = [
-        {
-            name: "Sarah W.",
-            location: "Auckland",
-            rating: 5,
-            comment: "The support team helped me navigate selling items to fund my children's school uniforms. They understood my situation and connected me with buyers who truly cared about helping our family.",
-            date: "3 days ago",
-            impact: "Funded children's education"
-        },
-        {
-            name: "Te Aroha M.",
-            location: "Rotorua",
-            rating: 5,
-            comment: "When I was struggling to find work, the support team helped me optimize my job search and connected me with employers who value potential over perfect CVs. Now I'm employed and supporting my whānau.",
-            date: "1 week ago",
-            impact: "Life-changing employment"
-        },
-        {
-            name: "Michael C.",
-            location: "Wellington",
-            rating: 5,
-            comment: "The community support team helped me understand how to use the platform to support other families in need. They showed me how every small action creates ripple effects of positive change.",
-            date: "5 days ago",
-            impact: "Community leadership"
-        }
-    ];
 
     return (
         <div className="min-h-screen bg-gray-50">
