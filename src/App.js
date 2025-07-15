@@ -51,7 +51,6 @@ function AppContent() {
     const [contactSellerItem, setContactSellerItem] = useState(null);
     const [isCheckoutModalOpen, setIsCheckoutModalOpen] = useState(false);
     const [checkoutItem, setCheckoutItem] = useState(null);
-    const [isTeReoMode, setIsTeReoMode] = useState(false);
     const [isCategoriesMenuOpen, setIsCategoriesMenuOpen] = useState(false);
     const { showNotification } = useNotification();
     const { isDarkMode } = useTheme();

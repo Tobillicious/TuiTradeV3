@@ -13,19 +13,10 @@ import {
   Clock, 
   MapPin,
   Briefcase,
-  Home,
   Award,
-  Zap,
-  Eye,
-  MessageCircle,
-  ThumbsUp,
-  Verified,
-  Crown,
-  Globe,
   Activity,
-  Calendar,
   Target,
-  Sparkles
+  Crown
 } from 'lucide-react';
 
 const SocialProofIndicators = ({ 
@@ -37,7 +28,6 @@ const SocialProofIndicators = ({
   maxRecentItems = 5
 }) => {
   const [recentActivity, setRecentActivity] = useState([]);
-  const [trustStats, setTrustStats] = useState({});
   const [currentActivityIndex, setCurrentActivityIndex] = useState(0);
   const [isVisible, setIsVisible] = useState(true);
 
@@ -219,7 +209,7 @@ const SocialProofIndicators = ({
     }, 30000);
 
     return () => clearInterval(interval);
-  }, []);
+  }, [activityTemplates]);
 
   // Cycle through activities in floating mode
   useEffect(() => {

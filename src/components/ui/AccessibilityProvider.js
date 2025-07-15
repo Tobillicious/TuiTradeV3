@@ -5,16 +5,12 @@ import React, { createContext, useContext, useState, useEffect, useCallback } fr
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Volume2, 
-  VolumeX, 
   Eye, 
-  EyeOff, 
   Type, 
   MousePointer,
   Keyboard,
   Heart,
   Zap,
-  Sun,
-  Moon,
   Contrast,
   Focus,
   Accessibility,
@@ -26,47 +22,17 @@ import {
 // Accessibility Context
 const AccessibilityContext = createContext();
 
-// Accessibility modes and settings
-const ACCESSIBILITY_MODES = {
-  VISUAL: {
-    HIGH_CONTRAST: 'high-contrast',
-    DARK_MODE: 'dark-mode',
-    LARGE_TEXT: 'large-text',
-    REDUCED_MOTION: 'reduced-motion',
-    FOCUS_INDICATORS: 'focus-indicators',
-    COLOR_BLIND_FRIENDLY: 'color-blind-friendly'
-  },
-  MOTOR: {
-    LARGE_CLICK_TARGETS: 'large-click-targets',
-    STICKY_HOVER: 'sticky-hover',
-    VOICE_NAVIGATION: 'voice-navigation',
-    KEYBOARD_ONLY: 'keyboard-only'
-  },
-  COGNITIVE: {
-    SIMPLIFIED_UI: 'simplified-ui',
-    CLEAR_LANGUAGE: 'clear-language',
-    PROGRESS_INDICATORS: 'progress-indicators',
-    AUTO_SAVE: 'auto-save'
-  },
-  AUDIO: {
-    SCREEN_READER: 'screen-reader',
-    AUDIO_DESCRIPTIONS: 'audio-descriptions',
-    CAPTIONS: 'captions',
-    SOUND_ALERTS: 'sound-alerts'
-  }
-};
-
-// Te Reo Māori accessibility terms
-const ACCESSIBILITY_TRANSLATIONS = {
-  accessibility: 'uru whānui',
-  'screen reader': 'pānui mata',
-  'high contrast': 'rereke tiketike',
-  'large text': 'kupu nunui',
-  'voice control': 'whakahaere reo',
-  'keyboard navigation': 'kōwhiri papapātuhi',
-  'focus indicator': 'tohu arotahi',
-  'alternative text': 'kupu kē'
-};
+// Te Reo Māori accessibility terms for future use
+// const ACCESSIBILITY_TRANSLATIONS = {
+//   accessibility: 'uru whānui',
+//   'screen reader': 'pānui mata',
+//   'high contrast': 'rereke tiketike',
+//   'large text': 'kupu nunui',
+//   'voice control': 'whakahaere reo',
+//   'keyboard navigation': 'kōwhiri papapātuhi',
+//   'focus indicator': 'tohu arotahi',
+//   'alternative text': 'kupu kē'
+// };
 
 export const AccessibilityProvider = ({ children }) => {
   const [settings, setSettings] = useState({
@@ -103,7 +69,6 @@ export const AccessibilityProvider = ({ children }) => {
   });
 
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState('visual');
   const [announcements, setAnnouncements] = useState([]);
 
   // Load settings from localStorage on mount
@@ -132,7 +97,7 @@ export const AccessibilityProvider = ({ children }) => {
   useEffect(() => {
     localStorage.setItem('tuitrade-accessibility', JSON.stringify(settings));
     applyAccessibilityStyles();
-  }, [settings]);
+  }, [settings, applyAccessibilityStyles]);
 
   // Apply CSS custom properties for accessibility
   const applyAccessibilityStyles = useCallback(() => {
@@ -182,26 +147,7 @@ export const AccessibilityProvider = ({ children }) => {
     } else {
       root.classList.remove('simplified-ui');
     }
-  }, [settings]);
-
-  // Toggle individual setting
-  const toggleSetting = useCallback((setting) => {
-    setSettings(prev => ({
-      ...prev,
-      [setting]: !prev[setting]
-    }));
-    
-    // Announce change to screen readers
-    announce(`${setting} ${settings[setting] ? 'disabled' : 'enabled'}`);
-  }, [settings]);
-
-  // Update range setting
-  const updateRangeSetting = useCallback((setting, value) => {
-    setSettings(prev => ({
-      ...prev,
-      [setting]: value
-    }));
-  }, []);
+  }, [settings.textSize, settings.highContrast, settings.largeClickTargets, settings.reducedMotion, settings.focusIndicators, settings.colorBlindMode, settings.simplifiedUI]);
 
   // Screen reader announcements
   const announce = useCallback((message, priority = 'polite') => {
@@ -218,6 +164,25 @@ export const AccessibilityProvider = ({ children }) => {
     setTimeout(() => {
       setAnnouncements(prev => prev.filter(a => a.id !== announcement.id));
     }, 5000);
+  }, []);
+
+  // Toggle individual setting
+  const toggleSetting = useCallback((setting) => {
+    setSettings(prev => ({
+      ...prev,
+      [setting]: !prev[setting]
+    }));
+    
+    // Announce change to screen readers
+    announce(`${setting} ${settings[setting] ? 'disabled' : 'enabled'}`);
+  }, [settings, announce]);
+
+  // Update range setting
+  const updateRangeSetting = useCallback((setting, value) => {
+    setSettings(prev => ({
+      ...prev,
+      [setting]: value
+    }));
   }, []);
 
   // Keyboard navigation handler
@@ -241,6 +206,22 @@ export const AccessibilityProvider = ({ children }) => {
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [isMenuOpen, announce]);
 
+  const handleVoiceCommand = useCallback((command) => {
+    if (command.includes('profile')) {
+      window.location.href = '/profiles';
+      announce('Navigating to profiles');
+    } else if (command.includes('jobs')) {
+      window.location.href = '/jobs';
+      announce('Navigating to jobs');
+    } else if (command.includes('marketplace')) {
+      window.location.href = '/marketplace';
+      announce('Navigating to marketplace');
+    } else if (command.includes('help')) {
+      window.location.href = '/help';
+      announce('Navigating to help');
+    }
+  }, [announce]);
+
   // Voice navigation (simplified implementation)
   useEffect(() => {
     if (settings.voiceNavigation && 'webkitSpeechRecognition' in window) {
@@ -257,23 +238,7 @@ export const AccessibilityProvider = ({ children }) => {
       
       return () => recognition.stop();
     }
-  }, [settings.voiceNavigation]);
-
-  const handleVoiceCommand = (command) => {
-    if (command.includes('profile')) {
-      window.location.href = '/profiles';
-      announce('Navigating to profiles');
-    } else if (command.includes('jobs')) {
-      window.location.href = '/jobs';
-      announce('Navigating to jobs');
-    } else if (command.includes('marketplace')) {
-      window.location.href = '/marketplace';
-      announce('Navigating to marketplace');
-    } else if (command.includes('help')) {
-      window.location.href = '/help';
-      announce('Navigating to help');
-    }
-  };
+  }, [settings.voiceNavigation, handleVoiceCommand]);
 
   const contextValue = {
     settings,

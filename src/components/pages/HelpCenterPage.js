@@ -1,9 +1,10 @@
 // Help Center - Comprehensive support for life-changing platform
-// Designed to empower users and maximize their positive impact
+// Designed to empower users and maximize their positive impact throughout TuiTrade
+// Every help article focuses on enabling users to change lives and create social impact
 
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Search, HelpCircle, MessageCircle, Phone, Mail, FileText, Shield, DollarSign, Truck, User, Settings, ShoppingBag, CreditCard, AlertTriangle, CheckCircle, ChevronDown, ChevronRight, Heart, Star, Globe, Award, Zap, Users } from 'lucide-react';
+import { ArrowLeft, Search, HelpCircle, MessageCircle, Phone, Mail, FileText, Shield, DollarSign, Truck, User, Settings, ShoppingBag, CreditCard, AlertTriangle, CheckCircle, ChevronDown, ChevronRight, Heart, Star, Globe, Award, Zap, Users, Target, Home, Baby, Briefcase, BookOpen, Sparkles } from 'lucide-react';
 
 const HelpCenterPage = ({ onNavigate }) => {
     const [searchQuery, setSearchQuery] = useState('');
@@ -12,66 +13,166 @@ const HelpCenterPage = ({ onNavigate }) => {
 
     const helpCategories = [
         {
+            icon: Heart,
+            title: "Life-Changing Impact | Tawhiti Taiao",
+            teReo: "Ngā pānga whakataone oranga",
+            description: "How every transaction on TuiTrade changes lives across Aotearoa",
+            articles: [
+                {
+                    title: "Understanding TuiTrade's mission | Te Whakatōhea o TuiTrade",
+                    content: "Learn how every purchase, sale, and connection on TuiTrade contributes to breaking cycles of poverty and creating opportunities for struggling families. Our platform prioritizes social impact over profit."
+                },
+                {
+                    title: "How your purchases help families | Me pēhea ō hoko e āwhina ai ngā whānau",
+                    content: "When you buy on TuiTrade, you're directly supporting families in need. Sellers often use income to fund their children's education, pay for medical treatments, or achieve housing stability."
+                },
+                {
+                    title: "Creating meaningful job opportunities | Te waihanga mahi whakatōhea",
+                    content: "Every job posting creates hope for unemployed individuals. Learn how to post jobs that prioritize potential over perfection, giving opportunities to those who need them most."
+                },
+                {
+                    title: "Building community connections | Te hanga hononga hapori",
+                    content: "Discover how neighborhood features, mentorship opportunities, and community support networks transform isolated individuals into connected community members."
+                }
+            ]
+        },
+        {
             icon: ShoppingBag,
             title: "Buying & Selling | Hoko me Hoko",
             teReo: "Hoko me te hoko atu",
-            description: "Everything about buying and selling on TuiTrade",
+            description: "Safe transactions that create positive social impact",
             articles: [
                 {
-                    title: "How to buy safely | Me pēhea te hoko mā te haumaru",
-                    content: "Learn about our buyer protection policies, how to verify sellers, and what to do if something goes wrong with your purchase."
+                    title: "How to buy with purpose | Me pēhea te hoko mā te take",
+                    content: "Learn how to choose purchases that support families in need, verify life-changing impact claims, and maximize the social benefit of your spending through TuiTrade."
                 },
                 {
-                    title: "How to create a listing | Me pēhea te hanga rārangi",
-                    content: "Step-by-step guide to creating effective listings with great photos, descriptions, and pricing strategies."
+                    title: "Creating impact-focused listings | Me pēhea te hanga rārangi whakatōhea",
+                    content: "Guide to creating listings that highlight how sales will change your life - whether funding education, supporting family, or achieving stability. Include your story to connect with buyers."
                 },
                 {
-                    title: "Payment methods | Ngā tikanga utu",
-                    content: "Information about accepted payment methods, how payments work, and security measures in place."
+                    title: "Safe payment methods | Ngā tikanga utu haumaru",
+                    content: "Information about secure payment methods that protect both buyers and sellers, ensuring funds reach families in need safely while maintaining transaction security."
                 },
                 {
-                    title: "Shipping and delivery | Tukunga me te tuku",
-                    content: "Guidelines for shipping items, tracking packages, and handling delivery issues."
+                    title: "Supporting local families | Te tautoko i ngā whānau taone",
+                    content: "How to prioritize purchases from local families, understand delivery challenges for struggling sellers, and create supportive buyer-seller relationships."
+                }
+            ]
+        },
+        {
+            icon: Users,
+            title: "Jobs & Opportunities | Mahi me ngā Ritenga",
+            teReo: "Ngā mahi me ngā ritenga whaihua",
+            description: "Employment opportunities that change lives and build careers",
+            articles: [
+                {
+                    title: "Finding life-changing employment | Te kimi mahi whakataone oranga",
+                    content: "How to search for jobs that offer genuine opportunities for growth, support for personal circumstances, and employers who prioritize people over just skills. Filter for family-friendly and inclusive workplaces."
+                },
+                {
+                    title: "Creating inclusive job postings | Te waihanga whakatau mahi",
+                    content: "Guide for employers to create job listings that welcome diverse candidates, offer skill development, and provide opportunities for people rebuilding their lives or changing careers."
+                },
+                {
+                    title: "Supporting unemployed community members | Te tautoko i ngā kore mahi",
+                    content: "How to connect unemployed neighbors with opportunities, mentor job seekers, and create employment pathways for people facing barriers to traditional hiring."
+                },
+                {
+                    title: "Remote work for parents and caregivers | Mahi tawhiti mō mātua",
+                    content: "Finding and creating remote work opportunities that allow parents and caregivers to earn income while maintaining family responsibilities and stability."
+                }
+            ]
+        },
+        {
+            icon: Home,
+            title: "Housing & Stability | Whare me te Ū",
+            teReo: "Ngā whare me te whakatau",
+            description: "Safe, affordable housing that builds family stability",
+            articles: [
+                {
+                    title: "Finding family-friendly housing | Te kimi whare whānau",
+                    content: "How to search for affordable rentals that welcome families, understand landlord preferences for stable tenants, and present your family in the best light for housing applications."
+                },
+                {
+                    title: "Supporting families in housing crisis | Te tautoko whānau whare",
+                    content: "How community members can help families find emergency accommodation, connect with housing resources, and provide references or guarantees for struggling families."
+                },
+                {
+                    title: "Creating inclusive rental listings | Te waihanga raina whare",
+                    content: "Guide for landlords to create welcoming rental listings, understand tenant challenges, and prioritize stable family housing over maximum profit."
+                },
+                {
+                    title: "Pathway to homeownership | Te ara ki te rangatira whare",
+                    content: "Resources and connections for families working toward purchasing their first home, including shared equity schemes and community support programs."
                 }
             ]
         },
         {
             icon: User,
-            title: "Account & Profile | Pūkete me te Kōtaha",
-            teReo: "Pūkete me te kōtaha tangata",
-            description: "Managing your account, profile, and settings",
+            title: "Account & Verification | Pūkete me te Whakamana",
+            teReo: "Pūkete me te whakamana tangata",
+            description: "Building trust and credibility for maximum impact",
             articles: [
                 {
-                    title: "Creating and managing your account | Te hanga me te whakahaere i tō pūkete",
-                    content: "How to create an account, update your profile, change settings, and manage your personal information."
+                    title: "Building a trustworthy profile | Te hanga kōtaha pono",
+                    content: "How to create a profile that demonstrates your commitment to changing lives, share your story authentically, and build credibility within the TuiTrade community."
                 },
                 {
-                    title: "Privacy and security | Tūmataiti me te haumaru",
-                    content: "How we protect your data, privacy settings, and security best practices for your account."
+                    title: "Privacy for families in need | Tūmataiti mō whānau hiakai",
+                    content: "How to protect your family's privacy while sharing enough information to build trust, manage personal information safely, and control who sees your circumstances."
                 },
                 {
-                    title: "Verification process | Te tukanga whakamana",
-                    content: "How to verify your account, why verification is important, and what documents are required."
+                    title: "Verification for community trust | Whakamana mō te whakapono",
+                    content: "How verification builds community trust, what documents are needed, and why verified users create more life-changing opportunities and connections."
                 }
             ]
         },
         {
             icon: Shield,
-            title: "Safety & Trust | Haumaru me te Whakapono",
-            teReo: "Haumaru me te whakapono",
-            description: "Staying safe and building trust on the platform",
+            title: "Safety & Protection | Haumaru me te Tiaki",
+            teReo: "Haumaru me te tiaki whānau",
+            description: "Protecting families while building community trust",
             articles: [
                 {
-                    title: "Buyer protection | Te tiaki kaihoko",
-                    content: "How our buyer protection works, what's covered, and how to file a claim if needed."
+                    title: "Protecting vulnerable community members | Te tiaki hapori",
+                    content: "How our protection systems specifically support families in crisis, elderly community members, and those facing financial hardship. Special safeguards for life-changing transactions."
                 },
                 {
-                    title: "Avoiding scams | Te ārai i ngā hē",
-                    content: "Common scam tactics to watch out for, red flags, and how to report suspicious activity."
+                    title: "Recognizing genuine need vs exploitation | Te motuhake pono",
+                    content: "How to identify authentic families in need versus those who might exploit community generosity. Red flags and verification methods to ensure help reaches those who truly need it."
                 },
                 {
-                    title: "Meeting safely | Te hui mā te haumaru",
-                    content: "Safety tips for meeting buyers or sellers in person, recommended meeting places, and precautions."
+                    title: "Safe community meetings | Te hui haumaru hapori",
+                    content: "Guidelines for safely meeting community members, especially when supporting families in vulnerable situations. Recommended meeting places and safety protocols for high-impact interactions."
+                },
+                {
+                    title: "Reporting concerning behavior | Te pūrongo whakaaro",
+                    content: "How to report suspicious activity that might harm vulnerable community members, including financial exploitation, unsafe situations, or misuse of community support."
+                }
+            ]
+        },
+        {
+            icon: Sparkles,
+            title: "Community Impact | Pānga Hapori",
+            teReo: "Ngā pānga whakataone hapori",
+            description: "Maximizing your positive impact within the TuiTrade community",
+            articles: [
+                {
+                    title: "Becoming a community champion | He rangatira hapori",
+                    content: "How to earn community badges, build reputation through helping others, and become a trusted leader who creates opportunities for families in need."
+                },
+                {
+                    title: "Mentoring and skill sharing | Te tohungatanga me te whakatipu",
+                    content: "Ways to share your skills with community members, mentor job seekers, and create educational opportunities that lead to long-term life changes."
+                },
+                {
+                    title: "Organizing community support | Te whakahaere tautoko hapori",
+                    content: "How to coordinate neighborhood support for families in crisis, organize group purchases to help struggling businesses, and create lasting community connections."
+                },
+                {
+                    title: "Measuring your impact | Te ine i tō pānga",
+                    content: "Track the lives you've helped change through TuiTrade, understand your community impact score, and see how your actions contribute to breaking cycles of poverty."
                 }
             ]
         },
@@ -79,19 +180,19 @@ const HelpCenterPage = ({ onNavigate }) => {
             icon: Settings,
             title: "Technical Support | Tautoko Hangarau",
             teReo: "Tautoko mō ngā raruraru hangarau",
-            description: "Technical issues and platform problems",
+            description: "Getting technical help to maximize your platform impact",
             articles: [
                 {
-                    title: "App and website issues | Ngā raruraru o te taupānga me te paetukutuku",
-                    content: "Troubleshooting common app and website problems, browser compatibility, and performance issues."
+                    title: "Accessibility features | Ngā āhuatanga uru whānui",
+                    content: "How to use TuiTrade's accessibility features, screen reader support, voice navigation, and adaptive technologies to ensure everyone can participate in life-changing opportunities."
                 },
                 {
-                    title: "Photo upload problems | Ngā raruraru tuku whakaahua",
-                    content: "How to upload photos, supported formats, size limits, and common upload issues."
+                    title: "Mobile app for families on-the-go | Taupānga pūkoro whānau",
+                    content: "Using TuiTrade mobile features effectively, offline capabilities for limited data situations, and quick access to urgent opportunities and support."
                 },
                 {
-                    title: "Messaging problems | Ngā raruraru kōrero",
-                    content: "Issues with the messaging system, notifications, and communication features."
+                    title: "Photo and listing optimization | Whakamana whakaahua",
+                    content: "How to create compelling photos and listings even with basic equipment, storytelling techniques for maximum impact, and presenting your needs authentically."
                 }
             ]
         }
@@ -99,24 +200,28 @@ const HelpCenterPage = ({ onNavigate }) => {
 
     const faqs = [
         {
-            question: "How do I get my money back if I'm not happy with my purchase? | Me pēhea taku moni e whakahoki mai ai mēnā kāore au e pai ki taku hoko?",
-            answer: "If you're not satisfied with your purchase, contact the seller first to try to resolve the issue. If that doesn't work, you can file a buyer protection claim within 30 days of purchase. We'll investigate and may provide a refund if the item doesn't match the description or if there are other valid issues."
+            question: "How does TuiTrade actually change lives? | Me pēhea a TuiTrade e whakataone ai ngā oranga?",
+            answer: "Every transaction creates real impact: sales fund children's education and medical care, job postings provide hope for unemployed families, housing connections stabilize struggling households, and community networks support isolated individuals. We document and track these life changes through our platform."
         },
         {
-            question: "What should I do if a seller doesn't respond to my messages? | Me aha ahau mēnā kāore te kaihoko e whakautu ki aku karere?",
-            answer: "If a seller doesn't respond within 48 hours, you can report them for poor communication. We recommend waiting a reasonable time before escalating, as sellers may be busy or have technical issues. You can also try messaging them again or look for similar items from other sellers."
+            question: "How can I help families in my community through TuiTrade? | Me pēhea au e āwhina ai ngā whānau i tōku hapori?",
+            answer: "You can buy from families in need, offer employment opportunities, provide housing or references, mentor job seekers, share skills and knowledge, or simply connect isolated community members with support networks. Every positive interaction creates ripple effects of change."
         },
         {
-            question: "How do I know if a seller is trustworthy? | Me pēhea au e mōhio ai mēnā he pono te kaihoko?",
-            answer: "Check the seller's profile for verification badges, read their reviews and ratings, look at their response time, and examine their listing history. Verified sellers with good ratings and positive reviews are generally more trustworthy. Always use our secure payment methods and buyer protection."
+            question: "What if I'm struggling financially myself? | Me aha mēnā he uaua ōku moni?",
+            answer: "TuiTrade is designed for mutual support. Share your skills through jobs or services, sell items you no longer need, connect with neighbors for support, access community resources, and remember that small actions like kind messages or connections can create value even without money."
         },
         {
-            question: "Can I cancel a purchase after I've paid? | Ka taea e au te whakakore i te hoko i muri i taku utu?",
-            answer: "You can request a cancellation from the seller within 24 hours of payment. If the seller agrees, they can cancel the transaction and you'll receive a full refund. If the seller has already shipped the item, cancellation may not be possible. Check our cancellation policy for more details."
+            question: "How do I verify that my help is actually making a difference? | Me pēhea au e mōhio ai he rerekē taku āwhina?",
+            answer: "Our platform tracks impact through user updates, community feedback, achievement systems, and life change documentation. You'll receive notifications when your actions lead to positive outcomes, and can see long-term progress through our impact dashboard."
         },
         {
-            question: "What payment methods are accepted? | He aha ngā tikanga utu e whakaaetia ana?",
-            answer: "We accept major credit cards, debit cards, bank transfers, and digital wallets like PayPal. All payments are processed securely through our payment partners. We recommend using our secure payment system rather than paying outside the platform for better protection."
+            question: "What happens if someone takes advantage of community generosity? | Me aha mēnā ka whakamahi kē tētahi i te atawhai o te hapori?",
+            answer: "We have verification systems, community reporting, and impact tracking to ensure help reaches genuine need. Our trust scores, review systems, and community oversight help identify and prevent exploitation while protecting those who truly need support."
+        },
+        {
+            question: "How can businesses create meaningful employment opportunities? | Me pēhea ngā pakihi e waihanga ai ngā ritenga mahi whai take?",
+            answer: "Post jobs that prioritize potential over perfection, offer skill development and mentorship, provide family-friendly policies, consider remote work options, and focus on giving opportunities to people who've faced barriers to traditional employment. Small businesses often create the most meaningful impact."
         }
     ];
 
@@ -340,19 +445,37 @@ const HelpCenterPage = ({ onNavigate }) => {
                     </div>
                 )}
 
-                {/* Contact Section */}
-                <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl p-8 text-white text-center">
-                    <h3 className="text-2xl font-bold mb-4">Still need help? | Kua hiahia āwhina tonu?</h3>
-                    <p className="text-lg mb-6">Our support team is here to help you with any questions or issues</p>
+                {/* Life-Changing Mission Section */}
+                <div className="bg-gradient-to-r from-green-600 to-blue-600 rounded-2xl p-8 text-white text-center mb-8">
+                    <Heart className="w-16 h-16 mx-auto mb-4" />
+                    <h3 className="text-2xl font-bold mb-4">Ready to Change Lives? | Kua rite ki te whakataone oranga?</h3>
+                    <p className="text-lg mb-6">Every question you ask and action you take brings our community closer to transforming lives across Aotearoa</p>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                        <div className="bg-white bg-opacity-20 rounded-lg p-4">
+                            <Target className="w-8 h-8 mx-auto mb-2" />
+                            <div className="text-2xl font-bold">247+</div>
+                            <div className="text-sm">Lives Changed</div>
+                        </div>
+                        <div className="bg-white bg-opacity-20 rounded-lg p-4">
+                            <Users className="w-8 h-8 mx-auto mb-2" />
+                            <div className="text-2xl font-bold">50+</div>
+                            <div className="text-sm">Children Helped</div>
+                        </div>
+                        <div className="bg-white bg-opacity-20 rounded-lg p-4">
+                            <Award className="w-8 h-8 mx-auto mb-2" />
+                            <div className="text-2xl font-bold">12</div>
+                            <div className="text-sm">Jobs Created</div>
+                        </div>
+                    </div>
                     <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                        <button className="bg-white text-blue-600 px-6 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors">
+                        <button className="bg-white text-green-600 px-6 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors">
                             Contact Support | Whakapā atu ki te Tautoko
                         </button>
                         <button
                             onClick={() => onNavigate('home')}
-                            className="border-2 border-white text-white px-6 py-3 rounded-lg font-semibold hover:bg-white hover:text-blue-600 transition-colors"
+                            className="border-2 border-white text-white px-6 py-3 rounded-lg font-semibold hover:bg-white hover:text-green-600 transition-colors"
                         >
-                            Back to Home | Hoki ki te Kāinga
+                            Start Changing Lives | Tīmata te whakataone oranga
                         </button>
                     </div>
                 </div>

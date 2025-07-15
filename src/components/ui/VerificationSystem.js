@@ -2,6 +2,7 @@
 // Multi-level verification system ensuring safe, trustworthy interactions
 
 import React, { useState, useEffect } from 'react';
+import { getUserReviews } from '../../lib/reviewService';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Shield, 
@@ -235,29 +236,14 @@ const VerificationSystem = ({
     
     setVerificationStatus(mockVerificationStatus);
 
-    // Mock user reviews
-    const mockReviews = [
-      {
-        id: 1,
-        rating: 5,
-        comment: "Absolutely life-changing experience! Sarah helped me find the perfect job.",
-        reviewer: "Mike T.",
-        date: "2024-03-01",
-        verified: true,
-        helpfulVotes: 12
-      },
-      {
-        id: 2,
-        rating: 5,
-        comment: "Quick communication, genuine person who really cares about community.",
-        reviewer: "Ana K.",
-        date: "2024-02-15",
-        verified: true,
-        helpfulVotes: 8
-      }
-    ];
-    
-    setUserReviews(mockReviews);
+    // Load real user reviews
+    try {
+      const reviews = await getUserReviews(userId, { limit: 5 });
+      setUserReviews(reviews);
+    } catch (error) {
+      console.error('Error loading user reviews:', error);
+      setUserReviews([]); // Fallback to empty array
+    }
 
     // Earned badges based on profile
     const earnedBadges = [];

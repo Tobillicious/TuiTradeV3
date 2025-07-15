@@ -9,6 +9,7 @@ import {
 } from 'lucide-react';
 import { SELLER_LEVELS, ACHIEVEMENT_BADGES, calculateTrustScore } from '../../lib/communityFeatures';
 import { formatNZCurrency } from '../../lib/nzLocalization';
+import { getUserReviews } from '../../lib/reviewService';
 
 const UserProfile = ({
     userId,
@@ -78,10 +79,17 @@ const UserProfile = ({
             { id: 2, title: 'Retro Coffee Table', price: 320, image: 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=150&h=150&fit=crop', status: 'sold' },
             { id: 3, title: 'Plant Collection', price: 45, image: 'https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=150&h=150&fit=crop', status: 'active' }
         ]);
-        setReviews([
-            { id: 1, rating: 5, comment: 'Amazing seller! Item exactly as described and shipped super fast.', buyer: 'Mike_AKL', date: '1 week ago' },
-            { id: 2, rating: 5, comment: 'Beautiful vintage piece, very well packaged. Highly recommend!', buyer: 'VintageCollector', date: '2 weeks ago' }
-        ]);
+        // Load real user reviews
+        const loadUserReviews = async () => {
+            try {
+                const userReviews = await getUserReviews(userId, { limit: 5 });
+                setReviews(userReviews);
+            } catch (error) {
+                console.error('Error loading user reviews:', error);
+                setReviews([]); // Fallback to empty array
+            }
+        };
+        loadUserReviews();
     }, [userId]);
 
     const trustScore = useMemo(() => {

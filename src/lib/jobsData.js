@@ -605,66 +605,50 @@ export const COMMON_BENEFITS = [
   'Transport Allowance'
 ];
 
-// Mock job data for demonstration
-export const MOCK_JOBS = [
-  {
-    id: 'job-001',
-    title: 'Senior Software Engineer',
-    company: 'Tech Solutions Ltd',
-    location: 'Auckland Central',
-    region: 'Auckland',
-    category: 'information-technology',
-    subcategory: 'developers-programmers',
+// Development helper functions for job data
+// No longer contains mock data - all jobs come from Firebase
+
+// Helper to initialize job categories in Firestore (run once)
+export const initializeJobCategories = async () => {
+  console.log('Job categories are static data - no Firestore initialization needed');
+  return true;
+};
+
+// Helper to get sample job structure for development
+export const getSampleJobStructure = () => {
+  return {
+    title: '',
+    company: '',
+    companyId: '',
+    description: '',
+    requirements: [],
+    responsibilities: [],
+    location: '',
+    region: '',
+    isRemote: false,
+    category: '',
+    subcategory: '',
     type: 'full-time',
-    salary: '80k-100k',
-    experience: 'senior-level',
-    workRights: 'nz-citizen',
-    postedDate: '2024-01-10',
-    description: 'Join our dynamic team as a Senior Software Engineer working on cutting-edge web applications...',
-    requirements: ['5+ years experience', 'React/Node.js', 'Agile methodology'],
-    benefits: ['Health Insurance', 'Flexible Working', 'Professional Development'],
-    logo: 'https://via.placeholder.com/60x60?text=TS',
-    featured: true
-  },
-  {
-    id: 'job-002',
-    title: 'Marketing Manager',
-    company: 'Creative Agency NZ',
-    location: 'Wellington',
-    region: 'Wellington',
-    category: 'marketing-communications',
-    subcategory: 'brand-management',
-    type: 'full-time',
-    salary: '60k-70k',
-    experience: 'mid-level',
-    workRights: 'no-restrictions',
-    postedDate: '2024-01-09',
-    description: 'Lead our marketing efforts and drive brand growth across digital and traditional channels...',
-    requirements: ['3+ years marketing experience', 'Digital marketing skills', 'Team leadership'],
-    benefits: ['KiwiSaver', 'Work From Home', 'Annual Leave'],
-    logo: 'https://via.placeholder.com/60x60?text=CA',
-    featured: false
-  },
-  {
-    id: 'job-003',
-    title: 'Registered Nurse',
-    company: 'Auckland Hospital',
-    location: 'Auckland Central',
-    region: 'Auckland',
-    category: 'healthcare-medical',
-    subcategory: 'nursing',
-    type: 'full-time',
-    salary: '50k-60k',
+    salaryMin: 0,
+    salaryMax: 0,
+    salaryType: 'annual',
     experience: 'entry-level',
-    workRights: 'nz-citizen',
-    postedDate: '2024-01-08',
-    description: 'Join our nursing team providing quality patient care in a supportive environment...',
-    requirements: ['Nursing registration', 'Patient care experience', 'Team collaboration'],
-    benefits: ['Health Insurance', 'Shift Allowances', 'Professional Development'],
-    logo: 'https://via.placeholder.com/60x60?text=AH',
-    featured: true
-  }
-];
+    workRights: 'no-restrictions',
+    benefits: [],
+    perks: [],
+    companySize: '',
+    companyLogo: '',
+    companyWebsite: '',
+    applicationMethod: 'platform',
+    applicationEmail: '',
+    applicationUrl: '',
+    applicationInstructions: '',
+    featured: false,
+    urgent: false,
+    keywords: [],
+    tags: []
+  };
+};
 
 // Helper functions
 export const getCategoryByKey = (key) => {
@@ -684,60 +668,22 @@ export const getAllCategories = () => {
   }));
 };
 
+// Legacy functions maintained for compatibility
+// All job data now comes from Firebase via jobService.js
+
 export const getJobsByCategory = (categoryKey) => {
-  return MOCK_JOBS.filter(job => job.category === categoryKey);
+  console.warn('getJobsByCategory is deprecated. Use jobService.getJobs({ category }) instead.');
+  return [];
 };
 
 export const getJobsByLocation = (locationKey) => {
-  return MOCK_JOBS.filter(job => job.region.toLowerCase() === locationKey.toLowerCase());
+  console.warn('getJobsByLocation is deprecated. Use jobService.getJobs({ region }) instead.');
+  return [];
 };
 
 export const searchJobs = (filters) => {
-  let results = [...MOCK_JOBS];
-  
-  if (filters.category) {
-    results = results.filter(job => job.category === filters.category);
-  }
-  
-  if (filters.subcategory) {
-    results = results.filter(job => job.subcategory === filters.subcategory);
-  }
-  
-  if (filters.location) {
-    results = results.filter(job => 
-      job.region.toLowerCase() === filters.location.toLowerCase() ||
-      job.location.toLowerCase().includes(filters.location.toLowerCase())
-    );
-  }
-  
-  if (filters.type) {
-    results = results.filter(job => job.type === filters.type);
-  }
-  
-  if (filters.salary) {
-    results = results.filter(job => job.salary === filters.salary);
-  }
-  
-  if (filters.experience) {
-    results = results.filter(job => job.experience === filters.experience);
-  }
-  
-  if (filters.workRights) {
-    results = results.filter(job => job.workRights === filters.workRights);
-  }
-  
-  if (filters.keywords) {
-    const keywords = filters.keywords.toLowerCase().split(' ');
-    results = results.filter(job => 
-      keywords.some(keyword => 
-        job.title.toLowerCase().includes(keyword) ||
-        job.company.toLowerCase().includes(keyword) ||
-        job.description.toLowerCase().includes(keyword)
-      )
-    );
-  }
-  
-  return results;
+  console.warn('searchJobs is deprecated. Use jobService.searchJobs() instead.');
+  return [];
 };
 
 export default {
@@ -749,11 +695,12 @@ export default {
   NZ_LOCATIONS,
   COMPANY_SIZES,
   COMMON_BENEFITS,
-  MOCK_JOBS,
   getCategoryByKey,
   getSubcategoryName,
   getAllCategories,
-  getJobsByCategory,
-  getJobsByLocation,
-  searchJobs
+  getJobsByCategory, // deprecated
+  getJobsByLocation, // deprecated  
+  searchJobs, // deprecated
+  getSampleJobStructure,
+  initializeJobCategories
 };

@@ -2,7 +2,7 @@
 // Authentic testimonials demonstrating TuiTrade's mission to change lives
 
 import React, { useState, useEffect, useRef } from 'react';
-import { motion, AnimatePresence, useInView } from 'framer-motion';
+import { motion, useInView } from 'framer-motion';
 import { 
   Quote, 
   Star, 
@@ -10,24 +10,19 @@ import {
   CheckCircle, 
   MapPin, 
   Calendar,
-  User,
-  Camera,
   Video,
   Play,
   Pause,
-  Volume2,
-  VolumeX,
   ChevronLeft,
   ChevronRight,
-  Award,
-  TrendingUp,
   Users,
   Briefcase,
   Home,
   GraduationCap,
   Baby,
   Shield,
-  Sparkles
+  Sparkles,
+  TrendingUp
 } from 'lucide-react';
 
 const TestimonialSystem = ({ 
@@ -42,7 +37,6 @@ const TestimonialSystem = ({
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(autoPlay);
   const [filter, setFilter] = useState(category);
-  const [videoStates, setVideoStates] = useState({});
   const containerRef = useRef(null);
   const isInView = useInView(containerRef, { once: true, threshold: 0.1 });
 
@@ -221,7 +215,7 @@ const TestimonialSystem = ({
       ? realTestimonials 
       : realTestimonials.filter(t => t.category === filter);
     setTestimonials(filtered.slice(0, maxItems));
-  }, [filter, maxItems]);
+  }, [filter, maxItems, realTestimonials]);
 
   useEffect(() => {
     if (!isPlaying || displayMode !== 'carousel') return;
@@ -242,10 +236,8 @@ const TestimonialSystem = ({
   };
 
   const toggleVideo = (testimonialId) => {
-    setVideoStates(prev => ({
-      ...prev,
-      [testimonialId]: !prev[testimonialId]
-    }));
+    // Video functionality placeholder - integrate with video player
+    console.log('Play video for testimonial:', testimonialId);
   };
 
   const categories = [

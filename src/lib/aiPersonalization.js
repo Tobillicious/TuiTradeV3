@@ -10,6 +10,9 @@ class AIPersonalizationEngine {
     this.behaviorData = null;
     this.preferences = null;
     this.impactGoals = null;
+    this.lifeChangingMetrics = null;
+    this.communityConnections = null;
+    this.aiInsights = [];
   }
 
   // Initialize personalization for a user
@@ -20,11 +23,97 @@ class AIPersonalizationEngine {
       await this.loadBehaviorData(userId);
       await this.loadPreferences(userId);
       await this.analyzeImpactGoals(userId);
+      await this.loadLifeChangingMetrics(userId);
+      await this.analyzeCommunityConnections(userId);
       
       return this.generatePersonalizationStrategy();
     } catch (error) {
       console.error('Error initializing personalization:', error);
       return this.getDefaultPersonalization();
+    }
+  }
+
+  // Load and analyze life-changing impact metrics
+  async loadLifeChangingMetrics(userId) {
+    try {
+      const userDoc = await getDoc(doc(db, 'users', userId));
+      const userData = userDoc.exists() ? userDoc.data() : {};
+      
+      this.lifeChangingMetrics = {
+        // Direct impact metrics
+        livesDirectlyChanged: userData.impact?.livesChanged || 0,
+        childrenHelped: userData.impact?.childrenHelped || 0,
+        jobsCreated: userData.impact?.jobsCreated || 0,
+        familiesSupported: userData.impact?.familiesSupported || 0,
+        economicImpact: userData.impact?.economicValue || 0,
+        
+        // Behavioral indicators
+        prioritizesSocialImpact: userData.behaviorAnalysis?.prioritizesSocialImpact || false,
+        helpsInCrisis: userData.behaviorAnalysis?.helpsInCrisis || false,
+        mentoringActivity: userData.behaviorAnalysis?.mentoringActivity || 0,
+        communityLeadership: userData.behaviorAnalysis?.communityLeadership || 0,
+        
+        // Platform engagement
+        impactAchievements: userData.achievements?.filter(a => a.category === 'impact') || [],
+        communityBadges: userData.badges?.filter(b => b.type === 'community') || [],
+        trustLevel: userData.trustLevel || { level: 'new' },
+        
+        // Goals and aspirations
+        personalGoals: userData.personalGoals || [],
+        familyGoals: userData.familyGoals || [],
+        communityGoals: userData.communityGoals || [],
+        emergencyNeeds: userData.emergencyNeeds || []
+      };
+    } catch (error) {
+      console.error('Error loading life-changing metrics:', error);
+      this.lifeChangingMetrics = this.getDefaultLifeChangingMetrics();
+    }
+  }
+
+  // Analyze community connections and support networks
+  async analyzeCommunityConnections(userId) {
+    try {
+      // Get user's neighborhood and community data
+      const neighbourhoodQuery = query(
+        collection(db, 'neighbourhood_members'),
+        where('userId', '==', userId),
+        where('isActive', '==', true)
+      );
+      
+      const neighSnapshot = await getDocs(neighbourhoodQuery);
+      const neighbourhoods = neighSnapshot.docs.map(doc => doc.data());
+      
+      // Get mentoring relationships
+      const mentoringQuery = query(
+        collection(db, 'mentoring_relationships'),
+        where('mentorId', '==', userId),
+        where('status', '==', 'active')
+      );
+      
+      const mentorSnapshot = await getDocs(mentoringQuery);
+      const mentoringRelationships = mentorSnapshot.docs.map(doc => doc.data());
+      
+      // Get support network strength
+      const supportQuery = query(
+        collection(db, 'user_connections'),
+        where('userId', '==', userId),
+        where('type', 'in', ['family', 'friend', 'community', 'professional'])
+      );
+      
+      const supportSnapshot = await getDocs(supportQuery);
+      const supportNetwork = supportSnapshot.docs.map(doc => doc.data());
+      
+      this.communityConnections = {
+        neighbourhoods,
+        mentoringRelationships,
+        supportNetwork,
+        networkStrength: this.calculateNetworkStrength(supportNetwork),
+        isolationRisk: this.assessIsolationRisk(supportNetwork, neighbourhoods),
+        communityRole: this.determineCommunityRole(mentoringRelationships, neighbourhoods)
+      };
+    } catch (error) {
+      console.error('Error analyzing community connections:', error);
+      this.communityConnections = this.getDefaultCommunityConnections();
     }
   }
 
@@ -407,6 +496,175 @@ class AIPersonalizationEngine {
     } catch (error) {
       console.error('Error updating personalization data:', error);
     }
+  }
+  // Helper methods for community analysis
+  calculateNetworkStrength(supportNetwork) {
+    if (!supportNetwork || supportNetwork.length === 0) return 0;
+    
+    const weightsByType = {
+      family: 3,
+      friend: 2,
+      community: 2,
+      professional: 1
+    };
+    
+    const totalWeight = supportNetwork.reduce((sum, connection) => {
+      const weight = weightsByType[connection.type] || 1;
+      const strengthMultiplier = connection.strength || 1; // 1-5 scale
+      return sum + (weight * strengthMultiplier);
+    }, 0);
+    
+    return Math.min(100, Math.round((totalWeight / supportNetwork.length) * 10));
+  }
+  
+  assessIsolationRisk(supportNetwork, neighbourhoods) {
+    let riskScore = 0;
+    
+    // Low support network increases risk
+    if (!supportNetwork || supportNetwork.length < 3) riskScore += 30;
+    
+    // No family connections
+    const hasFamily = supportNetwork?.some(conn => conn.type === 'family');
+    if (!hasFamily) riskScore += 20;
+    
+    // No community involvement
+    if (!neighbourhoods || neighbourhoods.length === 0) riskScore += 25;
+    
+    // Recent isolation indicators
+    const recentConnections = supportNetwork?.filter(conn => {
+      const lastContact = new Date(conn.lastContact);
+      const daysSince = (Date.now() - lastContact.getTime()) / (1000 * 60 * 60 * 24);
+      return daysSince <= 30;
+    });
+    
+    if (!recentConnections || recentConnections.length < 2) riskScore += 25;
+    
+    return Math.min(100, riskScore);
+  }
+  
+  determineCommunityRole(mentoringRelationships, neighbourhoods) {
+    if (mentoringRelationships?.length > 0) {
+      return mentoringRelationships.length >= 3 ? 'community_leader' : 'mentor';
+    }
+    
+    if (neighbourhoods?.some(n => n.role === 'admin' || n.role === 'moderator')) {
+      return 'neighbourhood_leader';
+    }
+    
+    if (neighbourhoods?.length > 1) {
+      return 'active_member';
+    }
+    
+    if (neighbourhoods?.length === 1) {
+      return 'member';
+    }
+    
+    return 'newcomer';
+  }
+  
+  getDefaultLifeChangingMetrics() {
+    return {
+      livesDirectlyChanged: 0,
+      childrenHelped: 0,
+      jobsCreated: 0,
+      familiesSupported: 0,
+      economicImpact: 0,
+      prioritizesSocialImpact: false,
+      helpsInCrisis: false,
+      mentoringActivity: 0,
+      communityLeadership: 0,
+      impactAchievements: [],
+      communityBadges: [],
+      trustLevel: { level: 'new' },
+      personalGoals: [],
+      familyGoals: [],
+      communityGoals: [],
+      emergencyNeeds: []
+    };
+  }
+  
+  getDefaultCommunityConnections() {
+    return {
+      neighbourhoods: [],
+      mentoringRelationships: [],
+      supportNetwork: [],
+      networkStrength: 0,
+      isolationRisk: 50,
+      communityRole: 'newcomer'
+    };
+  }
+
+  // Generate AI-powered recommendations for life-changing opportunities
+  async generateLifeChangingRecommendations(userId) {
+    try {
+      if (!this.lifeChangingMetrics || !this.communityConnections) {
+        await this.initializePersonalization(userId);
+      }
+      
+      const recommendations = {
+        immediateOpportunities: [],
+        skillDevelopment: [],
+        communitySupport: [],
+        emergencyAssistance: [],
+        mentoringOpportunities: []
+      };
+      
+      // Immediate life-changing opportunities
+      if (this.lifeChangingMetrics.emergencyNeeds.length > 0) {
+        recommendations.immediateOpportunities = await this.findEmergencySupport(userId);
+      }
+      
+      // Skills that could transform their situation
+      if (this.userProfile?.skillsIndex?.size < 3) {
+        recommendations.skillDevelopment = await this.findSkillDevelopmentOpportunities(userId);
+      }
+      
+      // Community connections for isolated users
+      if (this.communityConnections.isolationRisk > 60) {
+        recommendations.communitySupport = await this.findCommunityConnections(userId);
+      }
+      
+      // Mentoring opportunities
+      if (this.communityConnections.communityRole !== 'newcomer') {
+        recommendations.mentoringOpportunities = await this.findMentoringOpportunities(userId);
+      }
+      
+      return {
+        ...recommendations,
+        priorityLevel: this.calculateRecommendationPriority(recommendations),
+        impactPotential: this.estimateImpactPotential(recommendations)
+      };
+    } catch (error) {
+      console.error('Error generating life-changing recommendations:', error);
+      return this.getDefaultRecommendations();
+    }
+  }
+  
+  calculateRecommendationPriority(recommendations) {
+    if (recommendations.emergencyAssistance?.length > 0) return 'urgent';
+    if (recommendations.immediateOpportunities?.length > 0) return 'high';
+    if (recommendations.communitySupport?.length > 0) return 'medium';
+    return 'low';
+  }
+  
+  estimateImpactPotential(recommendations) {
+    const totalOpportunities = Object.values(recommendations).flat().length;
+    if (totalOpportunities >= 10) return 'transformative';
+    if (totalOpportunities >= 5) return 'significant';
+    if (totalOpportunities >= 2) return 'moderate';
+    return 'minimal';
+  }
+  
+  getDefaultRecommendations() {
+    return {
+      immediateOpportunities: [],
+      skillDevelopment: [],
+      communitySupport: [],
+      emergencyAssistance: [],
+      mentoringOpportunities: [],
+      priorityLevel: 'low',
+      impactPotential: 'minimal'
+    };
   }
 }
 

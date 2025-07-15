@@ -6,8 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import { db } from '../../lib/firebase';
 import { LISTINGS_LIMIT } from '../../lib/utils';
 import { trackPageView } from '../../lib/analytics';
-import { useAppContext } from '../../context/AppContext';
-import { safeArrayOperation } from '../../lib/debugUtils';
+import useAppContextSafe from '../../hooks/useAppContextSafe';
 import ItemCard from '../ui/ItemCard';
 import { AuctionCard } from '../ui/AuctionSystem';
 import Carousel from '../ui/Carousel';
@@ -19,30 +18,14 @@ import LiveImpactTracker from '../ui/LiveImpactTracker';
 import { Tag, Shield, Star, MessageCircle, ChevronDown } from 'lucide-react';
 import { getBilingualText, TE_REO_TRANSLATIONS } from '../../lib/nzLocalizationEnhanced';
 
-// AGENT_TASK: Extract context destructuring and validation into a custom hook for reuse.
 const HomePage = () => {
-    // Enhanced context destructuring with detailed logging
-    const contextValue = useAppContext();
-    
-    if (process.env.NODE_ENV === 'development') {
-        console.group('🏠 HomePage: Context Analysis');
-        console.log('Context value:', contextValue);
-        console.log('watchedItems type:', typeof contextValue?.watchedItems);
-        console.log('cartItems type:', typeof contextValue?.cartItems);
-        console.groupEnd();
-    }
-    
-    // Safe destructuring with explicit validation
+    // Use safe context hook with validation and helpers (refactored from inline code)
     const {
-        onWatchToggle = () => console.warn('HomePage: onWatchToggle not available'),
-        watchedItems: rawWatchedItems = [],
-        onAddToCart = () => console.warn('HomePage: onAddToCart not available'),
-        cartItems: rawCartItems = []
-    } = contextValue || {};
-    
-    // Use safe array operations to prevent includes() errors
-    const watchedItems = safeArrayOperation(rawWatchedItems, Array.prototype.includes, []);
-    const cartItems = safeArrayOperation(rawCartItems, Array.prototype.some, []);
+        onWatchToggle,
+        watchedItems,
+        onAddToCart,
+        cartItems
+    } = useAppContextSafe();
     const navigate = useNavigate();
     const [listings, setListings] = useState([]);
     const [isLoading, setIsLoading] = useState(true);

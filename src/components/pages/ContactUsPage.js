@@ -1,6 +1,8 @@
-// src/components/pages/ContactUsPage.js
+// ContactUsPage - Life-changing support connection hub
+// Designed to connect community members with support that transforms lives
+
 import React, { useState } from 'react';
-import { ArrowLeft, Mail, Phone, MessageCircle, MapPin, Clock, Send, CheckCircle, AlertCircle, User, FileText, Star } from 'lucide-react';
+import { ArrowLeft, Mail, Phone, MessageCircle, MapPin, Clock, Send, CheckCircle, AlertCircle, User, FileText, Star, Heart, Target, Users, Award, Sparkles, Home, Baby, Shield } from 'lucide-react';
 
 const ContactUsPage = ({ onNavigate }) => {
     const [formData, setFormData] = useState({
@@ -70,12 +72,13 @@ const ContactUsPage = ({ onNavigate }) => {
     ];
 
     const categories = [
+        { value: 'impact', label: 'Life-Changing Impact | Tawhiti Taiao' },
+        { value: 'community', label: 'Community Support | Tautoko Hapori' },
+        { value: 'emergency', label: 'Emergency Assistance | Āwhina Ohotata' },
         { value: 'general', label: 'General Inquiry | Pātai Whānui' },
         { value: 'technical', label: 'Technical Support | Tautoko Hangarau' },
-        { value: 'billing', label: 'Billing & Payments | Utu me ngā Tukunga' },
-        { value: 'safety', label: 'Safety & Trust | Haumaru me te Whakapono' },
-        { value: 'feedback', label: 'Feedback & Suggestions | Urupare me ngā Tohutohu' },
-        { value: 'partnership', label: 'Partnership & Business | Mahi Tahi me te Pakihi' }
+        { value: 'safety', label: 'Safety & Protection | Haumaru me te Tiaki' },
+        { value: 'partnership', label: 'Community Partnership | Mahi Tahi Hapori' }
     ];
 
     const handleInputChange = (e) => {
@@ -107,25 +110,28 @@ const ContactUsPage = ({ onNavigate }) => {
 
     const testimonials = [
         {
-            name: "Kiri M.",
-            location: "Wellington",
-            rating: 5,
-            comment: "The support team was incredibly helpful when I had issues with my first sale. They responded quickly and solved everything perfectly.",
-            date: "2 days ago"
-        },
-        {
-            name: "Tama R.",
-            location: "Christchurch",
-            rating: 5,
-            comment: "Great customer service! They helped me understand the buyer protection process and made me feel confident about using the platform.",
-            date: "1 week ago"
-        },
-        {
-            name: "Aroha K.",
+            name: "Sarah W.",
             location: "Auckland",
             rating: 5,
-            comment: "Fast response time and very knowledgeable staff. They really care about their users and it shows in their service.",
-            date: "3 days ago"
+            comment: "The support team helped me navigate selling items to fund my children's school uniforms. They understood my situation and connected me with buyers who truly cared about helping our family.",
+            date: "3 days ago",
+            impact: "Funded children's education"
+        },
+        {
+            name: "Te Aroha M.",
+            location: "Rotorua",
+            rating: 5,
+            comment: "When I was struggling to find work, the support team helped me optimize my job search and connected me with employers who value potential over perfect CVs. Now I'm employed and supporting my whānau.",
+            date: "1 week ago",
+            impact: "Life-changing employment"
+        },
+        {
+            name: "Michael C.",
+            location: "Wellington",
+            rating: 5,
+            comment: "The community support team helped me understand how to use the platform to support other families in need. They showed me how every small action creates ripple effects of positive change.",
+            date: "5 days ago",
+            impact: "Community leadership"
         }
     ];
 
@@ -154,22 +160,44 @@ const ContactUsPage = ({ onNavigate }) => {
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                 {/* Hero Section */}
                 <div className="text-center mb-12">
-                    <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl p-8 text-white">
-                        <MessageCircle className="w-16 h-16 mx-auto mb-4" />
-                        <h2 className="text-3xl font-bold mb-4">Get in Touch | Whakapā Mai</h2>
-                        <p className="text-xl mb-6">Our friendly team is ready to help with any questions or concerns</p>
+                    <div className="bg-gradient-to-r from-green-600 to-blue-600 rounded-2xl p-8 text-white">
+                        <Heart className="w-16 h-16 mx-auto mb-4" />
+                        <h2 className="text-3xl font-bold mb-4">We're Here to Help | Kei konei mātou hei āwhina</h2>
+                        <p className="text-xl mb-6">Connect with support that understands your journey toward positive change</p>
+                        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                            <div className="bg-white bg-opacity-20 rounded-lg p-3">
+                                <Target className="w-6 h-6 mx-auto mb-1" />
+                                <div className="text-lg font-bold">247+</div>
+                                <div className="text-xs">Lives Changed</div>
+                            </div>
+                            <div className="bg-white bg-opacity-20 rounded-lg p-3">
+                                <Users className="w-6 h-6 mx-auto mb-1" />
+                                <div className="text-lg font-bold">50+</div>
+                                <div className="text-xs">Children Helped</div>
+                            </div>
+                            <div className="bg-white bg-opacity-20 rounded-lg p-3">
+                                <Award className="w-6 h-6 mx-auto mb-1" />
+                                <div className="text-lg font-bold">12</div>
+                                <div className="text-xs">Jobs Created</div>
+                            </div>
+                            <div className="bg-white bg-opacity-20 rounded-lg p-3">
+                                <Clock className="w-6 h-6 mx-auto mb-1" />
+                                <div className="text-lg font-bold">24/7</div>
+                                <div className="text-xs">Support</div>
+                            </div>
+                        </div>
                         <div className="flex justify-center space-x-8 text-sm">
                             <div className="flex items-center space-x-2">
-                                <Clock className="w-5 h-5" />
-                                <span>24/7 Support</span>
+                                <Heart className="w-5 h-5" />
+                                <span>Life-Changing Focus</span>
                             </div>
                             <div className="flex items-center space-x-2">
                                 <CheckCircle className="w-5 h-5" />
-                                <span>Quick Response</span>
+                                <span>Community-First</span>
                             </div>
                             <div className="flex items-center space-x-2">
-                                <Star className="w-5 h-5" />
-                                <span>Expert Help</span>
+                                <Sparkles className="w-5 h-5" />
+                                <span>Impact-Driven</span>
                             </div>
                         </div>
                     </div>
@@ -348,6 +376,12 @@ const ContactUsPage = ({ onNavigate }) => {
                                             ))}
                                         </div>
                                         <p className="text-gray-700 text-sm mb-2 italic">"{testimonial.comment}"</p>
+                                        <div className="bg-green-50 rounded-lg p-2 mb-2">
+                                            <div className="flex items-center space-x-2">
+                                                <Sparkles className="w-4 h-4 text-green-600" />
+                                                <span className="text-green-800 text-xs font-semibold">{testimonial.impact}</span>
+                                            </div>
+                                        </div>
                                         <div className="flex items-center justify-between">
                                             <div>
                                                 <p className="font-medium text-gray-900 text-sm">{testimonial.name}</p>
@@ -364,23 +398,35 @@ const ContactUsPage = ({ onNavigate }) => {
 
                 {/* FAQ Section */}
                 <div className="mt-16">
-                    <h3 className="text-2xl font-bold text-gray-900 mb-6 text-center">Frequently Asked Questions | Ngā Pātai Auau</h3>
+                    <h3 className="text-2xl font-bold text-gray-900 mb-6 text-center">Common Questions | Ngā Pātai Auau</h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-                            <h4 className="font-semibold text-gray-900 mb-2">How quickly do you respond? | Kia tere te whakautu?</h4>
-                            <p className="text-gray-600 text-sm">We aim to respond to all inquiries within 24 hours. For urgent matters, live chat is available 24/7 for immediate assistance.</p>
+                            <h4 className="font-semibold text-gray-900 mb-2 flex items-center">
+                                <Heart className="w-5 h-5 text-green-600 mr-2" />
+                                How can you help my family's situation? | Me pēhea koe e āwhina ai i tōku whānau?
+                            </h4>
+                            <p className="text-gray-600 text-sm">We understand every family's journey is unique. Our support team connects you with resources, opportunities, and community members who can help create positive change in your specific circumstances.</p>
                         </div>
                         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-                            <h4 className="font-semibold text-gray-900 mb-2">What information should I include? | He aha ngā mōhiohio me tāpiri?</h4>
-                            <p className="text-gray-600 text-sm">Please include your name, email, and a detailed description of your issue or question. Screenshots are helpful for technical problems.</p>
+                            <h4 className="font-semibold text-gray-900 mb-2 flex items-center">
+                                <Clock className="w-5 h-5 text-blue-600 mr-2" />
+                                How quickly can I get help? | Kia tere ai au ki te whiwhi āwhina?
+                            </h4>
+                            <p className="text-gray-600 text-sm">For urgent situations, live chat provides immediate connection. For life-changing opportunities and community support, we typically respond within 24 hours with personalized guidance.</p>
                         </div>
                         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-                            <h4 className="font-semibold text-gray-900 mb-2">Can I call outside business hours? | Ka taea te waea i waho o ngā hāora mahi?</h4>
-                            <p className="text-gray-600 text-sm">Our phone support is available Monday-Friday, 9AM-6PM NZST. For after-hours support, please use live chat or email.</p>
+                            <h4 className="font-semibold text-gray-900 mb-2 flex items-center">
+                                <Users className="w-5 h-5 text-purple-600 mr-2" />
+                                What if I need help but can't pay? | Me aha mēnā he hiahia āwhina kāore he utu?
+                            </h4>
+                            <p className="text-gray-600 text-sm">TuiTrade's community support is built on mutual aid and shared resources. Many services, connections, and opportunities are available regardless of your current financial situation.</p>
                         </div>
                         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-                            <h4 className="font-semibold text-gray-900 mb-2">How do I report a problem? | Me pēhea te pūrongo i te raruraru?</h4>
-                            <p className="text-gray-600 text-sm">You can report problems through our contact form, live chat, or by calling our support team. Please provide as much detail as possible.</p>
+                            <h4 className="font-semibold text-gray-900 mb-2 flex items-center">
+                                <Shield className="w-5 h-5 text-red-600 mr-2" />
+                                Is my personal information safe? | He haumaru ōku kōrero whaiaro?
+                            </h4>
+                            <p className="text-gray-600 text-sm">We protect your privacy while connecting you with help. You control what information you share and with whom, ensuring your family's safety while accessing community support.</p>
                         </div>
                     </div>
                 </div>
